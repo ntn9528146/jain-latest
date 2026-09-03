@@ -1,10 +1,11 @@
 import { ROLES, HIERARCHY_RANK } from '../config/rbacRules.js';
 
 const AUTH_DB_KEY = 'paperpilot_master_accounts';
+const SCHOOLS_DB_KEY = 'paperpilot_schools_db';
 
 export const INITIAL_SCHOOLS = [
-  { id: "SCH_001", name: "Arden Progressive School", city: "Haldwani", status: "Active", plan: "Enterprise 2026-27" },
-  { id: "SCH_002", name: "Delhi Public School", city: "Nainital", status: "Active", plan: "Standard Plan" }
+  { id: "SCH_001", name: "Arden Progressive School", city: "Haldwani", status: "Active", suspendReason: "", plan: "Enterprise 2026-27" },
+  { id: "SCH_002", name: "Delhi Public School", city: "Nainital", status: "Active", suspendReason: "", plan: "Standard Plan" }
 ];
 
 export const INITIAL_USERS = [
@@ -45,6 +46,19 @@ export const INITIAL_USERS = [
     status: "Active"
   }
 ];
+
+export function getSchools() {
+  const data = localStorage.getItem(SCHOOLS_DB_KEY);
+  if (!data) {
+    localStorage.setItem(SCHOOLS_DB_KEY, JSON.stringify(INITIAL_SCHOOLS));
+    return INITIAL_SCHOOLS;
+  }
+  return JSON.parse(data);
+}
+
+export function saveSchools(schools) {
+  localStorage.setItem(SCHOOLS_DB_KEY, JSON.stringify(schools));
+}
 
 export function getUsers() {
   const data = localStorage.getItem(AUTH_DB_KEY);
