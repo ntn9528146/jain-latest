@@ -24,8 +24,7 @@ export default function ModeCbseCurriculum({ onGeneratePaper, loading }) {
   const [selectedUnits, setSelectedUnits] = useState({});
   const [selectedSubtopics, setSelectedSubtopics] = useState({});
 
-  // Auto-sync syllabus according to selected Exam Pattern
-  const applyAutoSyllabusSelection = (unitsList, examName) => {
+  const applyAutoSyllabus = (unitsList, examName) => {
     const autoResult = getAutoSelectedSyllabusUnits(unitsList, examName);
     setSelectedUnits(autoResult.selectedUnits);
     setSelectedSubtopics(autoResult.selectedSubtopics);
@@ -33,7 +32,7 @@ export default function ModeCbseCurriculum({ onGeneratePaper, loading }) {
 
   useEffect(() => {
     if (currentSubjectData.units) {
-      applyAutoSyllabusSelection(currentSubjectData.units, selectedExamType);
+      applyAutoSyllabus(currentSubjectData.units, selectedExamType);
     }
   }, [selectedExamType, selectedSubject, selectedClass]);
 
@@ -156,7 +155,6 @@ export default function ModeCbseCurriculum({ onGeneratePaper, loading }) {
         </div>
       </div>
 
-      {/* Marks Adjustment Controller */}
       <div className="p-4 bg-slate-950 border border-slate-800 rounded-xl flex flex-wrap justify-between items-center gap-4">
         <div>
           <span className="text-slate-400 text-[11px] block">Evaluation Distribution:</span>
@@ -208,7 +206,6 @@ export default function ModeCbseCurriculum({ onGeneratePaper, loading }) {
 
       <QuestionMatrix matrix={matrix} onChange={setMatrix} targetMarks={theoryMarks} />
 
-      {/* Expandable Syllabus Checkbox List */}
       <div className="space-y-2">
         <div className="flex justify-between items-center">
           <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
