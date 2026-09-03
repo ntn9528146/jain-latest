@@ -2,109 +2,59 @@ import React, { useState } from 'react';
 import Button from '../components/common/Button.jsx';
 import { getSchools, saveSchools, getUsers, saveUsers } from '../services/authStore.js';
 import { generateSecretCode, getAllInviteCodes } from '../services/inviteService.js';
+import { SAAS_PLANS } from '../config/saasPlans.js';
 import { ROLES } from '../config/rbacRules.js';
 
 export default function SuperAdminPortal({ user, onLogout }) {
+  const [activeTab, setActiveTab] = useState('schools'); // schools | users | plans
   const [schools, setSchools] = useState(getSchools());
   const [selectedSchoolId, setSelectedSchoolId] = useState(schools[0]?.id || '');
-  const [showAddSchool, setShowAddSchool] = useState(false);
-  const [newSchoolName, setNewSchoolName] = useState('');
-  const [newSchoolCity, setNewSchoolCity] = useState('');
-  const [targetRole, setTargetRole] = useState(ROLES.PRINCIPAL);
+  const [users, setUsersList] = useState(getUsers());
+  const [editingUser, setEditingUser] = useState(null);
   const [codeNotice, setCodeNotice] = useState('');
 
-  const users = getUsers();
   const currentSchool = schools.find((s) => s.id === selectedSchoolId) || schools[0];
-  
-  // Strict School-Specific filtering
-  const currentSchoolUsers = users.filter((u) => u.schoolId === currentSchool?.id);
-  const currentSchoolCodes = getAllInviteCodes().filter((c) => c.schoolId === currentSchool?.id);
+  const schoolScopedUsers = users.filter((u) => u.schoolId === currentSchool?.id);
 
-  // Add School
-  const handleAddSchool = (e) => {
+  // Edit User Details (Developer Only)
+  const handleSaveUserEdit = (e) => {
     e.preventDefault();
-    if (!newSchoolName.trim() || !newSchoolCity.trim()) return;
-
-    const newId = "SCH_" + (schools.length + 1).toString().padStart(3, '0');
-    const newEntry = {
-      id: newId,
-      name: newSchoolName.trim(),
-      city: newSchoolCity.trim(),
-      status: "Active",
-      suspendReason: "",
-      plan: "Enterprise 2026-27"
-    };
-
-    const updated = [...schools, newEntry];
-    setSchools(updated);
-    saveSchools(updated);
-    setSelectedSchoolId(newId);
-    setNewSchoolName('');
-    setNewSchoolCity('');
-    setShowAddSchool(false);
+    const updated = users.map((u) => (u.id === editingUser.id ? editingUser : u));
+    setUsersList(updated);
+    saveUsers(updated);
+    setEditingUser(null);
   };
 
-  // Suspend School with Reason
-  const handleToggleSchoolSuspension = (targetSchool) => {
-    let reason = "";
-    if (targetSchool.status === 'Active') {
-      reason = prompt(`Enter reason for suspending ${targetSchool.name}:`, "Annual Subscription Renewal Overdue");
-      if (reason === null) return; // cancelled
-      if (!reason.trim()) reason = "Suspended by Developer";
-    }
+  // Delete User
+  const handleDeleteUser = (targetId) => {
+    if (!confirm('Permanent Action: Do you want to remove this account from the database?')) return;
+    const updated = users.filter((u) => u.id !== targetId);
+    setUsersList(updated);
+    saveUsers(updated);
+  };
 
-    const updated = schools.map((s) => {
-      if (s.id === targetSchool.id) {
-        return {
-          ...s,
-          status: s.status === 'Active' ? 'Suspended' : 'Active',
-          suspendReason: s.status === 'Active' ? reason : ""
-        };
+  // Suspend User
+  const handleToggleUserSuspend = (targetUser) => {
+    const updated = users.map((u) => {
+      if (u.id === targetUser.id) {
+        return { ...u, status: u.status === 'Active' ? 'Suspended' : 'Active' };
       }
-      return s;
+      return u;
     });
-
-    setSchools(updated);
-    saveSchools(updated);
-  };
-
-  // Remove School
-  const handleRemoveSchool = (targetSchool) => {
-    if (!confirm(`Are you sure you want to permanently remove ${targetSchool.name}? All linked teachers will be detached.`)) return;
-
-    const updated = schools.filter((s) => s.id !== targetSchool.id);
-    setSchools(updated);
-    saveSchools(updated);
-    if (selectedSchoolId === targetSchool.id && updated.length > 0) {
-      setSelectedSchoolId(updated[0].id);
-    }
-  };
-
-  const handleCreateMasterToken = () => {
-    const code = generateSecretCode({
-      schoolId: currentSchool.id,
-      schoolName: currentSchool.name,
-      assignedRole: targetRole,
-      department: "Administration",
-      generatedBy: "Developer (Master Override)"
-    });
-    setCodeNotice(`Master Token Generated: ${code.code} for [${targetRole}] at ${currentSchool.name}`);
-    setTimeout(() => setCodeNotice(''), 7000);
+    setUsersList(updated);
+    saveUsers(updated);
   };
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
-      {/* Super Developer Header */}
       <header className="bg-slate-900 border-b border-indigo-950 px-6 py-4 flex flex-wrap justify-between items-center gap-4">
         <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-xl bg-amber-500 flex items-center justify-center font-black text-slate-950 text-lg">
-            S
-          </div>
+          <div className="h-9 w-9 rounded-xl bg-amber-500 flex items-center justify-center font-black text-slate-950 text-lg">S</div>
           <div>
             <h1 className="text-base font-bold text-white flex items-center gap-2">
               SaaS Multi-School Developer Cockpit
               <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                Root (100)
+                Root Access (100)
               </span>
             </h1>
             <p className="text-xs text-slate-400">Architect: {user.fullName}</p>
@@ -112,186 +62,178 @@ export default function SuperAdminPortal({ user, onLogout }) {
         </div>
 
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => setShowAddSchool(!showAddSchool)}
-            className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3 py-1.5 rounded-xl font-semibold transition"
-          >
-            + Onboard New School
-          </button>
-          <Button variant="secondary" onClick={onLogout} className="text-xs py-1.5 px-3">
-            Sign Out
-          </Button>
+          <nav className="flex bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs">
+            <button onClick={() => setActiveTab('schools')} className={`px-3 py-1.5 rounded-lg font-medium transition ${activeTab === 'schools' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'}`}>Institutions</button>
+            <button onClick={() => setActiveTab('users')} className={`px-3 py-1.5 rounded-lg font-medium transition ${activeTab === 'users' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'}`}>Master Credentials Vault</button>
+            <button onClick={() => setActiveTab('plans')} className={`px-3 py-1.5 rounded-lg font-medium transition ${activeTab === 'plans' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'}`}>SaaS Plans & Pricing</button>
+          </nav>
+          <Button variant="secondary" onClick={onLogout} className="text-xs py-1.5 px-3">Sign Out</Button>
         </div>
       </header>
 
-      {/* Add School Modal */}
-      {showAddSchool && (
-        <div className="bg-slate-900 border-b border-slate-800 p-6">
-          <div className="max-w-xl mx-auto space-y-3">
-            <h3 className="text-sm font-bold text-white">Register New Institution</h3>
-            <form onSubmit={handleAddSchool} className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-              <input
-                type="text"
-                placeholder="School Name (e.g. St. Xavier Senior Secondary)"
-                value={newSchoolName}
-                onChange={(e) => setNewSchoolName(e.target.value)}
-                className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white"
-              />
-              <input
-                type="text"
-                placeholder="City (e.g. Dehradun)"
-                value={newSchoolCity}
-                onChange={(e) => setNewSchoolCity(e.target.value)}
-                className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white"
-              />
-              <div className="sm:col-span-2 flex gap-2">
-                <Button type="submit">Save & Add School</Button>
-                <Button variant="secondary" onClick={() => setShowAddSchool(false)}>Cancel</Button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Main Developer View */}
       <main className="flex-1 p-6 max-w-7xl w-full mx-auto space-y-6">
-        {/* School Switcher Bar */}
-        <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex flex-wrap justify-between items-center gap-4">
-          <div className="flex items-center gap-3">
-            <span className="text-xs font-semibold text-slate-400">Select School to Audit:</span>
-            <select
-              value={selectedSchoolId}
-              onChange={(e) => setSelectedSchoolId(e.target.value)}
-              className="bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 text-indigo-300 font-bold text-xs"
-            >
-              {schools.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name} ({s.city}) [{s.status}]
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => handleToggleSchoolSuspension(currentSchool)}
-              className={`text-xs px-3 py-1.5 rounded-xl font-bold border transition ${
-                currentSchool?.status === 'Active'
-                  ? 'border-amber-500/40 text-amber-300 hover:bg-amber-500/10'
-                  : 'border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/10'
-              }`}
-            >
-              {currentSchool?.status === 'Active' ? 'Suspend School' : 'Activate School'}
-            </button>
-            <button
-              onClick={() => handleRemoveSchool(currentSchool)}
-              className="text-xs px-3 py-1.5 rounded-xl font-bold border border-rose-500/40 text-rose-400 hover:bg-rose-500/10 transition"
-            >
-              Delete School
-            </button>
-          </div>
-        </div>
-
-        {/* School Status Alert if Suspended */}
-        {currentSchool?.status === 'Suspended' && (
-          <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center justify-between">
-            <div>
-              <span className="font-bold">⚠️ Institution Access Suspended:</span> {currentSchool?.name}
-              <p className="text-[11px] text-rose-400/80 mt-0.5">Reason: {currentSchool.suspendReason || "Payment / Contract Hold"}</p>
+        {/* Tab 1: Institution Scope */}
+        {activeTab === 'schools' && (
+          <div className="space-y-4">
+            <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex justify-between items-center">
+              <div className="flex items-center gap-3 text-xs">
+                <span className="text-slate-400 font-semibold">Active Institution:</span>
+                <select
+                  value={selectedSchoolId}
+                  onChange={(e) => setSelectedSchoolId(e.target.value)}
+                  className="bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-indigo-300 font-bold"
+                >
+                  {schools.map((s) => (
+                    <option key={s.id} value={s.id}>{s.name} ({s.city}) [{s.status}]</option>
+                  ))}
+                </select>
+              </div>
+              <span className="text-xs font-mono text-emerald-400">Linked IDs: {schoolScopedUsers.length}</span>
             </div>
-            <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-rose-500/20 text-rose-200">Staff Blocked</span>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl">
+                <p className="text-[10px] text-slate-400 uppercase">Institution Plan</p>
+                <p className="text-lg font-bold text-white mt-1">{currentSchool.plan}</p>
+              </div>
+              <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl">
+                <p className="text-[10px] text-slate-400 uppercase">Total User Accounts</p>
+                <p className="text-2xl font-bold text-indigo-400 mt-1">{schoolScopedUsers.length}</p>
+              </div>
+              <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl">
+                <p className="text-[10px] text-slate-400 uppercase">Current Status</p>
+                <p className={`text-sm font-bold mt-2 ${currentSchool.status === 'Active' ? 'text-emerald-400' : 'text-rose-400'}`}>{currentSchool.status}</p>
+              </div>
+            </div>
           </div>
         )}
 
-        {/* KPI Stats Strictly for the SELECTED School */}
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-          <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl">
-            <p className="text-xs text-slate-400 uppercase tracking-wider">Institution Accounts</p>
-            <p className="text-2xl font-bold text-white mt-1">{currentSchoolUsers.length} <span className="text-xs font-normal text-slate-400">Total IDs</span></p>
-          </div>
-          <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl">
-            <p className="text-xs text-slate-400 uppercase tracking-wider">Issued Invite Codes</p>
-            <p className="text-2xl font-bold text-indigo-400 mt-1">{currentSchoolCodes.length}</p>
-          </div>
-          <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl">
-            <p className="text-xs text-slate-400 uppercase tracking-wider">Plan License</p>
-            <p className="text-base font-bold text-emerald-400 mt-2">{currentSchool?.plan}</p>
-          </div>
-          <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl">
-            <p className="text-xs text-slate-400 uppercase tracking-wider">Fee Collection</p>
-            <p className="text-2xl font-bold text-white mt-1">₹14,999 <span className="text-xs font-normal text-emerald-400">Settled</span></p>
-          </div>
-        </div>
-
-        {/* Master Token Generator for This School */}
-        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-4">
-          <div className="flex flex-wrap justify-between items-center gap-3">
-            <div>
-              <h3 className="text-sm font-bold text-white">Generate Secret Token for {currentSchool?.name}</h3>
-              <p className="text-xs text-slate-400">Single-use token directly linked to this school.</p>
+        {/* Tab 2: Master Credentials Vault (Developer Only - Passwords Visible) */}
+        {activeTab === 'users' && (
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-base font-bold text-white">Master Credentials & Identity Vault</h2>
+                <p className="text-xs text-slate-400">Strictly confidential to System Developer. Cleartext passwords & privilege controls.</p>
+              </div>
             </div>
-            <div className="flex items-center gap-2 text-xs">
-              <select
-                value={targetRole}
-                onChange={(e) => setTargetRole(e.target.value)}
-                className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-slate-200"
-              >
-                <option value={ROLES.PRINCIPAL}>Principal</option>
-                <option value={ROLES.DIRECTOR}>Director / Management</option>
-                <option value={ROLES.TEACHER}>Subject Teacher</option>
-              </select>
-              <button
-                onClick={handleCreateMasterToken}
-                className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-3 py-1.5 rounded-xl transition"
-              >
-                + Issue Token
-              </button>
-            </div>
-          </div>
 
-          {codeNotice && (
-            <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono">
-              {codeNotice}
-            </div>
-          )}
-
-          {/* User Table for SELECTED SCHOOL ONLY */}
-          <div className="border border-slate-800 rounded-xl overflow-hidden mt-4">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-950 text-slate-400 uppercase text-[10px]">
-                <tr>
-                  <th className="p-3">Faculty Name</th>
-                  <th className="p-3">Email ID</th>
-                  <th className="p-3">Role</th>
-                  <th className="p-3">Department</th>
-                  <th className="p-3">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800/60 font-mono text-slate-300">
-                {currentSchoolUsers.map((u) => (
-                  <tr key={u.id} className="hover:bg-slate-800/20">
-                    <td className="p-3 font-sans font-medium text-white">{u.fullName}</td>
-                    <td className="p-3 text-slate-400">{u.email}</td>
-                    <td className="p-3 font-sans">
-                      <span className="px-2 py-0.5 rounded bg-slate-800 text-indigo-300 text-[10px]">{u.role}</span>
-                    </td>
-                    <td className="p-3 font-sans text-slate-400">{u.department}</td>
-                    <td className="p-3 font-sans">
-                      <span className={`px-2 py-0.5 rounded text-[10px] ${u.status === 'Active' ? 'text-emerald-400 bg-emerald-500/10' : 'text-rose-400 bg-rose-500/10'}`}>
-                        {u.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-                {currentSchoolUsers.length === 0 && (
+            <div className="border border-slate-800 rounded-2xl overflow-hidden bg-slate-900">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-950 text-slate-400 uppercase text-[10px]">
                   <tr>
-                    <td colSpan="5" className="p-4 text-center text-slate-500 font-sans">No staff registered for this school yet.</td>
+                    <th className="p-3">User / Identity</th>
+                    <th className="p-3">Email Login</th>
+                    <th className="p-3">Decrypted Password</th>
+                    <th className="p-3">School</th>
+                    <th className="p-3">Role</th>
+                    <th className="p-3">State</th>
+                    <th className="p-3 text-right">Actions</th>
                   </tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-slate-800/60 font-mono">
+                  {users.map((u) => (
+                    <tr key={u.id} className="hover:bg-slate-800/20">
+                      <td className="p-3 font-sans text-white font-medium">{u.fullName}</td>
+                      <td className="p-3 text-slate-400">{u.email}</td>
+                      <td className="p-3">
+                        <span className="bg-slate-950 border border-amber-500/30 text-amber-300 px-2 py-0.5 rounded font-bold">
+                          {u.password}
+                        </span>
+                      </td>
+                      <td className="p-3 font-sans text-slate-400">{u.schoolName}</td>
+                      <td className="p-3 font-sans"><span className="px-2 py-0.5 rounded bg-slate-800 text-indigo-300 text-[10px]">{u.role}</span></td>
+                      <td className="p-3 font-sans">
+                        <span className={`px-2 py-0.5 rounded text-[10px] ${u.status === 'Active' ? 'text-emerald-400 bg-emerald-500/10' : 'text-rose-400 bg-rose-500/10'}`}>
+                          {u.status}
+                        </span>
+                      </td>
+                      <td className="p-3 text-right font-sans space-x-2">
+                        <button onClick={() => setEditingUser(u)} className="text-xs text-indigo-400 hover:underline">Edit</button>
+                        <button onClick={() => handleToggleUserSuspend(u)} className="text-xs text-amber-400 hover:underline">
+                          {u.status === 'Active' ? 'Suspend' : 'Activate'}
+                        </button>
+                        <button onClick={() => handleDeleteUser(u.id)} className="text-xs text-rose-400 hover:underline">Delete</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Tab 3: SaaS Subscription Plans (₹7,999 to ₹19,999) */}
+        {activeTab === 'plans' && (
+          <div className="space-y-4">
+            <div>
+              <h2 className="text-base font-bold text-white">Institutional SaaS Offerings for Schools</h2>
+              <p className="text-xs text-slate-400">Standardized annual commercial packages designed for CBSE accredited institutions.</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {SAAS_PLANS.map((plan) => (
+                <div key={plan.id} className="bg-slate-900 border border-slate-800 hover:border-indigo-500/60 p-6 rounded-2xl flex flex-col justify-between space-y-4 transition">
+                  <div className="space-y-2">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/30">
+                      {plan.recommendedFor}
+                    </span>
+                    <h3 className="text-lg font-bold text-white mt-1">{plan.name}</h3>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-3xl font-extrabold text-white font-mono">₹{plan.price.toLocaleString('en-IN')}</span>
+                      <span className="text-slate-500 text-xs">/ {plan.billingCycle}</span>
+                    </div>
+                    <p className="text-xs text-slate-400 border-t border-slate-800 pt-2">
+                      <strong className="text-slate-300">Coverage:</strong> {plan.classesCovered}
+                    </p>
+                    <p className="text-xs text-slate-400">
+                      <strong className="text-slate-300">Faculty Seats:</strong> {plan.maxFacultyAccounts}
+                    </p>
+                    <ul className="space-y-1.5 pt-2 text-xs text-slate-300">
+                      {plan.features.map((feat, idx) => (
+                        <li key={idx} className="flex items-start gap-2">
+                          <span className="text-emerald-400 font-bold">✓</span>
+                          <span>{feat}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <button className="w-full bg-slate-950 hover:bg-indigo-600 text-white font-semibold py-2.5 rounded-xl border border-slate-800 hover:border-transparent text-xs transition">
+                    Assign Plan to School
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Modal for Editing User by Developer */}
+        {editingUser && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+            <div className="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl p-6 space-y-4 text-xs">
+              <h3 className="text-sm font-bold text-white">Edit User Credentials (Master Override)</h3>
+              <form onSubmit={handleSaveUserEdit} className="space-y-3">
+                <div>
+                  <label className="block text-slate-400 text-[10px] uppercase mb-1">Full Name</label>
+                  <input type="text" value={editingUser.fullName} onChange={(e) => setEditingUser({ ...editingUser, fullName: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white" />
+                </div>
+                <div>
+                  <label className="block text-slate-400 text-[10px] uppercase mb-1">Email ID</label>
+                  <input type="email" value={editingUser.email} onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white" />
+                </div>
+                <div>
+                  <label className="block text-slate-400 text-[10px] uppercase mb-1">Decrypted Password</label>
+                  <input type="text" value={editingUser.password} onChange={(e) => setEditingUser({ ...editingUser, password: e.target.value })} className="w-full bg-slate-950 border border-amber-500/40 rounded-xl px-3 py-2 text-amber-300 font-mono" />
+                </div>
+                <div className="flex gap-2 pt-2">
+                  <Button type="submit">Save Changes</Button>
+                  <Button variant="secondary" onClick={() => setEditingUser(null)}>Cancel</Button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
