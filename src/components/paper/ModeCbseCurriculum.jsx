@@ -1,31 +1,54 @@
 import React, { useState } from 'react';
 import Button from '../common/Button.jsx';
+import QuestionMatrix from './QuestionMatrix.jsx';
 import { getSyllabusDataForClass, ALL_CLASSES } from '../../config/syllabus/index.js';
+import { autoBalanceQuestions } from '../../config/questionFormats.js';
+import { EXAM_CATEGORIES, DIFFICULTY_LEVELS } from '../../config/examTypes.js';
 
-export default function ModeCbseCurriculum({ onGeneratePaper }) {
+export default function ModeCbseCurriculum({ onGeneratePaper, loading }) {
   const [selectedClass, setSelectedClass] = useState('Class 12');
+  const [selectedExamType, setSelectedExamType] = useState(EXAM_CATEGORIES[3].name); // Pre-board
+  const [difficulty, setDifficulty] = useState(DIFFICULTY_LEVELS[1].label); // Standard
+
   const syllabusBundle = getSyllabusDataForClass(selectedClass);
-
   const availableSubjects = syllabusBundle ? Object.keys(syllabusBundle.subjects) : [];
-  const [selectedSubject, setSelectedSubject] = useState(availableSubjects[0] || '');
+  const [selectedSubject, setSelectedSubject] = useState(availableSubjects[0] || 'Computer Science (Code 083)');
 
-  // Marks Configuration (Fixed for 9-12, customizable for Nursery-8th)
-  const isHigherSecondary = ['Class 9', 'Class 10', 'Class 11', 'Class 12'].includes(selectedClass);
+  // Dynamic Free Marks Controller (No Locked values, freely adjustable)
   const currentSubjectData = syllabusBundle?.subjects[selectedSubject] || {};
+  const [theoryMarks, setTheoryMarks] = useState(currentSubjectData.fixedTheoryMarks || 80);
+  const [practicalMarks, setPracticalMarks] = useState(currentSubjectData.fixedPracticalMarks || 20);
 
-  const [theoryMarks, setTheoryMarks] = useState(
-    currentSubjectData.fixedTheoryMarks || syllabusBundle?.defaultTheoryMarks || 80
-  );
-  const [internalMarks, setInternalMarks] = useState(
-    currentSubjectData.fixedPracticalMarks || syllabusBundle?.defaultInternalMarks || 20
-  );
+  // Dynamic Question Matrix initialized with auto-balance
+  const [matrix, setMatrix] = useState(autoBalanceQuestions(theoryMarks));
 
   // Expand / Collapse state for subtopics
   const [expandedUnits, setExpandedUnits] = useState({});
-  // Selected Units checklist
   const [selectedUnits, setSelectedUnits] = useState({});
-  // Selected Subtopics checklist
   const [selectedSubtopics, setSelectedSubtopics] = useState({});
+
+  const handleClassChange = (newClass) => {
+    setSelectedClass(newClass);
+    const nextBundle = getSyllabusDataForClass(newClass);
+    const firstSub = nextBundle ? Object.keys(nextBundle.subjects)[0] : '';
+    setSelectedSubject(firstSub);
+
+    const subData = nextBundle?.subjects[firstSub] || {};
+    const thMarks = subData.fixedTheoryMarks || 80;
+    setTheoryMarks(thMarks);
+    setPracticalMarks(subData.fixedPracticalMarks || 20);
+    setMatrix(autoBalanceQuestions(thMarks));
+  };
+
+  const handleSubjectChange = (newSub) => {
+    setSelectedSubject(newSub);
+    const subData = syllabusBundle?.subjects[newSub] || {};
+    // Correct 80 Marks for Maths, 70 for CS/Physics
+    const thMarks = subData.fixedTheoryMarks || (newSub.includes('Math') ? 80 : 70);
+    setTheoryMarks(thMarks);
+    setPracticalMarks(subData.fixedPracticalMarks || (newSub.includes('Math') ? 20 : 30));
+    setMatrix(autoBalanceQuestions(thMarks));
+  };
 
   const toggleExpand = (unitId) => {
     setExpandedUnits((prev) => ({ ...prev, [unitId]: !prev[unitId] }));
@@ -34,8 +57,6 @@ export default function ModeCbseCurriculum({ onGeneratePaper }) {
   const toggleUnitCheck = (unit) => {
     const nextState = !selectedUnits[unit.id];
     setSelectedUnits((prev) => ({ ...prev, [unit.id]: nextState }));
-
-    // Auto select / deselect all its subtopics
     const updatedSubs = { ...selectedSubtopics };
     unit.subtopics.forEach((sub) => {
       updatedSubs[`${unit.id}_${sub}`] = nextState;
@@ -49,35 +70,36 @@ export default function ModeCbseCurriculum({ onGeneratePaper }) {
   };
 
   const handleGenerate = () => {
+    const activeTopics = Object.keys(selectedSubtopics)
+      .filter((k) => selectedSubtopics[k])
+      .map((k) => k.split('_')[1]);
+
     onGeneratePaper({
       selectedClass,
       selectedSubject,
+      examType: selectedExamType,
+      difficulty,
       theoryMarks,
-      internalMarks,
-      selectedUnits,
-      selectedSubtopics
+      practicalMarks,
+      matrix,
+      selectedTopics: activeTopics
     });
   };
 
   return (
-    <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-5 text-xs">
+    <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-6 text-xs">
       <div>
-        <h3 className="text-sm font-bold text-white">Mode 3: Official CBSE Curriculum Checkbox Engine</h3>
-        <p className="text-slate-400 mt-0.5">Click (+) to expand specific sub-topics. Checked topics are strictly adhered to in the generated paper.</p>
+        <h3 className="text-sm font-bold text-white">Mode 1: Official CBSE Curriculum & Dynamic Exam Engine</h3>
+        <p className="text-slate-400 mt-0.5">Customise class, exam level, PYQ years, syllabus units, and section marks with live auto-balance.</p>
       </div>
 
-      {/* Class & Subject Selector */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      {/* Row 1: Class, Subject, Exam Type & Standard */}
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
         <div>
-          <label className="block text-slate-400 text-[10px] uppercase mb-1">Select Class (K-12)</label>
+          <label className="block text-slate-400 text-[10px] uppercase mb-1">Class (K-12)</label>
           <select
             value={selectedClass}
-            onChange={(e) => {
-              setSelectedClass(e.target.value);
-              const nextBundle = getSyllabusDataForClass(e.target.value);
-              const firstSub = nextBundle ? Object.keys(nextBundle.subjects)[0] : '';
-              setSelectedSubject(firstSub);
-            }}
+            onChange={(e) => handleClassChange(e.target.value)}
             className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-bold"
           >
             {ALL_CLASSES.map((c) => (
@@ -87,10 +109,10 @@ export default function ModeCbseCurriculum({ onGeneratePaper }) {
         </div>
 
         <div>
-          <label className="block text-slate-400 text-[10px] uppercase mb-1">Select Subject</label>
+          <label className="block text-slate-400 text-[10px] uppercase mb-1">Subject</label>
           <select
             value={selectedSubject}
-            onChange={(e) => setSelectedSubject(e.target.value)}
+            onChange={(e) => handleSubjectChange(e.target.value)}
             className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-indigo-300 font-bold"
           >
             {availableSubjects.map((sub) => (
@@ -98,49 +120,94 @@ export default function ModeCbseCurriculum({ onGeneratePaper }) {
             ))}
           </select>
         </div>
+
+        <div>
+          <label className="block text-slate-400 text-[10px] uppercase mb-1">Examination Pattern</label>
+          <select
+            value={selectedExamType}
+            onChange={(e) => setSelectedExamType(e.target.value)}
+            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white"
+          >
+            {EXAM_CATEGORIES.map((e) => (
+              <option key={e.id} value={e.name}>{e.name}</option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-slate-400 text-[10px] uppercase mb-1">Difficulty / Standard</label>
+          <select
+            value={difficulty}
+            onChange={(e) => setDifficulty(e.target.value)}
+            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-amber-300 font-semibold"
+          >
+            {DIFFICULTY_LEVELS.map((d) => (
+              <option key={d.id} value={d.label}>{d.label}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
-      {/* Marks Weightage Controller (80+20 default for Junior, customizable) */}
+      {/* Row 2: Free Marks Controller (+ / - for 9th to 12th as well) */}
       <div className="p-4 bg-slate-950 border border-slate-800 rounded-xl flex flex-wrap justify-between items-center gap-4">
         <div>
-          <span className="text-slate-400 text-[11px] block">CBSE Evaluation Weightage:</span>
+          <span className="text-slate-400 text-[11px] block">Evaluation Distribution:</span>
           <span className="font-bold text-white text-xs">
-            {isHigherSecondary ? 'Standard Board Pattern Locked' : 'Junior Secondary (80+20 Default - Fully Adjustable)'}
+            Theory & Internal/Practical Marks (Freely Adjustable for All Classes)
           </span>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <span className="text-slate-400 text-[10px] uppercase">Theory Marks:</span>
-            <input
-              type="number"
-              value={theoryMarks}
-              disabled={isHigherSecondary}
-              onChange={(e) => setTheoryMarks(Number(e.target.value))}
-              className={`w-16 bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-center font-mono font-bold ${isHigherSecondary ? 'text-indigo-400' : 'text-emerald-400'}`}
-            />
+            <button
+              type="button"
+              onClick={() => {
+                const next = Math.max(10, theoryMarks - 5);
+                setTheoryMarks(next);
+                setMatrix(autoBalanceQuestions(next));
+              }}
+              className="h-6 w-6 rounded bg-slate-900 border border-slate-700 hover:border-indigo-500 text-white font-bold text-xs"
+            >−</button>
+            <span className="font-mono font-bold text-indigo-400 text-sm w-8 text-center">{theoryMarks}</span>
+            <button
+              type="button"
+              onClick={() => {
+                const next = theoryMarks + 5;
+                setTheoryMarks(next);
+                setMatrix(autoBalanceQuestions(next));
+              }}
+              className="h-6 w-6 rounded bg-slate-900 border border-slate-700 hover:border-indigo-500 text-white font-bold text-xs"
+            >+</button>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-slate-400 text-[10px] uppercase">Internal / Viva:</span>
-            <input
-              type="number"
-              value={internalMarks}
-              disabled={isHigherSecondary}
-              onChange={(e) => setInternalMarks(Number(e.target.value))}
-              className={`w-16 bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-center font-mono font-bold ${isHigherSecondary ? 'text-amber-400' : 'text-emerald-400'}`}
-            />
+            <span className="text-slate-400 text-[10px] uppercase">Practical / Internal:</span>
+            <button
+              type="button"
+              onClick={() => setPracticalMarks(Math.max(0, practicalMarks - 5))}
+              className="h-6 w-6 rounded bg-slate-900 border border-slate-700 hover:border-indigo-500 text-white font-bold text-xs"
+            >−</button>
+            <span className="font-mono font-bold text-amber-400 text-sm w-8 text-center">{practicalMarks}</span>
+            <button
+              type="button"
+              onClick={() => setPracticalMarks(practicalMarks + 5)}
+              className="h-6 w-6 rounded bg-slate-900 border border-slate-700 hover:border-indigo-500 text-white font-bold text-xs"
+            >+</button>
           </div>
         </div>
       </div>
 
-      {/* Units & Subtopics Accordion with Checkboxes */}
+      {/* Row 3: Interactive Question Format Matrix */}
+      <QuestionMatrix matrix={matrix} onChange={setMatrix} targetMarks={theoryMarks} />
+
+      {/* Row 4: Expandable Syllabus Units & Subtopics */}
       <div className="space-y-2">
         <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
           Units & Sub-Topics for {selectedSubject} ({selectedClass}):
         </p>
 
-        <div className="space-y-2 max-h-96 overflow-y-auto pr-1">
+        <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
           {currentSubjectData.units?.map((unit) => {
             const isExpanded = expandedUnits[unit.id];
             const isChecked = !!selectedUnits[unit.id];
@@ -153,7 +220,7 @@ export default function ModeCbseCurriculum({ onGeneratePaper }) {
                       type="checkbox"
                       checked={isChecked}
                       onChange={() => toggleUnitCheck(unit)}
-                      className="h-4 w-4 rounded bg-slate-900 border-slate-700 text-indigo-600 focus:ring-0 cursor-pointer"
+                      className="h-4 w-4 rounded bg-slate-900 border-slate-700 text-indigo-600 cursor-pointer"
                     />
                     <span className="font-semibold text-white">{unit.name}</span>
                   </div>
@@ -167,7 +234,6 @@ export default function ModeCbseCurriculum({ onGeneratePaper }) {
                   </button>
                 </div>
 
-                {/* Expanded Subtopics Checkbox List */}
                 {isExpanded && (
                   <div className="p-3 bg-slate-900/60 border-t border-slate-800/80 pl-9 space-y-2">
                     <p className="text-[10px] text-slate-500 uppercase font-semibold">Sub-Topics in this Unit:</p>
@@ -193,8 +259,8 @@ export default function ModeCbseCurriculum({ onGeneratePaper }) {
         </div>
       </div>
 
-      <Button onClick={handleGenerate}>
-        Generate CBSE Aligned Question Paper & Marking Scheme
+      <Button onClick={handleGenerate} disabled={loading} className="w-full">
+        {loading ? 'AI Engine Compiling Paper...' : '⚡ Generate CBSE Question Paper, Answer Key & Blueprint'}
       </Button>
     </div>
   );
