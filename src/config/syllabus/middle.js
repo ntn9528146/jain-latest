@@ -1,58 +1,114 @@
 export const middleSyllabus = {
-  category: 'Middle School (Class 6th to 8th)',
+  category: 'Middle School Level (Classes 6 to 8)',
   defaultTheoryMarks: 80,
   defaultInternalMarks: 20,
   classes: ['Class 6', 'Class 7', 'Class 8'],
   subjects: {
-    'Science': {
+    'Science (Physics, Chemistry, Biology)': {
       units: [
         {
-          id: 'm_sci_1',
-          name: 'Food & Living World (Biology)',
-          subtopics: ['Components of Food & Nutrients', 'Cell Structure and Microorganisms', 'Respiration & Reproduction in Plants/Animals']
+          id: 'mid_sci_phy',
+          name: 'Physics: Motion, Energy & Natural Forces',
+          subtopics: ['Motion, Speed and Distance-Time Graphs', 'Force, Pressure and Friction', 'Sound, Light Reflection & Dispersion', 'Electricity, Chemical Effects & Electric Circuits']
         },
         {
-          id: 'm_sci_2',
-          name: 'Matter & Materials (Chemistry)',
-          subtopics: ['Acids, Bases and Salts', 'Physical and Chemical Changes', 'Synthetic Fibres, Metals and Non-Metals']
+          id: 'mid_sci_chem',
+          name: 'Chemistry: Matter & Material Transformation',
+          subtopics: ['Physical and Chemical Changes', 'Acids, Bases, Salts and Indicators', 'Metals and Non-Metals: Properties and Reactions', 'Synthetic Fibres, Plastics, Coal and Petroleum']
         },
         {
-          id: 'm_sci_3',
-          name: 'Energy & Motion (Physics)',
-          subtopics: ['Motion, Force and Pressure', 'Sound & Light Reflection', 'Electricity: Chemical Effects and Circuits']
+          id: 'mid_sci_bio',
+          name: 'Biology: Living World & Physiology',
+          subtopics: ['Cell Structure and Functions', 'Nutrition and Respiration in Plants & Animals', 'Transportation and Excretion in Organisms', 'Microorganisms: Friend and Foe', 'Conservation of Plants and Animals']
         }
       ]
     },
     'Mathematics': {
       units: [
         {
-          id: 'm_math_1',
-          name: 'Number System & Algebra',
-          subtopics: ['Rational Numbers & Exponents', 'Linear Equations in One Variable', 'Algebraic Expressions and Factorization']
+          id: 'mid_math_1',
+          name: 'Number System & Commercial Arithmetic',
+          subtopics: ['Integers, Rational Numbers and Exponents', 'Comparing Quantities: Ratios, Percentages, Profit & Loss, Simple/Compound Interest']
         },
         {
-          id: 'm_math_2',
-          name: 'Geometry & Mensuration',
-          subtopics: ['Understanding Quadrilaterals', 'Area and Surface Area of Solids', 'Visualising Solid Shapes']
+          id: 'mid_math_2',
+          name: 'Algebra & Equations',
+          subtopics: ['Algebraic Expressions, Identities & Factorisation', 'Linear Equations in One Variable']
         },
         {
-          id: 'm_math_3',
-          name: 'Commercial Maths & Statistics',
-          subtopics: ['Comparing Quantities (Percentage, Profit & Loss, SI/CI)', 'Data Handling & Pie Charts']
+          id: 'mid_math_3',
+          name: 'Geometry, Mensuration & Statistics',
+          subtopics: ['Lines and Angles, Triangles and its Properties', 'Understanding Quadrilaterals & Practical Geometry', 'Area and Surface Area of Plane and Solid Figures', 'Data Handling: Frequency Tables, Bar Graphs, Histograms and Pie Charts']
         }
       ]
     },
-    'Computer Science': {
+    'Social Science (History, Geography, Civics)': {
       units: [
         {
-          id: 'm_cs_1',
-          name: 'Foundations of Coding & Algorithms',
-          subtopics: ['Flowcharts and Algorithm Design', 'Introduction to Python / Block Coding', 'Variables, Loops and Conditions']
+          id: 'mid_sst_hist',
+          name: 'History: India & Modern Transitions',
+          subtopics: ['Ancient Civilizations & Empires', 'Medieval Kingdoms, Delhi Sultanate & Mughal Empire', 'Colonial Rule, Revolt of 1857 & Indian National Movement']
         },
         {
-          id: 'm_cs_2',
-          name: 'Cyber Safety & Digital Citizenship',
-          subtopics: ['Safe Internet Browsing', 'Cyber bullying and digital footprint', 'Computer Hardware and Cloud storage']
+          id: 'mid_sst_geo',
+          name: 'Geography: Earth, Resources & Development',
+          subtopics: ['Solar System, Earth Interior & Plate Tectonics', 'Natural Resources: Land, Soil, Water, Natural Vegetation', 'Agriculture, Major Crops, Minerals and Industries']
+        },
+        {
+          id: 'mid_sst_civ',
+          name: 'Civics / Political Science: Democracy & Governance',
+          subtopics: ['Indian Constitution and Secularism', 'Parliament and Law Making Process', 'Judiciary and Criminal Justice System', 'Social Justice and Marginalisation']
+        }
+      ]
+    },
+    'English Language & Literature': {
+      units: [
+        {
+          id: 'mid_eng_1',
+          name: 'Section A & B: Reading & Writing Skills',
+          subtopics: ['Discursive & Factual Unseen Passages', 'Formal & Informal Letter Writing', 'Notice, Diary Entry & Analytical Article Writing']
+        },
+        {
+          id: 'mid_eng_2',
+          name: 'Section C: Grammar & Literature Textbooks',
+          subtopics: ['Reported Speech, Active/Passive Voice, Modals, Subject-Verb Agreement', 'Prose & Poetry Appreciation, Theme Analysis and Character Sketches']
+        }
+      ]
+    },
+    'Hindi (हिंदी - भाषा, साहित्य व व्याकरण)': {
+      units: [
+        {
+          id: 'mid_hin_1',
+          name: 'अपठित बोध एवं व्याकरण',
+          subtopics: ['अपठित गद्यांश व काव्यांश', 'संधि, समास, उपसर्ग, प्रत्यय, मुहावरे', 'अलंकार, वाक्य विचार एवं पदबंध परिचय']
+        },
+        {
+          id: 'mid_hin_2',
+          name: 'साहित्य एवं रचनात्मक लेखन',
+          subtopics: ['वसंत / पाठ्यपुस्तक के पाठ, कविताएँ एवं एकांकी', 'संवाद लेखन, लघु कथा, विज्ञापन एवं औपचारिक पत्र']
+        }
+      ]
+    },
+    'Computer Science & Artificial Intelligence': {
+      units: [
+        {
+          id: 'mid_cs_1',
+          name: 'Office Productivity & Cyber Ethics',
+          subtopics: ['Advanced MS Excel: Formulas, Charts, Sorting', 'Presentations with Audio/Video in MS PowerPoint', 'Cyber Safety, Phishing, Passwords and Digital Etiquette']
+        },
+        {
+          id: 'mid_cs_2',
+          name: 'Coding & Intro to Artificial Intelligence',
+          subtopics: ['Algorithmic Thinking and Flowcharts', 'Block Coding / Python Basics (Variables, Loops, Conditions)', 'Domains of AI: Computer Vision, NLP and Data Science']
+        }
+      ]
+    },
+    'Third Language (Sanskrit / French / German / Regional)': {
+      units: [
+        {
+          id: 'mid_l3_1',
+          name: 'Grammar & Text Comprehension',
+          subtopics: ['शब्दरूप व धातुरूप (लट्, लृट्, लङ् लकार) / Verb Conjugations', 'कारक एवं विभक्ति परिचय / Articles & Prepositions', 'सरल अनुवाद एवं अपठित परिच्छेद']
         }
       ]
     }

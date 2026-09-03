@@ -1,14 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Button from '../common/Button.jsx';
 import QuestionMatrix from './QuestionMatrix.jsx';
 import { getSyllabusDataForClass, ALL_CLASSES } from '../../config/syllabus/index.js';
 import { autoBalanceQuestions } from '../../config/questionFormats.js';
 import { EXAM_CATEGORIES, DIFFICULTY_LEVELS } from '../../config/examTypes.js';
+import { getAutoSelectedSyllabusUnits } from '../../services/syllabusSelectorService.js';
 
 export default function ModeCbseCurriculum({ onGeneratePaper, loading }) {
   const [selectedClass, setSelectedClass] = useState('Class 12');
-  const [selectedExamType, setSelectedExamType] = useState(EXAM_CATEGORIES[3]?.name || 'Pre-Board Examination (100% Syllabus)');
-  const [difficulty, setDifficulty] = useState(DIFFICULTY_LEVELS[1]?.label || 'Standard CBSE Balanced (60% Medium, 20% Easy, 20% HOTS)');
+  const [selectedExamType, setSelectedExamType] = useState(EXAM_CATEGORIES[3]?.name || 'Pre-Board Examination');
+  const [difficulty, setDifficulty] = useState(DIFFICULTY_LEVELS[1]?.label || 'Standard CBSE Balanced');
 
   const syllabusBundle = getSyllabusDataForClass(selectedClass);
   const availableSubjects = syllabusBundle ? Object.keys(syllabusBundle.subjects) : [];
@@ -22,6 +23,19 @@ export default function ModeCbseCurriculum({ onGeneratePaper, loading }) {
   const [expandedUnits, setExpandedUnits] = useState({});
   const [selectedUnits, setSelectedUnits] = useState({});
   const [selectedSubtopics, setSelectedSubtopics] = useState({});
+
+  // Auto-sync syllabus according to selected Exam Pattern
+  const applyAutoSyllabusSelection = (unitsList, examName) => {
+    const autoResult = getAutoSelectedSyllabusUnits(unitsList, examName);
+    setSelectedUnits(autoResult.selectedUnits);
+    setSelectedSubtopics(autoResult.selectedSubtopics);
+  };
+
+  useEffect(() => {
+    if (currentSubjectData.units) {
+      applyAutoSyllabusSelection(currentSubjectData.units, selectedExamType);
+    }
+  }, [selectedExamType, selectedSubject, selectedClass]);
 
   const handleClassChange = (newClass) => {
     setSelectedClass(newClass);
@@ -65,9 +79,7 @@ export default function ModeCbseCurriculum({ onGeneratePaper, loading }) {
   };
 
   const handleGenerate = () => {
-    const activeTopics = Object.keys(selectedSubtopics)
-      .filter((k) => selectedSubtopics[k])
-      .map((k) => k.split('_')[1]);
+    const activeUnitsList = (currentSubjectData.units || []).filter((u) => selectedUnits[u.id]);
 
     if (onGeneratePaper) {
       onGeneratePaper({
@@ -78,7 +90,7 @@ export default function ModeCbseCurriculum({ onGeneratePaper, loading }) {
         theoryMarks,
         practicalMarks,
         matrix,
-        selectedTopics: activeTopics
+        activeUnits: activeUnitsList
       });
     }
   };
@@ -87,7 +99,7 @@ export default function ModeCbseCurriculum({ onGeneratePaper, loading }) {
     <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-6 text-xs">
       <div>
         <h3 className="text-sm font-bold text-white">Mode 1: Official CBSE Curriculum & Dynamic Exam Engine</h3>
-        <p className="text-slate-400 mt-0.5">Customize class, exam level, PYQ years, syllabus units, and section marks with live auto-balance.</p>
+        <p className="text-slate-400 mt-0.5">Syllabus units automatically adapt to the chosen exam pattern.</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
@@ -105,7 +117,7 @@ export default function ModeCbseCurriculum({ onGeneratePaper, loading }) {
         </div>
 
         <div>
-          <label className="block text-slate-400 text-[10px] uppercase mb-1">Subject</label>
+          <label className="block text-slate-400 text-[10px] uppercase mb-1">Subject ({availableSubjects.length} Available)</label>
           <select
             value={selectedSubject}
             onChange={(e) => handleSubjectChange(e.target.value)}
@@ -144,6 +156,7 @@ export default function ModeCbseCurriculum({ onGeneratePaper, loading }) {
         </div>
       </div>
 
+      {/* Marks Adjustment Controller */}
       <div className="p-4 bg-slate-950 border border-slate-800 rounded-xl flex flex-wrap justify-between items-center gap-4">
         <div>
           <span className="text-slate-400 text-[11px] block">Evaluation Distribution:</span>
@@ -162,7 +175,7 @@ export default function ModeCbseCurriculum({ onGeneratePaper, loading }) {
                 setTheoryMarks(next);
                 setMatrix(autoBalanceQuestions(next));
               }}
-              className="h-6 w-6 rounded bg-slate-900 border border-slate-700 hover:border-indigo-500 text-white font-bold text-xs"
+              className="h-6 w-6 rounded bg-slate-900 border border-slate-700 text-white font-bold text-xs"
             >−</button>
             <span className="font-mono font-bold text-indigo-400 text-sm w-8 text-center">{theoryMarks}</span>
             <button
@@ -172,7 +185,7 @@ export default function ModeCbseCurriculum({ onGeneratePaper, loading }) {
                 setTheoryMarks(next);
                 setMatrix(autoBalanceQuestions(next));
               }}
-              className="h-6 w-6 rounded bg-slate-900 border border-slate-700 hover:border-indigo-500 text-white font-bold text-xs"
+              className="h-6 w-6 rounded bg-slate-900 border border-slate-700 text-white font-bold text-xs"
             >+</button>
           </div>
 
@@ -181,13 +194,13 @@ export default function ModeCbseCurriculum({ onGeneratePaper, loading }) {
             <button
               type="button"
               onClick={() => setPracticalMarks(Math.max(0, practicalMarks - 5))}
-              className="h-6 w-6 rounded bg-slate-900 border border-slate-700 hover:border-indigo-500 text-white font-bold text-xs"
+              className="h-6 w-6 rounded bg-slate-900 border border-slate-700 text-white font-bold text-xs"
             >−</button>
             <span className="font-mono font-bold text-amber-400 text-sm w-8 text-center">{practicalMarks}</span>
             <button
               type="button"
               onClick={() => setPracticalMarks(practicalMarks + 5)}
-              className="h-6 w-6 rounded bg-slate-900 border border-slate-700 hover:border-indigo-500 text-white font-bold text-xs"
+              className="h-6 w-6 rounded bg-slate-900 border border-slate-700 text-white font-bold text-xs"
             >+</button>
           </div>
         </div>
@@ -195,10 +208,16 @@ export default function ModeCbseCurriculum({ onGeneratePaper, loading }) {
 
       <QuestionMatrix matrix={matrix} onChange={setMatrix} targetMarks={theoryMarks} />
 
+      {/* Expandable Syllabus Checkbox List */}
       <div className="space-y-2">
-        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-          Units & Sub-Topics for {selectedSubject} ({selectedClass}):
-        </p>
+        <div className="flex justify-between items-center">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            Syllabus Units for {selectedSubject} ({selectedExamType}):
+          </p>
+          <span className="text-[10px] font-mono text-indigo-400">
+            Auto-Checked for {selectedExamType}
+          </span>
+        </div>
 
         <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
           {currentSubjectData.units?.map((unit) => {
@@ -253,7 +272,7 @@ export default function ModeCbseCurriculum({ onGeneratePaper, loading }) {
       </div>
 
       <Button onClick={handleGenerate} disabled={loading} className="w-full">
-        {loading ? 'AI Engine Compiling Paper...' : '⚡ Generate CBSE Question Paper, Answer Key & Blueprint'}
+        {loading ? 'Compiling Paper & Blueprint...' : '⚡ Generate CBSE Question Paper, Answer Key & Blueprint'}
       </Button>
     </div>
   );
