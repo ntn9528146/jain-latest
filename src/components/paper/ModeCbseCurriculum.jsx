@@ -7,22 +7,18 @@ import { EXAM_CATEGORIES, DIFFICULTY_LEVELS } from '../../config/examTypes.js';
 
 export default function ModeCbseCurriculum({ onGeneratePaper, loading }) {
   const [selectedClass, setSelectedClass] = useState('Class 12');
-  const [selectedExamType, setSelectedExamType] = useState(EXAM_CATEGORIES[3].name); // Pre-board
-  const [difficulty, setDifficulty] = useState(DIFFICULTY_LEVELS[1].label); // Standard
+  const [selectedExamType, setSelectedExamType] = useState(EXAM_CATEGORIES[3]?.name || 'Pre-Board Examination (100% Syllabus)');
+  const [difficulty, setDifficulty] = useState(DIFFICULTY_LEVELS[1]?.label || 'Standard CBSE Balanced (60% Medium, 20% Easy, 20% HOTS)');
 
   const syllabusBundle = getSyllabusDataForClass(selectedClass);
   const availableSubjects = syllabusBundle ? Object.keys(syllabusBundle.subjects) : [];
   const [selectedSubject, setSelectedSubject] = useState(availableSubjects[0] || 'Computer Science (Code 083)');
 
-  // Dynamic Free Marks Controller (No Locked values, freely adjustable)
   const currentSubjectData = syllabusBundle?.subjects[selectedSubject] || {};
-  const [theoryMarks, setTheoryMarks] = useState(currentSubjectData.fixedTheoryMarks || 80);
-  const [practicalMarks, setPracticalMarks] = useState(currentSubjectData.fixedPracticalMarks || 20);
+  const [theoryMarks, setTheoryMarks] = useState(currentSubjectData.fixedTheoryMarks || 70);
+  const [practicalMarks, setPracticalMarks] = useState(currentSubjectData.fixedPracticalMarks || 30);
 
-  // Dynamic Question Matrix initialized with auto-balance
   const [matrix, setMatrix] = useState(autoBalanceQuestions(theoryMarks));
-
-  // Expand / Collapse state for subtopics
   const [expandedUnits, setExpandedUnits] = useState({});
   const [selectedUnits, setSelectedUnits] = useState({});
   const [selectedSubtopics, setSelectedSubtopics] = useState({});
@@ -34,16 +30,15 @@ export default function ModeCbseCurriculum({ onGeneratePaper, loading }) {
     setSelectedSubject(firstSub);
 
     const subData = nextBundle?.subjects[firstSub] || {};
-    const thMarks = subData.fixedTheoryMarks || 80;
+    const thMarks = subData.fixedTheoryMarks || (firstSub.includes('Math') ? 80 : 70);
     setTheoryMarks(thMarks);
-    setPracticalMarks(subData.fixedPracticalMarks || 20);
+    setPracticalMarks(subData.fixedPracticalMarks || (firstSub.includes('Math') ? 20 : 30));
     setMatrix(autoBalanceQuestions(thMarks));
   };
 
   const handleSubjectChange = (newSub) => {
     setSelectedSubject(newSub);
     const subData = syllabusBundle?.subjects[newSub] || {};
-    // Correct 80 Marks for Maths, 70 for CS/Physics
     const thMarks = subData.fixedTheoryMarks || (newSub.includes('Math') ? 80 : 70);
     setTheoryMarks(thMarks);
     setPracticalMarks(subData.fixedPracticalMarks || (newSub.includes('Math') ? 20 : 30));
@@ -58,7 +53,7 @@ export default function ModeCbseCurriculum({ onGeneratePaper, loading }) {
     const nextState = !selectedUnits[unit.id];
     setSelectedUnits((prev) => ({ ...prev, [unit.id]: nextState }));
     const updatedSubs = { ...selectedSubtopics };
-    unit.subtopics.forEach((sub) => {
+    (unit.subtopics || []).forEach((sub) => {
       updatedSubs[`${unit.id}_${sub}`] = nextState;
     });
     setSelectedSubtopics(updatedSubs);
@@ -74,26 +69,27 @@ export default function ModeCbseCurriculum({ onGeneratePaper, loading }) {
       .filter((k) => selectedSubtopics[k])
       .map((k) => k.split('_')[1]);
 
-    onGeneratePaper({
-      selectedClass,
-      selectedSubject,
-      examType: selectedExamType,
-      difficulty,
-      theoryMarks,
-      practicalMarks,
-      matrix,
-      selectedTopics: activeTopics
-    });
+    if (onGeneratePaper) {
+      onGeneratePaper({
+        selectedClass,
+        selectedSubject,
+        examType: selectedExamType,
+        difficulty,
+        theoryMarks,
+        practicalMarks,
+        matrix,
+        selectedTopics: activeTopics
+      });
+    }
   };
 
   return (
     <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-6 text-xs">
       <div>
         <h3 className="text-sm font-bold text-white">Mode 1: Official CBSE Curriculum & Dynamic Exam Engine</h3>
-        <p className="text-slate-400 mt-0.5">Customise class, exam level, PYQ years, syllabus units, and section marks with live auto-balance.</p>
+        <p className="text-slate-400 mt-0.5">Customize class, exam level, PYQ years, syllabus units, and section marks with live auto-balance.</p>
       </div>
 
-      {/* Row 1: Class, Subject, Exam Type & Standard */}
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
         <div>
           <label className="block text-slate-400 text-[10px] uppercase mb-1">Class (K-12)</label>
@@ -148,12 +144,11 @@ export default function ModeCbseCurriculum({ onGeneratePaper, loading }) {
         </div>
       </div>
 
-      {/* Row 2: Free Marks Controller (+ / - for 9th to 12th as well) */}
       <div className="p-4 bg-slate-950 border border-slate-800 rounded-xl flex flex-wrap justify-between items-center gap-4">
         <div>
           <span className="text-slate-400 text-[11px] block">Evaluation Distribution:</span>
           <span className="font-bold text-white text-xs">
-            Theory & Internal/Practical Marks (Freely Adjustable for All Classes)
+            Theory & Internal/Practical Marks (Adjustable for All Classes)
           </span>
         </div>
 
@@ -198,10 +193,8 @@ export default function ModeCbseCurriculum({ onGeneratePaper, loading }) {
         </div>
       </div>
 
-      {/* Row 3: Interactive Question Format Matrix */}
       <QuestionMatrix matrix={matrix} onChange={setMatrix} targetMarks={theoryMarks} />
 
-      {/* Row 4: Expandable Syllabus Units & Subtopics */}
       <div className="space-y-2">
         <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
           Units & Sub-Topics for {selectedSubject} ({selectedClass}):
@@ -237,7 +230,7 @@ export default function ModeCbseCurriculum({ onGeneratePaper, loading }) {
                 {isExpanded && (
                   <div className="p-3 bg-slate-900/60 border-t border-slate-800/80 pl-9 space-y-2">
                     <p className="text-[10px] text-slate-500 uppercase font-semibold">Sub-Topics in this Unit:</p>
-                    {unit.subtopics.map((sub, sIdx) => {
+                    {unit.subtopics?.map((sub, sIdx) => {
                       const subKey = `${unit.id}_${sub}`;
                       return (
                         <label key={sIdx} className="flex items-center gap-2 cursor-pointer text-slate-300 hover:text-white">
