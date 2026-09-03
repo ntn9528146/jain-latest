@@ -1,0 +1,13 @@
+export const pythonQuestions = [
+  { id: "py_01", type: "MCQ", marks: 1, text: "Which keyword is used to create an anonymous function in Python?", options: ["def", "lambda", "inline", "func"], ans: "lambda" },
+  { id: "py_02", type: "MCQ", marks: 1, text: "Which file access mode truncates an existing file to zero length or creates a new file for writing?", options: ["'r+'", "'w'", "'a'", "'x'"], ans: "'w'" },
+  { id: "py_03", type: "MCQ", marks: 1, text: "What is the return type of the readlines() method in Python file handling?", options: ["String", "Tuple", "List of strings", "Dictionary"], ans: "List of strings" },
+  { id: "py_04", type: "MCQ", marks: 1, text: "Which clause in Python exception handling executes regardless of whether an error occurred or not?", options: ["except", "else", "finally", "try"], ans: "finally" },
+  { id: "py_05", type: "MCQ", marks: 1, text: "In pickle module, which method is used to write an object hierarchy to an open file stream?", options: ["dump()", "load()", "write()", "serialize()"], ans: "dump()" },
+  { id: "py_06", type: "Short", marks: 2, text: "Differentiate between mutable and immutable data types in Python with one example each.", ans: "Mutable types can be altered in place (Lists, Dictionaries). Immutable types cannot be altered after creation (Strings, Tuples)." },
+  { id: "py_07", type: "Short", marks: 2, text: "Explain the purpose of seek() and tell() functions in Python text file operations.", ans: "tell() returns current byte position. seek(offset, from_what) moves cursor to specified position." },
+  { id: "py_08", type: "Short", marks: 2, text: "Write syntax and explain how a custom Exception can be raised using the raise keyword.", ans: "raise ValueError('Invalid entry') triggers explicit exception handling." },
+  { id: "py_09", type: "Medium", marks: 3, text: "Write a user-defined function count_lines() in Python to read 'notes.txt' and count lines that do not begin with '#'.", ans: "Open file, iterate lines with loop or readlines, increment count if not line.startswith('#')." },
+  { id: "py_10", type: "Medium", marks: 3, text: "Write a Python function to push and pop elements into a stack using list data structure with proper Overflow/Underflow checks.", ans: "Use append() for push and pop() with condition len(s) == 0 check." },
+  { id: "py_11", type: "Long", marks: 5, text: "A binary file 'STUDENT.DAT' contains roll_no, name, and marks. Write a complete Python program with functions to insert new records and search a record by roll number.", ans: "Use pickle.dump in 'ab' mode for insertion; pickle.load in a loop with try-except EOFError for searching." }
+];
