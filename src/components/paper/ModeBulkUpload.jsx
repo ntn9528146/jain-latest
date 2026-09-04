@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Button from '../common/Button.jsx';
 import { exportToDocx, printElementById } from '../../services/exportService.js';
 
-export default function ModeBulkUpload({ onPaperUploaded }) {
+const ModeBulkUpload = ({ onPaperUploaded }) => {
   const [uploadedDocs, setUploadedDocs] = useState([
     {
       id: 'DOC_101',
@@ -15,7 +15,7 @@ export default function ModeBulkUpload({ onPaperUploaded }) {
   ]);
 
   const [newTitle, setNewTitle] = useState('');
-  const [newSubject, setNewSubject] = useState('Physics');
+  const [newSubject, setNewSubject] = useState('Hindi Core (Code 302)');
   const [paperContent, setPaperContent] = useState('');
   const [selectedForPrint, setSelectedForPrint] = useState(null);
 
@@ -24,10 +24,11 @@ export default function ModeBulkUpload({ onPaperUploaded }) {
     if (file) {
       setNewTitle(file.name.replace(/\.[^/.]+$/, ''));
       const reader = new FileReader();
+      // Read strictly as UTF-8 so Hindi/Devanagari characters never get corrupted
+      reader.readAsText(file, 'UTF-8');
       reader.onload = (event) => {
-        setPaperContent(event.target?.result || 'Extracted document content...');
+        setPaperContent(event.target?.result || '');
       };
-      reader.readAsText(file);
     }
   };
 
@@ -48,7 +49,7 @@ export default function ModeBulkUpload({ onPaperUploaded }) {
     if (onPaperUploaded) onPaperUploaded(newDoc);
     setNewTitle('');
     setPaperContent('');
-    alert(`Successfully saved: ${newDoc.title}`);
+    alert(`सफलतापूर्वक सुरक्षित किया गया: ${newDoc.title}`);
   };
 
   const handlePrintDoc = (doc) => {
@@ -59,21 +60,21 @@ export default function ModeBulkUpload({ onPaperUploaded }) {
   };
 
   return (
-    <div className="space-y-6 text-xs">
+    <div className="space-y-6 text-xs font-sans">
       <div className="no-print bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4">
         <div>
           <h3 className="text-sm font-bold text-white">Mode 4: Self Upload & Bulk Archive Engine</h3>
-          <p className="text-slate-400 mt-0.5">Upload a paper file or paste text directly to archive and print in official A4 format.</p>
+          <p className="text-slate-400 mt-0.5">Upload Hindi/English paper file or paste text directly to archive and print in official A4 format.</p>
         </div>
 
         <div className="p-4 bg-slate-950 border-2 border-dashed border-slate-800 rounded-xl flex flex-col items-center justify-center gap-2 text-center">
           <span className="text-2xl">📁</span>
           <div>
             <label className="cursor-pointer text-indigo-400 hover:text-indigo-300 font-bold underline">
-              Browse and Upload Paper Document (.txt, .docx, .pdf)
+              Browse and Upload Paper Document (.txt, .docx, UTF-8 text)
               <input type="file" onChange={handleFileUpload} className="hidden" />
             </label>
-            <p className="text-[10px] text-slate-500 mt-0.5">Or type / paste questions manually below</p>
+            <p className="text-[10px] text-slate-500 mt-0.5">Supports pure Hindi (Mangal/Devanagari) and English formats</p>
           </div>
         </div>
 
@@ -84,7 +85,7 @@ export default function ModeBulkUpload({ onPaperUploaded }) {
               <input
                 type="text"
                 required
-                placeholder="e.g. Class 12 Pre-Board Mock 1"
+                placeholder="उदा. कक्षा 12 हिंदी कोर प्री-बोर्ड प्रश्न पत्र 1"
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
                 className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white"
@@ -95,7 +96,7 @@ export default function ModeBulkUpload({ onPaperUploaded }) {
               <input
                 type="text"
                 required
-                placeholder="e.g. Computer Science / Physics"
+                placeholder="उदा. हिंदी / Hindi Core"
                 value={newSubject}
                 onChange={(e) => setNewSubject(e.target.value)}
                 className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white"
@@ -104,14 +105,14 @@ export default function ModeBulkUpload({ onPaperUploaded }) {
           </div>
 
           <div>
-            <label className="block text-slate-400 text-[10px] uppercase font-bold mb-1">Paper Text / Questions</label>
+            <label className="block text-slate-400 text-[10px] uppercase font-bold mb-1">Paper Text / Questions (हिंदी या अंग्रेज़ी)</label>
             <textarea
-              rows="4"
+              rows="5"
               required
-              placeholder="Paste questions here..."
+              placeholder="प्रश्न यहाँ टाइप या पेस्ट करें..."
               value={paperContent}
               onChange={(e) => setPaperContent(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white font-mono text-[11px]"
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white font-serif text-[12px]"
             />
           </div>
 
@@ -131,10 +132,10 @@ export default function ModeBulkUpload({ onPaperUploaded }) {
                 <th className="p-3 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800 text-slate-300 font-sans">
+            <tbody className="divide-y divide-slate-800 text-slate-300">
               {uploadedDocs.map((doc) => (
                 <tr key={doc.id} className="hover:bg-slate-800/30">
-                  <td className="p-3 font-semibold text-white">{doc.title}</td>
+                  <td className="p-3 font-semibold text-white font-serif">{doc.title}</td>
                   <td className="p-3 text-indigo-400 font-mono">{doc.subject}</td>
                   <td className="p-3 text-slate-400 text-[11px]">{doc.date}</td>
                   <td className="p-3 text-right space-x-2">
@@ -147,7 +148,18 @@ export default function ModeBulkUpload({ onPaperUploaded }) {
                     </button>
                     <button
                       type="button"
-                      onClick={() => exportToDocx({ paperHeader: { schoolName: 'ARDEN PROGRESSIVE SCHOOL', examName: doc.title, subjectName: doc.subject, className: '12', maxMarks: 80, timeAllowed: '3 Hours' } })}
+                      onClick={() => exportToDocx({
+                        paperHeader: {
+                          schoolName: 'ARDEN PROGRESSIVE SCHOOL',
+                          examName: doc.title,
+                          subjectName: doc.subject,
+                          className: '12',
+                          maxMarks: 80,
+                          timeAllowed: '3 Hours'
+                        },
+                        generalInstructions: ["सभी प्रश्न अनिवार्य हैं।"],
+                        sections: [{ sectionTitle: 'प्रश्न पत्र', marksPerQ: 1, questions: [{ qNo: 1, marks: 80, questionText: doc.content, answerKey: 'यथावत' }] }]
+                      })}
                       className="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-2.5 py-1 rounded-lg text-[11px]"
                     >
                       DOCX
@@ -162,24 +174,35 @@ export default function ModeBulkUpload({ onPaperUploaded }) {
 
       {selectedForPrint && (
         <div id="printable-selfupload-core" className="bg-white text-black p-8 sm:p-12 rounded-xl shadow-xl space-y-4 font-serif">
-          <div className="text-center border-b-2 border-black pb-3">
-            <p className="header-title text-xl font-bold uppercase text-black">ARDEN PROGRESSIVE SCHOOL</p>
-            <p className="header-sub text-sm font-bold uppercase text-black">{selectedForPrint.title}</p>
-            <table className="w-full border-t border-b border-black text-xs font-bold my-2">
+          <div className="border-b-2 border-black pb-3 relative">
+            <div className="flex items-center justify-center relative">
+              <div className="absolute left-0 top-0 h-14 w-14 rounded-full border-2 border-black flex flex-col items-center justify-center bg-slate-100 font-bold text-xs text-center leading-none">
+                <span className="text-[14px]">🏫</span>
+                <span className="text-[8px] font-black mt-0.5">APS</span>
+              </div>
+              <div className="text-center px-16">
+                <p className="text-xl font-black uppercase text-black">ARDEN PROGRESSIVE SCHOOL</p>
+                <p className="text-sm font-bold uppercase text-black">{selectedForPrint.title}</p>
+              </div>
+            </div>
+
+            <table className="w-full border-t border-b border-black text-xs font-bold mt-3">
               <tbody>
                 <tr>
                   <td className="text-left py-1">SUBJECT: {selectedForPrint.subject}</td>
-                  <td className="text-right py-1">MAX. MARKS: {selectedForPrint.totalMarks} | TIME: 3 HOURS</td>
+                  <td className="text-right py-1">MAX. MARKS: {selectedForPrint.totalMarks} &nbsp;|&nbsp; TIME: 3 HOURS</td>
                 </tr>
               </tbody>
             </table>
           </div>
 
-          <div className="p-4 border border-black rounded text-xs whitespace-pre-wrap leading-relaxed text-black font-sans text-left">
+          <div className="p-4 border border-black rounded text-xs whitespace-pre-wrap leading-relaxed text-black font-serif text-left">
             {selectedForPrint.content}
           </div>
         </div>
       )}
     </div>
   );
-}
+};
+
+export default ModeBulkUpload;

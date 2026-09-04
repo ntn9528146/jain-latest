@@ -3,7 +3,7 @@ import Button from '../common/Button.jsx';
 import { exportToDocx, printElementById } from '../../services/exportService.js';
 import { getSyllabusDataForClass, ALL_CLASSES } from '../../config/syllabus/index.js';
 
-export default function PracticalStudio({ onPracticalGenerated }) {
+const PracticalStudio = ({ onPracticalGenerated }) => {
   const [selectedClass, setSelectedClass] = useState('Class 12');
   const syllabusBundle = getSyllabusDataForClass(selectedClass);
   const availableSubjects = syllabusBundle ? Object.keys(syllabusBundle.subjects) : [];
@@ -31,21 +31,30 @@ export default function PracticalStudio({ onPracticalGenerated }) {
       : currentUnits.flatMap((u) => u.subtopics || [u.name]);
 
     const fallbackTopic = selectedSubject || 'Laboratory Practical Skill';
+    const isCS = selectedSubject.toLowerCase().includes('computer') || selectedSubject.toLowerCase().includes('it');
+    const isBio = selectedSubject.toLowerCase().includes('bio');
+    const isChem = selectedSubject.toLowerCase().includes('chem');
 
     const experiments = [];
     for (let i = 0; i < experimentCount; i++) {
       const topic = topicsPool.length > 0 ? topicsPool[i % topicsPool.length] : fallbackTopic;
+      
+      let expTitle = `To study, investigate and experimentally verify the characteristics of ${topic}.`;
+      let apparatus = 'Standard Laboratory Workstation / Apparatus / Hardware Setup';
+
+      if (isCS) {
+        expTitle = `Write a Python program to implement ${topic} with file handling and database connectivity.`;
+        apparatus = 'Python 3.x IDLE, MySQL 8.0 Server, Client Terminal';
+      } else if (isChem) {
+        expTitle = `Prepare a standard solution and perform quantitative chemical titration involving ${topic}.`;
+        apparatus = 'Burette, Pipette, Conical Flask, Standard Chemical Reagents';
+      }
+
       experiments.push({
         expNo: i + 1,
-        title: `To study, investigate and experimentally verify the characteristics of ${topic}.`,
-        apparatus: 'Standard Laboratory Workstation / Apparatus / Hardware Setup',
-        principle: `According to official CBSE practical syllabus for ${selectedSubject}.`,
-        procedure: [
-          'Verify experimental apparatus layout with relevant safety precautions.',
-          'Record observation sets across minimum 3 successive trials.',
-          'Calculate mean deviations, identify experimental error, and plot curves.',
-          'State laboratory inferences and precautionary measures.'
-        ],
+        title: expTitle,
+        apparatus,
+        principle: `According to official CBSE practical curriculum specifications for ${selectedSubject}.`,
         marking: 'Aim & Apparatus (1M) + Procedure (2M) + Observations/Graphs (3M) + Result (1M) = 7 Marks'
       });
     }
@@ -55,8 +64,8 @@ export default function PracticalStudio({ onPracticalGenerated }) {
       const topic = topicsPool.length > 0 ? topicsPool[(i + 1) % topicsPool.length] : fallbackTopic;
       vivaQuestions.push({
         qNo: i + 1,
-        question: `What is the core working principle and physical significance of "${topic}"?`,
-        modelAnswer: `Candidate must state the governing formula of ${topic}, identify potential sources of experimental inaccuracies, and justify precision.`
+        question: `What is the core working principle and technical significance of "${topic}"?`,
+        modelAnswer: `Candidate must explain the governing principle of ${topic}, state potential sources of experimental error, and justify precision standards.`
       });
     }
 
@@ -65,10 +74,10 @@ export default function PracticalStudio({ onPracticalGenerated }) {
       sections: [
         '1. Student Declaration & Certificate of Authenticity',
         '2. Acknowledgement & Dedication',
-        '3. Objective, Significance and Scope of the Project',
+        '3. Objective, Aim and Scope of the Investigation',
         '4. Theoretical Framework & CBSE Curriculum Alignment',
-        '5. Experimental / Data Collection Logs',
-        '6. Graphs, Code Blocks, Charts & Observation Tables',
+        '5. Experimental / Data Collection Log',
+        '6. Graphs, Code Blocks, Charts & Observation Table',
         '7. Conclusions, Bibliography & Web References'
       ]
     };
@@ -90,6 +99,56 @@ export default function PracticalStudio({ onPracticalGenerated }) {
 
   const handlePrintPractical = () => {
     printElementById('printable-practical-core');
+  };
+
+  const handleExportDocx = () => {
+    if (!generatedStudio) return;
+
+    let secQuestions = [];
+    if (activeFileTab === 'practical') {
+      secQuestions = generatedStudio.experiments.map((e) => ({
+        qNo: e.expNo,
+        marks: 7,
+        questionText: `${e.title}\nApparatus: ${e.apparatus}\nProtocol: ${e.principle}`,
+        answerKey: e.marking
+      }));
+    } else if (activeFileTab === 'viva' || activeFileTab === 'answers') {
+      secQuestions = generatedStudio.vivaQuestions.map((v) => ({
+        qNo: v.qNo,
+        marks: 1,
+        questionText: v.question,
+        answerKey: v.modelAnswer
+      }));
+    } else {
+      secQuestions = generatedStudio.projectFileGuideline.sections.map((s, idx) => ({
+        qNo: idx + 1,
+        marks: 1,
+        questionText: s,
+        answerKey: 'Verified documentation module'
+      }));
+    }
+
+    exportToDocx({
+      paperHeader: {
+        schoolName: generatedStudio.schoolName,
+        examName: `${generatedStudio.title} - ${activeFileTab.toUpperCase()}`,
+        subjectName: generatedStudio.subject,
+        className: generatedStudio.className,
+        maxMarks: 30,
+        timeAllowed: '2.5 Hours'
+      },
+      generalInstructions: [
+        "Candidates must follow standard safety guidelines.",
+        "Perform the assigned experiments systematically."
+      ],
+      sections: [
+        {
+          sectionTitle: `EVALUATION MODULE: ${activeFileTab.toUpperCase()}`,
+          marksPerQ: 7,
+          questions: secQuestions
+        }
+      ]
+    });
   };
 
   return (
@@ -244,7 +303,7 @@ export default function PracticalStudio({ onPracticalGenerated }) {
               </button>
               <button
                 type="button"
-                onClick={() => exportToDocx({ paperHeader: { schoolName: generatedStudio.schoolName, examName: `${generatedStudio.title} - ${activeFileTab.toUpperCase()}`, subjectName: generatedStudio.subject, className: generatedStudio.className, maxMarks: 30, timeAllowed: '2 Hours' } })}
+                onClick={handleExportDocx}
                 className="bg-slate-800 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-xl text-xs font-semibold"
               >
                 📝 Word (DOCX)
@@ -255,15 +314,24 @@ export default function PracticalStudio({ onPracticalGenerated }) {
           <div id="printable-practical-core" className="bg-white text-black p-8 sm:p-12 rounded-xl shadow-xl space-y-4 font-serif">
             {activeFileTab === 'practical' && (
               <div className="space-y-4">
-                <div className="text-center border-b-2 border-black pb-3">
-                  <p className="header-title text-xl font-bold uppercase text-black">{generatedStudio.schoolName}</p>
-                  <p className="header-sub text-sm font-bold uppercase text-black">LABORATORY PRACTICAL EXAMINATION</p>
-                  <table className="w-full border-t border-b border-black text-xs font-bold my-2">
+                <div className="border-b-2 border-black pb-3 relative">
+                  <div className="flex items-center justify-center relative">
+                    <div className="absolute left-0 top-0 h-14 w-14 rounded-full border-2 border-black flex flex-col items-center justify-center bg-slate-100 font-bold text-xs text-center leading-none">
+                      <span className="text-[14px]">🏫</span>
+                      <span className="text-[8px] font-black mt-0.5">APS</span>
+                    </div>
+                    <div className="text-center px-16">
+                      <p className="text-xl font-black uppercase text-black">{generatedStudio.schoolName}</p>
+                      <p className="text-sm font-bold uppercase text-black">LABORATORY PRACTICAL EXAMINATION</p>
+                    </div>
+                  </div>
+
+                  <table className="w-full border-t border-b border-black text-xs font-bold mt-3">
                     <tbody>
                       <tr>
-                        <td className="text-left py-1">CLASS: {generatedStudio.className}</td>
-                        <td className="text-center py-1">SUBJECT: {generatedStudio.subject}</td>
-                        <td className="text-right py-1">TIME: 2.5 HOURS | MAX. MARKS: {generatedStudio.maxMarks}</td>
+                        <td className="text-left py-1.5 w-1/4">CLASS: {generatedStudio.className}</td>
+                        <td className="text-center py-1.5 w-2/4">SUBJECT: {generatedStudio.subject}</td>
+                        <td className="text-right py-1.5 w-1/4">TIME: 2.5 HOURS &nbsp;|&nbsp; MAX. MARKS: {generatedStudio.maxMarks}</td>
                       </tr>
                     </tbody>
                   </table>
@@ -279,12 +347,11 @@ export default function PracticalStudio({ onPracticalGenerated }) {
                   </thead>
                   <tbody>
                     {generatedStudio.experiments.map((exp) => (
-                      <tr key={exp.expNo} className="border-b border-black no-split">
+                      <tr key={exp.expNo} className="border-b border-black avoid-split">
                         <td className="border border-black p-2 text-center font-bold">{exp.expNo}</td>
                         <td className="border border-black p-2 text-left space-y-1 font-sans">
                           <p className="font-bold text-black">{exp.title}</p>
                           <p className="text-gray-800 text-[11px]"><strong className="text-black">Apparatus:</strong> {exp.apparatus}</p>
-                          <p className="text-gray-800 text-[11px]"><strong className="text-black">Protocol:</strong> {exp.principle}</p>
                         </td>
                         <td className="border border-black p-2 text-center font-bold">[7 Marks]</td>
                       </tr>
@@ -296,15 +363,24 @@ export default function PracticalStudio({ onPracticalGenerated }) {
 
             {activeFileTab === 'viva' && (
               <div className="space-y-4">
-                <div className="text-center border-b-2 border-black pb-3">
-                  <p className="header-title text-xl font-bold uppercase text-black">{generatedStudio.schoolName}</p>
-                  <p className="header-sub text-sm font-bold uppercase text-black">VIVA-VOCE QUESTION BANK (EXAMINER COPY)</p>
-                  <table className="w-full border-t border-b border-black text-xs font-bold my-2">
+                <div className="border-b-2 border-black pb-3 relative">
+                  <div className="flex items-center justify-center relative">
+                    <div className="absolute left-0 top-0 h-14 w-14 rounded-full border-2 border-black flex flex-col items-center justify-center bg-slate-100 font-bold text-xs text-center leading-none">
+                      <span className="text-[14px]">🏫</span>
+                      <span className="text-[8px] font-black mt-0.5">APS</span>
+                    </div>
+                    <div className="text-center px-16">
+                      <p className="text-xl font-black uppercase text-black">{generatedStudio.schoolName}</p>
+                      <p className="text-sm font-bold uppercase text-black">VIVA-VOCE QUESTION BANK (EXAMINER COPY)</p>
+                    </div>
+                  </div>
+
+                  <table className="w-full border-t border-b border-black text-xs font-bold mt-3">
                     <tbody>
                       <tr>
-                        <td className="text-left py-1">CLASS: {generatedStudio.className}</td>
-                        <td className="text-center py-1">SUBJECT: {generatedStudio.subject}</td>
-                        <td className="text-right py-1">MAX. VIVA MARKS: 5 MARKS</td>
+                        <td className="text-left py-1.5">CLASS: {generatedStudio.className}</td>
+                        <td className="text-center py-1.5">SUBJECT: {generatedStudio.subject}</td>
+                        <td className="text-right py-1.5">MAX. VIVA MARKS: 5 MARKS</td>
                       </tr>
                     </tbody>
                   </table>
@@ -320,7 +396,7 @@ export default function PracticalStudio({ onPracticalGenerated }) {
                   </thead>
                   <tbody>
                     {generatedStudio.vivaQuestions.map((v) => (
-                      <tr key={v.qNo} className="border-b border-black no-split font-sans">
+                      <tr key={v.qNo} className="border-b border-black avoid-split font-sans">
                         <td className="border border-black p-2 text-center font-bold">{v.qNo}</td>
                         <td className="border border-black p-2 text-left font-medium text-black">{v.question}</td>
                         <td className="border border-black p-2 text-center font-bold">[1 Mark]</td>
@@ -333,18 +409,10 @@ export default function PracticalStudio({ onPracticalGenerated }) {
 
             {activeFileTab === 'project' && (
               <div className="space-y-4">
-                <div className="text-center border-b-2 border-black pb-3">
-                  <p className="header-title text-xl font-bold uppercase text-black">{generatedStudio.schoolName}</p>
-                  <p className="header-sub text-sm font-bold uppercase text-black">INVESTIGATIVE PROJECT FILE - FORMAT & INDEX</p>
-                  <table className="w-full border-t border-b border-black text-xs font-bold my-2">
-                    <tbody>
-                      <tr>
-                        <td className="text-left py-1">CLASS: {generatedStudio.className}</td>
-                        <td className="text-center py-1">SUBJECT: {generatedStudio.subject}</td>
-                        <td className="text-right py-1">PROJECT WEIGHTAGE: 8 MARKS</td>
-                      </tr>
-                    </tbody>
-                  </table>
+                <div className="border-b-2 border-black pb-3 text-center">
+                  <p className="text-xl font-black uppercase text-black">{generatedStudio.schoolName}</p>
+                  <p className="text-sm font-bold uppercase text-black">INVESTIGATIVE PROJECT FILE - FORMAT & INDEX</p>
+                  <p className="text-xs font-bold text-black mt-1">CLASS: {generatedStudio.className} | SUBJECT: {generatedStudio.subject}</p>
                 </div>
 
                 <div className="border border-black p-4 space-y-3 text-xs leading-relaxed font-sans">
@@ -361,31 +429,23 @@ export default function PracticalStudio({ onPracticalGenerated }) {
 
             {activeFileTab === 'answers' && (
               <div className="space-y-4">
-                <div className="text-center border-b-2 border-black pb-3">
-                  <p className="header-title text-xl font-bold uppercase text-black">{generatedStudio.schoolName}</p>
-                  <p className="header-sub text-sm font-bold uppercase text-black">CONFIDENTIAL: VIVA-VOCE MODEL ANSWERS</p>
-                  <table className="w-full border-t border-b border-black text-xs font-bold my-2">
-                    <tbody>
-                      <tr>
-                        <td className="text-left py-1">CLASS: {generatedStudio.className}</td>
-                        <td className="text-center py-1">SUBJECT: {generatedStudio.subject}</td>
-                        <td className="text-right py-1">EXAMINER ONLY</td>
-                      </tr>
-                    </tbody>
-                  </table>
+                <div className="border-b-2 border-black pb-3 text-center">
+                  <p className="text-xl font-black uppercase text-black">{generatedStudio.schoolName}</p>
+                  <p className="text-sm font-bold uppercase text-black">CONFIDENTIAL: VIVA-VOCE MODEL ANSWERS</p>
+                  <p className="text-xs font-bold text-black mt-1">CLASS: {generatedStudio.className} | SUBJECT: {generatedStudio.subject}</p>
                 </div>
 
                 <table className="cbse-grid w-full border-collapse border border-black text-xs">
                   <thead>
                     <tr className="bg-gray-100 border-b border-black text-black">
                       <th className="border border-black p-2 w-16 text-center">Q.No</th>
-                      <th className="border border-black p-2 text-left">Question & Expected Model Answer</th>
+                      <th className="border border-black p-2 text-left">Question & Detailed Model Answer</th>
                       <th className="border border-black p-2 w-20 text-center">Marks</th>
                     </tr>
                   </thead>
                   <tbody>
                     {generatedStudio.vivaQuestions.map((v) => (
-                      <tr key={v.qNo} className="border-b border-black no-split font-sans">
+                      <tr key={v.qNo} className="border-b border-black avoid-split font-sans">
                         <td className="border border-black p-2 text-center font-bold">{v.qNo}</td>
                         <td className="border border-black p-2 text-left">
                           <p className="font-bold text-black mb-1">{v.question}</p>
@@ -403,4 +463,6 @@ export default function PracticalStudio({ onPracticalGenerated }) {
       )}
     </div>
   );
-}
+};
+
+export default PracticalStudio;

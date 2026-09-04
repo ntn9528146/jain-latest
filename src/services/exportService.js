@@ -1,4 +1,3 @@
-// Print directly without app UI interference
 export function printElementById(elementId) {
   const targetEl = document.getElementById(elementId);
   if (!targetEl) {
@@ -22,51 +21,88 @@ export function printElementById(elementId) {
     <!DOCTYPE html>
     <html>
       <head>
-        <title>CBSE Official Examination Paper</title>
+        <meta charset="utf-8">
+        <title>CBSE Examination Assessment</title>
         <style>
           @page {
             size: A4 portrait;
-            margin: 14mm 15mm 14mm 15mm;
+            margin: 12mm 15mm 15mm 15mm;
+            @bottom-right {
+              content: "Page " counter(page) " of " counter(pages);
+              font-family: 'Times New Roman', 'Mangal', serif;
+              font-size: 9pt;
+            }
           }
           body {
             font-family: 'Times New Roman', 'Mangal', serif;
             font-size: 11pt;
-            line-height: 1.4;
-            color: #000000;
-            background: #ffffff;
+            line-height: 1.38;
+            color: #000;
+            background: #fff;
             margin: 0;
             padding: 0;
           }
-          .header-title {
-            font-size: 14pt;
+          .brand-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            border-bottom: 2px solid #000;
+            padding-bottom: 6px;
+            margin-bottom: 6px;
+          }
+          .school-logo {
+            position: absolute;
+            left: 0;
+            top: 2px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 1px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-weight: bold;
+            font-size: 18pt;
+            background: #f4f4f4;
+          }
+          .school-details {
             text-align: center;
+            width: 100%;
+          }
+          .school-title {
+            font-size: 15pt;
+            font-weight: bold;
             text-transform: uppercase;
             margin: 0;
+            letter-spacing: 0.5px;
           }
-          .header-sub {
-            font-size: 11pt;
+          .exam-sub {
+            font-size: 11.5pt;
             font-weight: bold;
-            text-align: center;
-            margin: 3px 0;
+            text-transform: uppercase;
+            margin: 2px 0 0 0;
           }
-          .meta-table {
+          .cbse-meta-table {
             width: 100%;
             border-top: 1px solid #000;
             border-bottom: 1px solid #000;
             margin: 6px 0;
+            font-size: 10pt;
             font-weight: bold;
-            font-size: 10pt;
           }
-          .instructions-box {
-            font-size: 10pt;
-            border: 1px solid #333;
+          .cbse-meta-table td {
+            padding: 4px 0;
+          }
+          .instructions-card {
+            border: 1px solid #000;
             padding: 6px 10px;
-            margin-bottom: 10px;
+            font-size: 9.5pt;
             background: #fafafa;
+            margin-bottom: 8px;
           }
-          .instructions-box ol {
-            margin: 4px 0 0 16px;
+          .instructions-card ol {
+            margin: 2px 0 0 16px;
             padding: 0;
           }
           .cbse-grid {
@@ -80,30 +116,41 @@ export function printElementById(elementId) {
             padding: 6px 8px;
             vertical-align: top;
           }
-          .qno { width: 7%; text-align: center; font-weight: bold; }
-          .qtext { width: 83%; text-align: left; }
-          .marks { width: 10%; text-align: center; font-weight: bold; }
-          .sec-banner {
-            text-align: center;
+          .qno-col { width: 7%; text-align: center; font-weight: bold; }
+          .qtext-col { width: 83%; text-align: left; }
+          .marks-col { width: 10%; text-align: center; font-weight: bold; }
+          .section-bar {
+            background-color: #f0f0f0;
             font-weight: bold;
+            text-align: center;
             text-transform: uppercase;
-            background: #f0f0f0;
-            padding: 4px;
             border: 1px solid #000;
+            padding: 4px;
+            margin-top: 10px;
           }
-          .option-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            margin-top: 4px;
-            gap: 2px;
+          .ascii-box {
+            font-family: 'Courier New', Courier, monospace;
+            background: #f8f9fa;
+            border: 1px dashed #666;
+            padding: 6px;
+            font-size: 9.5pt;
+            white-space: pre;
+            margin: 4px 0;
+            display: inline-block;
+          }
+          .avoid-split {
+            page-break-inside: avoid;
+            break-inside: avoid;
           }
           .page-break {
             page-break-before: always;
             break-before: page;
           }
-          .no-split {
-            page-break-inside: avoid;
-            break-inside: avoid;
+          .footer-tracker {
+            text-align: right;
+            font-size: 8.5pt;
+            margin-top: 16px;
+            font-weight: bold;
           }
         </style>
       </head>
@@ -121,18 +168,18 @@ export function printElementById(elementId) {
   }, 400);
 }
 
-// Fixed DOCX Export with Mangal Hindi font and formatted Word tables
+// Fixed Word DOCX Exporter with UTF-8 BOM, Mangal Hindi support and clean tables
 export function exportToDocx(paperData) {
   const school = paperData?.paperHeader?.schoolName || 'ARDEN PROGRESSIVE SCHOOL';
-  const exam = paperData?.paperHeader?.examName || 'PRE-BOARD EXAMINATION (100% SYLLABUS)';
+  const exam = (paperData?.paperHeader?.examName || 'EXAMINATION 2026-27').replace(/\(\s*\d+%\s*SYLLABUS\s*\)/gi, '').trim();
   const cls = paperData?.paperHeader?.className || '12';
   const sub = paperData?.paperHeader?.subjectName || 'Subject';
   const marks = paperData?.paperHeader?.maxMarks || '70';
   const time = paperData?.paperHeader?.timeAllowed || '3 Hours';
 
-  let doc = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+  let html = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
   <head>
-    <meta charset='utf-8'>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>${exam}</title>
     <!--[if gte mso 9]>
     <xml>
@@ -145,123 +192,143 @@ export function exportToDocx(paperData) {
     <![endif]-->
     <style>
       body {
-        font-family: 'Times New Roman', 'Mangal', serif;
+        font-family: 'Times New Roman', 'Mangal', 'Segoe UI', serif;
         font-size: 11pt;
         line-height: 1.35;
-        color: #000000;
+        color: #000;
       }
-      p.header-title {
-        font-size: 14pt;
+      p.school-head {
+        font-size: 15pt;
         font-weight: bold;
         text-align: center;
         text-transform: uppercase;
-        margin: 0 0 2pt 0;
+        margin: 0;
       }
-      p.header-sub {
-        font-size: 11pt;
+      p.exam-head {
+        font-size: 12pt;
         font-weight: bold;
         text-align: center;
-        margin: 0 0 6pt 0;
+        text-transform: uppercase;
+        margin: 3pt 0 6pt 0;
       }
-      table.meta-bar {
+      table.meta-grid {
         width: 100%;
-        border-top: 1pt solid #000;
-        border-bottom: 1pt solid #000;
-        margin-bottom: 8pt;
+        border-top: 1.5pt solid #000;
+        border-bottom: 1.5pt solid #000;
+        margin: 4pt 0 8pt 0;
       }
-      table.meta-bar td {
+      table.meta-grid td {
         font-size: 10pt;
         font-weight: bold;
         padding: 3pt 0;
       }
-      table.cbse-table {
+      table.cbse-doc-table {
         width: 100%;
         border-collapse: collapse;
-        border: 1pt solid #000000;
-        margin-top: 6pt;
+        margin-top: 8pt;
         margin-bottom: 12pt;
       }
-      table.cbse-table th, table.cbse-table td {
-        border: 1pt solid #000000;
-        padding: 5pt 7pt;
+      table.cbse-doc-table th, table.cbse-doc-table td {
+        border: 1pt solid #000;
+        padding: 6pt 8pt;
         vertical-align: top;
       }
       .col-qno { width: 8%; text-align: center; font-weight: bold; }
-      .col-text { width: 82%; text-align: left; mso-line-height-rule: exactly; }
+      .col-qtext { width: 82%; text-align: left; }
       .col-marks { width: 10%; text-align: center; font-weight: bold; }
-      .sec-head {
-        background-color: #EAEAEA;
+      .sec-row {
+        background-color: #E5E7EB;
         font-weight: bold;
         text-align: center;
         text-transform: uppercase;
         padding: 4pt;
       }
-      ol.inst {
-        margin: 4pt 0 8pt 16pt;
-        font-size: 10pt;
+      pre.code-table {
+        font-family: 'Courier New', monospace;
+        font-size: 9.5pt;
+        background: #F3F4F6;
+        padding: 4pt;
       }
     </style>
   </head>
   <body>
-    <p class='header-title'>${school}</p>
-    <p class='header-sub'>${exam}</p>
-    
-    <table class='meta-bar'>
+    <p class='school-head'>🏫 ${school}</p>
+    <p class='exam-head'>${exam}</p>
+
+    <table class='meta-grid'>
       <tr>
-        <td style='text-align:left;'>CLASS: ${cls}</td>
-        <td style='text-align:center;'>SUBJECT: ${sub}</td>
-        <td style='text-align:right;'>TIME: ${time} | MAX. MARKS: ${marks}</td>
+        <td style='border:none; text-align:left;'>CLASS: ${cls}</td>
+        <td style='border:none; text-align:center;'>SUBJECT: ${sub}</td>
+        <td style='border:none; text-align:right;'>TIME: ${time} &nbsp;&nbsp;|&nbsp;&nbsp; MAX. MARKS: ${marks}</td>
       </tr>
     </table>
 
-    <p style='font-weight:bold; font-size:10pt; margin:4pt 0 2pt 0;'>General Instructions:</p>
-    <ol class='inst'>`;
+    <p style='font-weight:bold; margin:4pt 0;'>General Instructions:</p>
+    <ol style='margin:0 0 10pt 18pt; font-size:10pt;'>`;
 
   if (paperData?.generalInstructions && paperData.generalInstructions.length > 0) {
     paperData.generalInstructions.forEach((ins) => {
-      doc += `<li>${ins}</li>`;
+      html += `<li>${ins}</li>`;
     });
   } else {
-    doc += `<li>All questions are compulsory.</li><li>Internal choices are provided where applicable.</li>`;
+    html += `<li>All questions are compulsory.</li><li>Internal choices are provided where applicable.</li>`;
   }
 
-  doc += `</ol>`;
+  html += `</ol>`;
 
   if (paperData?.sections && paperData.sections.length > 0) {
     paperData.sections.forEach((sec) => {
-      doc += `<table class='cbse-table'>
-        <tr><td colspan='3' class='sec-head'>${sec.sectionTitle}</td></tr>
-        <tr><th class='col-qno'>Q.No</th><th class='col-text'>Question Details</th><th class='col-marks'>Marks</th></tr>`;
+      html += `<table class='cbse-doc-table'>
+        <tr><td colspan='3' class='sec-row'>${sec.sectionTitle}</td></tr>
+        <tr><th class='col-qno'>Q.No</th><th class='col-qtext'>Question Details</th><th class='col-marks'>Marks</th></tr>`;
 
       sec.questions?.forEach((q) => {
-        // Option lines formatting without justify gaps
-        const formattedQuestion = q.questionText
-          ? q.questionText.replace(/\n/g, '<br/>')
-          : '';
+        const textFormatted = (q.questionText || '')
+          .replace(/\n/g, '<br/>')
+          .replace(/\+[-+]+\+/g, (match) => `<pre class='code-table'>${match}</pre>`);
 
-        doc += `<tr>
+        html += `<tr>
           <td class='col-qno'>${q.qNo}</td>
-          <td class='col-text'>${formattedQuestion}</td>
+          <td class='col-qtext'>${textFormatted}</td>
           <td class='col-marks'>[${q.marks}]</td>
         </tr>`;
       });
 
-      doc += `</table><br/>`;
+      html += `</table><br/>`;
     });
   }
 
-  doc += `</body></html>`;
+  // Answer Key Attachment in Word
+  if (paperData?.sections) {
+    html += `<br clear='all' style='page-break-before:always'/>`;
+    html += `<p class='exam-head'>CONFIDENTIAL: MARKING SCHEME & STEP VALUES</p>`;
+    html += `<table class='cbse-doc-table'>
+      <tr><th class='col-qno'>Q.No</th><th class='col-qtext'>Step-by-Step Model Answer</th><th class='col-marks'>Marks</th></tr>`;
 
-  const blob = new Blob(['\ufeff', doc], { type: 'application/msword' });
+    paperData.sections.flatMap((s) => s.questions || []).forEach((q) => {
+      const ansFormatted = (q.answerKey || '').replace(/\n/g, '<br/>');
+      html += `<tr>
+        <td class='col-qno'>${q.qNo}</td>
+        <td class='col-qtext'>${ansFormatted}</td>
+        <td class='col-marks'>[${q.marks}]</td>
+      </tr>`;
+    });
+    html += `</table>`;
+  }
+
+  html += `</body></html>`;
+
+  // Prepend UTF-8 BOM so Hindi/Devanagari text never renders as garbled boxes
+  const blob = new Blob(['\ufeff', html], { type: 'application/msword;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `${sub.replace(/[^a-zA-Z0-9]/g, '_')}_Class_${cls}.doc`;
+  a.download = `${sub.replace(/[^a-zA-Z0-9\u0900-\u097F]/g, '_')}_Class_${cls}.doc`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
 }
 
 export function exportToSlides() {
-  alert("Slide presentation generated.");
+  alert("Classroom Projection Slides generated.");
 }
