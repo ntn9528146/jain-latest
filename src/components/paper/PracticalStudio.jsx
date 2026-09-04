@@ -3,7 +3,7 @@ import Button from '../common/Button.jsx';
 import { exportToDocx } from '../../services/exportService.js';
 import { getSyllabusDataForClass, ALL_CLASSES } from '../../config/syllabus/index.js';
 
-const PracticalStudio = ({ onPracticalGenerated }) => {
+export default function PracticalStudio({ onPracticalGenerated }) {
   const [selectedClass, setSelectedClass] = useState('Class 12');
   const syllabusBundle = getSyllabusDataForClass(selectedClass);
   const availableSubjects = syllabusBundle ? Object.keys(syllabusBundle.subjects) : [];
@@ -14,9 +14,7 @@ const PracticalStudio = ({ onPracticalGenerated }) => {
   const [experimentCount, setExperimentCount] = useState(2);
   const [vivaCount, setVivaCount] = useState(5);
   const [generatedStudio, setGeneratedStudio] = useState(null);
-
-  // Print & Display tab state for 4 separate files
-  const [activeFileTab, setActiveFileTab] = useState('practical'); // practical | viva | project | answers
+  const [activeFileTab, setActiveFileTab] = useState('practical');
 
   const handleClassChange = (newClass) => {
     setSelectedClass(newClass);
@@ -34,37 +32,34 @@ const PracticalStudio = ({ onPracticalGenerated }) => {
 
     const fallbackTopic = selectedSubject || 'Core Laboratory Skill';
 
-    // 1. Practical Experiments Sheet
     const experiments = [];
     for (let i = 0; i < experimentCount; i++) {
       const topic = (topicsPool.length > 0) ? topicsPool[i % topicsPool.length] : fallbackTopic;
       experiments.push({
         expNo: i + 1,
-        title: `To design, conduct and document the experimental investigation of ${topic}.`,
-        apparatus: 'Standard Laboratory Workstation / Apparatus / Instruments',
-        principle: `According to standard CBSE practical specifications for ${selectedSubject}.`,
+        title: `To design, conduct and document the experimental evaluation of ${topic}.`,
+        apparatus: 'Standard Laboratory Workstation / Apparatus / Hardware Setup',
+        principle: `According to standard CBSE practical guidelines for ${selectedSubject}.`,
         procedure: [
-          'Verify circuit/apparatus alignment with appropriate safety measures.',
-          'Take reading sets across minimum 3 repeated trials.',
-          'Calculate mean, identify standard error, and draw characteristic curve.',
-          'State experimental result and precautions.'
+          'Verify workstation / apparatus layout with relevant laboratory precautions.',
+          'Record experimental observations across minimum 3 repeated trials.',
+          'Calculate deviations, identify errors and plot relevant graphs/data tables.',
+          'State experimental inference and precautions.'
         ],
         marking: 'Aim & Apparatus (1M) + Procedure (2M) + Table & Graphs (3M) + Result (1M) = 7 Marks'
       });
     }
 
-    // 2. Viva Voce Questions & Answers
     const vivaQuestions = [];
     for (let i = 0; i < vivaCount; i++) {
       const topic = (topicsPool.length > 0) ? topicsPool[(i + 1) % topicsPool.length] : fallbackTopic;
       vivaQuestions.push({
         qNo: i + 1,
-        question: `What is the core working principle and physical/logical significance of "${topic}"?`,
-        modelAnswer: `Expected Answer: The student must clearly state the governing law/formula of ${topic}, describe the source of experimental discrepancies, and define the precision threshold.`
+        question: `What is the core working principle and physical significance of "${topic}"?`,
+        modelAnswer: `Expected Answer: The student must clearly state the governing formula of ${topic}, describe the source of experimental discrepancies, and define precision.`
       });
     }
 
-    // 3. Project File Guidelines
     const projectFileGuideline = {
       projectTitle: `Comprehensive Investigative Academic Project on ${topicsPool[0] || fallbackTopic}`,
       sections: [
@@ -79,7 +74,7 @@ const PracticalStudio = ({ onPracticalGenerated }) => {
     };
 
     const compiled = {
-      schoolName: "AFFILIATED SENIOR SECONDARY SCHOOL",
+      schoolName: "ARDEN PROGRESSIVE SCHOOL",
       title: `CBSE Practical Examination & Assessment 2026-27`,
       subject: selectedSubject,
       className: selectedClass,
@@ -204,7 +199,6 @@ const PracticalStudio = ({ onPracticalGenerated }) => {
 
       {generatedStudio && (
         <div className="space-y-4 pt-4 border-t border-slate-800">
-          {/* File Navigation & Individual Print Buttons */}
           <div className="no-print flex flex-wrap justify-between items-center gap-3 bg-slate-950 p-2.5 rounded-xl border border-slate-800">
             <div className="flex bg-slate-900 p-1 rounded-lg border border-slate-800 text-[11px] font-semibold">
               <button
@@ -243,7 +237,7 @@ const PracticalStudio = ({ onPracticalGenerated }) => {
                 onClick={() => window.print()}
                 className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs flex items-center gap-1"
               >
-                🖨️ Print Current File (A4)
+                🖨️ Print Active Tab (A4)
               </button>
               <button
                 type="button"
@@ -255,152 +249,141 @@ const PracticalStudio = ({ onPracticalGenerated }) => {
             </div>
           </div>
 
-          {/* ================= FILE 1: PRACTICAL QUESTION PAPER ================= */}
-          {activeFileTab === 'practical' && (
-            <div className="cbse-board-sheet bg-white text-black p-8 sm:p-12 rounded-xl shadow-xl space-y-4 font-serif">
-              <div className="text-center border-b-2 border-black pb-3">
-                <p className="text-[10pt] font-bold uppercase tracking-wider text-gray-700">CBSE BOARD PRACTICAL EVALUATION</p>
-                <h1 className="cbse-header-title text-xl text-black">{generatedStudio.schoolName}</h1>
-                <h2 className="text-sm font-bold uppercase text-black">LABORATORY PRACTICAL EXAMINATION</h2>
-                <div className="flex justify-between text-xs font-bold pt-2 border-t border-black mt-2">
-                  <span>CLASS: {generatedStudio.className}</span>
-                  <span>SUBJECT: {generatedStudio.subject}</span>
-                  <span>MAX. MARKS: {generatedStudio.maxMarks}</span>
-                  <span>TIME: 2.5 HOURS</span>
+          {/* Bound to #cbse-print-region for clean A4 printing */}
+          <div id="cbse-print-region" className="bg-white text-black p-8 sm:p-12 rounded-xl shadow-xl space-y-4 font-serif">
+            {activeFileTab === 'practical' && (
+              <div className="space-y-4">
+                <div className="text-center border-b-2 border-black pb-3">
+                  <h1 className="text-xl font-bold uppercase text-black">{generatedStudio.schoolName}</h1>
+                  <h2 className="text-sm font-bold uppercase text-black">LABORATORY PRACTICAL EXAMINATION</h2>
+                  <div className="flex justify-between text-xs font-bold pt-2 border-t border-black mt-2">
+                    <span>CLASS: {generatedStudio.className}</span>
+                    <span>SUBJECT: {generatedStudio.subject}</span>
+                    <span>MAX. MARKS: {generatedStudio.maxMarks}</span>
+                    <span>TIME: 2.5 HOURS</span>
+                  </div>
                 </div>
-              </div>
 
-              <table className="cbse-table-grid w-full border-collapse border border-black text-xs">
-                <thead>
-                  <tr className="bg-gray-100 border-b border-black text-black">
-                    <th className="cbse-col-qno border border-black p-2">Exp. No</th>
-                    <th className="cbse-col-text border border-black p-2 text-left">Experiment Aim & Laboratory Guidelines</th>
-                    <th className="cbse-col-marks border border-black p-2">Weightage</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {generatedStudio.experiments.map((exp) => (
-                    <tr key={exp.expNo} className="border-b border-black avoid-break-inside">
-                      <td className="cbse-col-qno border border-black p-2 text-center font-bold">{exp.expNo}</td>
-                      <td className="cbse-col-text border border-black p-2 text-justify space-y-1">
-                        <p className="font-bold text-black">{exp.title}</p>
-                        <p className="text-gray-800 text-[11px]"><strong className="text-black">Apparatus Required:</strong> {exp.apparatus}</p>
-                        <p className="text-gray-800 text-[11px]"><strong className="text-black">Working Protocol:</strong> {exp.principle}</p>
-                      </td>
-                      <td className="cbse-col-marks border border-black p-2 text-center font-bold">[7 Marks]</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {/* ================= FILE 2: VIVA-VOCE QUESTION SHEET ================= */}
-          {activeFileTab === 'viva' && (
-            <div className="cbse-board-sheet bg-white text-black p-8 sm:p-12 rounded-xl shadow-xl space-y-4 font-serif">
-              <div className="text-center border-b-2 border-black pb-3">
-                <h1 className="cbse-header-title text-xl text-black">{generatedStudio.schoolName}</h1>
-                <h2 className="text-sm font-bold uppercase text-black">VIVA-VOCE QUESTION BANK (EXAMINER SHEET)</h2>
-                <div className="flex justify-between text-xs font-bold pt-2 border-t border-black mt-2">
-                  <span>CLASS: {generatedStudio.className}</span>
-                  <span>SUBJECT: {generatedStudio.subject}</span>
-                  <span>MAX. VIVA MARKS: 5 MARKS</span>
-                </div>
-              </div>
-
-              <table className="cbse-table-grid w-full border-collapse border border-black text-xs">
-                <thead>
-                  <tr className="bg-gray-100 border-b border-black text-black">
-                    <th className="cbse-col-qno border border-black p-2">Q.No</th>
-                    <th className="cbse-col-text border border-black p-2 text-left">Viva-Voce Questions for Candidate</th>
-                    <th className="cbse-col-marks border border-black p-2">Marks</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {generatedStudio.vivaQuestions.map((v) => (
-                    <tr key={v.qNo} className="border-b border-black avoid-break-inside">
-                      <td className="cbse-col-qno border border-black p-2 text-center font-bold">{v.qNo}</td>
-                      <td className="cbse-col-text border border-black p-2 text-justify font-medium text-black">
-                        {v.question}
-                      </td>
-                      <td className="cbse-col-marks border border-black p-2 text-center font-bold">[1 Mark]</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {/* ================= FILE 3: PROJECT FILE GUIDELINES ================= */}
-          {activeFileTab === 'project' && (
-            <div className="cbse-board-sheet bg-white text-black p-8 sm:p-12 rounded-xl shadow-xl space-y-4 font-serif">
-              <div className="text-center border-b-2 border-black pb-3">
-                <h1 className="cbse-header-title text-xl text-black">{generatedStudio.schoolName}</h1>
-                <h2 className="text-sm font-bold uppercase text-black">INVESTIGATIVE PROJECT FILE - FORMAT & INDEX</h2>
-                <div className="flex justify-between text-xs font-bold pt-2 border-t border-black mt-2">
-                  <span>CLASS: {generatedStudio.className}</span>
-                  <span>SUBJECT: {generatedStudio.subject}</span>
-                  <span>PROJECT EVALUATION: 8 MARKS</span>
-                </div>
-              </div>
-
-              <div className="border border-black p-4 space-y-3 text-xs leading-relaxed">
-                <h3 className="font-bold text-sm text-black uppercase border-b border-black pb-1">
-                  Mandatory Project Dossier Architecture:
-                </h3>
-                <p className="font-bold text-black">{generatedStudio.projectFileGuideline.projectTitle}</p>
-                <ol className="list-decimal pl-5 space-y-1 text-black font-medium">
-                  {generatedStudio.projectFileGuideline.sections.map((sec, idx) => (
-                    <li key={idx}>{sec}</li>
-                  ))}
-                </ol>
-              </div>
-            </div>
-          )}
-
-          {/* ================= FILE 4: EVALUATION KEY & ANSWERS ================= */}
-          {activeFileTab === 'answers' && (
-            <div className="cbse-board-sheet bg-white text-black p-8 sm:p-12 rounded-xl shadow-xl space-y-4 font-serif">
-              <div className="text-center border-b-2 border-black pb-3">
-                <h1 className="cbse-header-title text-xl text-black">{generatedStudio.schoolName}</h1>
-                <h2 className="text-sm font-bold uppercase text-black">CONFIDENTIAL: EXPERIMENT & VIVA MODEL ANSWERS</h2>
-                <div className="flex justify-between text-xs font-bold pt-2 border-t border-black mt-2">
-                  <span>CLASS: {generatedStudio.className}</span>
-                  <span>SUBJECT: {generatedStudio.subject}</span>
-                  <span>EXAMINER ONLY</span>
-                </div>
-              </div>
-
-              <div className="space-y-4 text-xs">
-                <h3 className="font-bold text-black uppercase border-b border-black pb-1">Viva Voce Expected Answers:</h3>
                 <table className="cbse-table-grid w-full border-collapse border border-black text-xs">
                   <thead>
                     <tr className="bg-gray-100 border-b border-black text-black">
-                      <th className="cbse-col-qno border border-black p-2">Q.No</th>
-                      <th className="cbse-col-text border border-black p-2 text-left">Question & Model Technical Answer</th>
-                      <th className="cbse-col-marks border border-black p-2">Max Marks</th>
+                      <th className="border border-black p-2 w-16 text-center">Exp. No</th>
+                      <th className="border border-black p-2 text-left">Experiment Aim & Laboratory Guidelines</th>
+                      <th className="border border-black p-2 w-20 text-center">Weightage</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {generatedStudio.vivaQuestions.map((v) => (
-                      <tr key={v.qNo} className="border-b border-black avoid-break-inside">
-                        <td className="cbse-col-qno border border-black p-2 text-center font-bold">{v.qNo}</td>
-                        <td className="cbse-col-text border border-black p-2">
-                          <p className="font-bold text-black mb-1">{v.question}</p>
-                          <pre className="font-serif text-black whitespace-pre-wrap">{v.modelAnswer}</pre>
+                    {generatedStudio.experiments.map((exp) => (
+                      <tr key={exp.expNo} className="border-b border-black avoid-break-inside">
+                        <td className="border border-black p-2 text-center font-bold">{exp.expNo}</td>
+                        <td className="border border-black p-2 text-justify space-y-1 font-sans">
+                          <p className="font-bold text-black">{exp.title}</p>
+                          <p className="text-gray-800 text-[11px]"><strong className="text-black">Apparatus Required:</strong> {exp.apparatus}</p>
+                          <p className="text-gray-800 text-[11px]"><strong className="text-black">Working Protocol:</strong> {exp.principle}</p>
                         </td>
-                        <td className="cbse-col-marks border border-black p-2 text-center font-bold">[1 Mark]</td>
+                        <td className="border border-black p-2 text-center font-bold">[7 Marks]</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
-            </div>
-          )}
+            )}
+
+            {activeFileTab === 'viva' && (
+              <div className="space-y-4">
+                <div className="text-center border-b-2 border-black pb-3">
+                  <h1 className="text-xl font-bold uppercase text-black">{generatedStudio.schoolName}</h1>
+                  <h2 className="text-sm font-bold uppercase text-black">VIVA-VOCE QUESTION BANK (EXAMINER COPY)</h2>
+                  <div className="flex justify-between text-xs font-bold pt-2 border-t border-black mt-2">
+                    <span>CLASS: {generatedStudio.className}</span>
+                    <span>SUBJECT: {generatedStudio.subject}</span>
+                    <span>MAX. VIVA MARKS: 5 MARKS</span>
+                  </div>
+                </div>
+
+                <table className="cbse-table-grid w-full border-collapse border border-black text-xs">
+                  <thead>
+                    <tr className="bg-gray-100 border-b border-black text-black">
+                      <th className="border border-black p-2 w-16 text-center">Q.No</th>
+                      <th className="border border-black p-2 text-left">Viva Questions</th>
+                      <th className="border border-black p-2 w-20 text-center">Marks</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {generatedStudio.vivaQuestions.map((v) => (
+                      <tr key={v.qNo} className="border-b border-black avoid-break-inside font-sans">
+                        <td className="border border-black p-2 text-center font-bold">{v.qNo}</td>
+                        <td className="border border-black p-2 text-justify font-medium text-black">{v.question}</td>
+                        <td className="border border-black p-2 text-center font-bold">[1 Mark]</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {activeFileTab === 'project' && (
+              <div className="space-y-4">
+                <div className="text-center border-b-2 border-black pb-3">
+                  <h1 className="text-xl font-bold uppercase text-black">{generatedStudio.schoolName}</h1>
+                  <h2 className="text-sm font-bold uppercase text-black">INVESTIGATIVE PROJECT FILE - FORMAT & INDEX</h2>
+                  <div className="flex justify-between text-xs font-bold pt-2 border-t border-black mt-2">
+                    <span>CLASS: {generatedStudio.className}</span>
+                    <span>SUBJECT: {generatedStudio.subject}</span>
+                    <span>PROJECT WEIGHTAGE: 8 MARKS</span>
+                  </div>
+                </div>
+
+                <div className="border border-black p-4 space-y-3 text-xs leading-relaxed font-sans">
+                  <h3 className="font-bold text-sm text-black uppercase border-b border-black pb-1">Mandatory Project Architecture:</h3>
+                  <p className="font-bold text-black">{generatedStudio.projectFileGuideline.projectTitle}</p>
+                  <ol className="list-decimal pl-5 space-y-1 text-black font-medium">
+                    {generatedStudio.projectFileGuideline.sections.map((sec, idx) => (
+                      <li key={idx}>{sec}</li>
+                    ))}
+                  </ol>
+                </div>
+              </div>
+            )}
+
+            {activeFileTab === 'answers' && (
+              <div className="space-y-4">
+                <div className="text-center border-b-2 border-black pb-3">
+                  <h1 className="text-xl font-bold uppercase text-black">{generatedStudio.schoolName}</h1>
+                  <h2 className="text-sm font-bold uppercase text-black">CONFIDENTIAL: VIVA-VOCE MODEL ANSWERS</h2>
+                  <div className="flex justify-between text-xs font-bold pt-2 border-t border-black mt-2">
+                    <span>CLASS: {generatedStudio.className}</span>
+                    <span>SUBJECT: {generatedStudio.subject}</span>
+                    <span>EXAMINER ONLY</span>
+                  </div>
+                </div>
+
+                <table className="cbse-table-grid w-full border-collapse border border-black text-xs">
+                  <thead>
+                    <tr className="bg-gray-100 border-b border-black text-black">
+                      <th className="border border-black p-2 w-16 text-center">Q.No</th>
+                      <th className="border border-black p-2 text-left">Question & Expected Model Answer</th>
+                      <th className="border border-black p-2 w-20 text-center">Marks</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {generatedStudio.vivaQuestions.map((v) => (
+                      <tr key={v.qNo} className="border-b border-black avoid-break-inside font-sans">
+                        <td className="border border-black p-2 text-center font-bold">{v.qNo}</td>
+                        <td className="border border-black p-2">
+                          <p className="font-bold text-black mb-1">{v.question}</p>
+                          <pre className="font-sans text-black whitespace-pre-wrap">{v.modelAnswer}</pre>
+                        </td>
+                        <td className="border border-black p-2 text-center font-bold">[1 Mark]</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>
   );
-};
-
-export default PracticalStudio;
+}

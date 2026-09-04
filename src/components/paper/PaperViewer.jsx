@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { exportToDocx, exportToSlides } from '../../services/exportService.js';
 
-const PaperViewer = ({ paperData, onClose }) => {
+export default function PaperViewer({ paperData, onClose }) {
   const [activeTab, setActiveTab] = useState('paper'); // paper | answerKey | blueprint | all
 
   if (!paperData) return null;
@@ -17,7 +17,7 @@ const PaperViewer = ({ paperData, onClose }) => {
 
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl space-y-4">
-      {/* Top Controls Toolbar */}
+      {/* Top Controls Bar (Hidden during print) */}
       <div className="no-print bg-slate-950 px-6 py-3 border-b border-slate-800 flex flex-wrap justify-between items-center gap-3">
         <div className="flex bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs font-semibold">
           <button
@@ -32,7 +32,7 @@ const PaperViewer = ({ paperData, onClose }) => {
             onClick={() => setActiveTab('answerKey')}
             className={`px-3 py-1.5 rounded-lg transition ${activeTab === 'answerKey' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'}`}
           >
-            🔑 Marking Scheme & Step Values
+            🔑 Marking Scheme & Answers
           </button>
           <button
             type="button"
@@ -87,14 +87,13 @@ const PaperViewer = ({ paperData, onClose }) => {
         </div>
       </div>
 
-      {/* Main Document Body */}
-      <div className="p-4 sm:p-6 max-w-4xl mx-auto">
-        {/* ================= 1. QUESTION PAPER (3-Column Layout with Borders) ================= */}
+      {/* Target Print Area */}
+      <div id="cbse-print-region" className="p-4 sm:p-6 max-w-4xl mx-auto">
         {(activeTab === 'paper' || activeTab === 'all') && (
-          <div className="cbse-board-sheet bg-white text-black p-8 sm:p-12 rounded-xl shadow-xl space-y-4 font-serif">
+          <div className="bg-white text-black p-8 sm:p-12 rounded-xl shadow-xl space-y-4 font-serif">
             <div className="text-center border-b-2 border-black pb-3 space-y-1">
               <p className="text-[10pt] font-bold tracking-wider uppercase text-gray-700">CENTRAL BOARD OF SECONDARY EDUCATION - EVALUATION SERIES</p>
-              <h1 className="cbse-header-title text-xl tracking-tight text-black">{paperData.paperHeader?.schoolName}</h1>
+              <h1 className="text-xl font-bold uppercase tracking-tight text-black">{paperData.paperHeader?.schoolName}</h1>
               <h2 className="text-sm font-bold uppercase text-black">{paperData.paperHeader?.examName}</h2>
               <div className="flex justify-between items-center text-xs font-bold pt-2 border-t border-black mt-2">
                 <span>CLASS: {paperData.paperHeader?.className}</span>
@@ -113,7 +112,6 @@ const PaperViewer = ({ paperData, onClose }) => {
               </ol>
             </div>
 
-            {/* Sections & 3-Column Table Grid */}
             <div className="space-y-6 pt-2">
               {paperData.sections?.map((sec, sIdx) => (
                 <div key={sIdx} className="space-y-2 avoid-break-inside">
@@ -124,28 +122,19 @@ const PaperViewer = ({ paperData, onClose }) => {
                   <table className="cbse-table-grid w-full border-collapse border border-black text-xs">
                     <thead>
                       <tr className="bg-gray-100 border-b border-black text-black">
-                        <th className="cbse-col-qno border border-black p-2">Q.No</th>
-                        <th className="cbse-col-text border border-black p-2 text-left">Question Text / Details</th>
-                        <th className="cbse-col-marks border border-black p-2">Marks</th>
+                        <th className="border border-black p-2 w-12 text-center">Q.No</th>
+                        <th className="border border-black p-2 text-left">Question Details</th>
+                        <th className="border border-black p-2 w-16 text-center">Marks</th>
                       </tr>
                     </thead>
                     <tbody>
                       {sec.questions?.map((q) => (
                         <tr key={q.qNo} className="border-b border-black avoid-break-inside">
-                          <td className="cbse-col-qno border border-black p-2 align-top text-center font-bold">
-                            {q.qNo}
+                          <td className="border border-black p-2 align-top text-center font-bold">{q.qNo}</td>
+                          <td className="border border-black p-2 align-top text-justify">
+                            <span className="whitespace-pre-line text-black leading-relaxed font-sans">{q.questionText}</span>
                           </td>
-                          <td className="cbse-col-text border border-black p-2 align-top text-justify">
-                            <span className="whitespace-pre-line text-black leading-relaxed">{q.questionText}</span>
-                            {q.yearTag && (
-                              <span className="inline-block ml-2 text-[10px] font-bold text-gray-800 bg-gray-200 px-1.5 py-0.5 rounded border border-gray-400">
-                                {q.yearTag}
-                              </span>
-                            )}
-                          </td>
-                          <td className="cbse-col-marks border border-black p-2 align-top text-center font-bold">
-                            [{q.marks}]
-                          </td>
+                          <td className="border border-black p-2 align-top text-center font-bold">[{q.marks}]</td>
                         </tr>
                       ))}
                     </tbody>
@@ -160,9 +149,8 @@ const PaperViewer = ({ paperData, onClose }) => {
           </div>
         )}
 
-        {/* ================= 2. SEPARATE MARKING SCHEME ================= */}
         {(activeTab === 'answerKey' || activeTab === 'all') && (
-          <div className={`cbse-board-sheet ${activeTab === 'all' ? 'page-break-before mt-8' : ''} bg-white text-black p-8 sm:p-12 rounded-xl shadow-xl space-y-4 font-serif`}>
+          <div className={`bg-white text-black p-8 sm:p-12 rounded-xl shadow-xl space-y-4 font-serif ${activeTab === 'all' ? 'page-break-before mt-8' : ''}`}>
             <div className="border-b-2 border-black pb-2 text-center">
               <h2 className="text-base font-bold uppercase">CONFIDENTIAL: OFFICIAL MARKING SCHEME & VALUE POINTS</h2>
               <p className="text-xs font-bold text-black">
@@ -173,28 +161,19 @@ const PaperViewer = ({ paperData, onClose }) => {
             <table className="cbse-table-grid w-full border-collapse border border-black text-xs">
               <thead>
                 <tr className="bg-gray-100 border-b border-black text-black">
-                  <th className="cbse-col-qno border border-black p-2">Q.No</th>
-                  <th className="cbse-col-text border border-black p-2 text-left">Detailed Step-Wise Value Points / Key</th>
-                  <th className="cbse-col-marks border border-black p-2">Marks</th>
+                  <th className="border border-black p-2 w-12 text-center">Q.No</th>
+                  <th className="border border-black p-2 text-left">Detailed Step-Wise Value Points / Model Answer</th>
+                  <th className="border border-black p-2 w-16 text-center">Marks</th>
                 </tr>
               </thead>
               <tbody>
                 {paperData.sections?.flatMap((s) => s.questions)?.map((q) => (
                   <tr key={q.qNo} className="border-b border-black avoid-break-inside">
-                    <td className="cbse-col-qno border border-black p-2 align-top text-center font-bold">
-                      {q.qNo}
+                    <td className="border border-black p-2 align-top text-center font-bold">{q.qNo}</td>
+                    <td className="border border-black p-2 align-top font-sans">
+                      <pre className="whitespace-pre-wrap leading-relaxed text-black font-sans text-xs">{q.answerKey}</pre>
                     </td>
-                    <td className="cbse-col-text border border-black p-2 align-top">
-                      <div className="font-bold text-[10px] text-gray-700 uppercase mb-1">
-                        Topic: {q.topicName || 'Core Curriculum'}
-                      </div>
-                      <pre className="font-serif text-xs whitespace-pre-wrap leading-relaxed text-black">
-                        {q.answerKey}
-                      </pre>
-                    </td>
-                    <td className="cbse-col-marks border border-black p-2 align-top text-center font-bold">
-                      [{q.marks}]
-                    </td>
+                    <td className="border border-black p-2 align-top text-center font-bold">[{q.marks}]</td>
                   </tr>
                 ))}
               </tbody>
@@ -202,25 +181,24 @@ const PaperViewer = ({ paperData, onClose }) => {
           </div>
         )}
 
-        {/* ================= 3. TOPIC BLUEPRINT MATRIX ================= */}
         {(activeTab === 'blueprint' || activeTab === 'all') && (
-          <div className={`cbse-board-sheet ${activeTab === 'all' ? 'page-break-before mt-8' : ''} bg-white text-black p-8 sm:p-12 rounded-xl shadow-xl space-y-4 font-serif`}>
+          <div className={`bg-white text-black p-8 sm:p-12 rounded-xl shadow-xl space-y-4 font-serif ${activeTab === 'all' ? 'page-break-before mt-8' : ''}`}>
             <div className="border-b-2 border-black pb-2">
-              <h2 className="text-base font-bold uppercase">CBSE QUESTION PAPER BLUEPRINT & CHAPTER-WISE DISTRIBUTION</h2>
+              <h2 className="text-base font-bold uppercase">CBSE QUESTION PAPER BLUEPRINT MATRIX</h2>
               <p className="text-xs text-black">Mapped against total {paperData.paperHeader?.maxMarks} marks.</p>
             </div>
 
             <table className="cbse-table-grid w-full border-collapse border border-black text-xs">
               <thead>
                 <tr className="bg-gray-100 border-b border-black text-black">
-                  <th className="border border-black p-2 text-left">Syllabus Unit / Chapter Name</th>
+                  <th className="border border-black p-2 text-left">Syllabus Unit / Chapter Focus</th>
                   <th className="border border-black p-2 text-center w-36">Questions Count</th>
-                  <th className="border border-black p-2 text-right w-36">Total Marks Assigned</th>
+                  <th className="border border-black p-2 text-right w-36">Marks Assigned</th>
                 </tr>
               </thead>
               <tbody>
                 {paperData.blueprintSummary?.map((item, idx) => (
-                  <tr key={idx} className="border-b border-black avoid-break-inside">
+                  <tr key={idx} className="border-b border-black avoid-break-inside font-sans">
                     <td className="border border-black p-2 font-semibold text-black">{item.unitName}</td>
                     <td className="border border-black p-2 text-center font-bold text-black">{item.questionsCount} Qs</td>
                     <td className="border border-black p-2 text-right font-bold text-black">{item.marksAssigned} Marks</td>
@@ -233,6 +211,4 @@ const PaperViewer = ({ paperData, onClose }) => {
       </div>
     </div>
   );
-};
-
-export default PaperViewer;
+}
