@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { exportToDocx, exportToSlides, printElementById, formatClassWithSuperscript } from '../../services/exportService.js';
+import { exportToThreeSeparateDocs, exportToSlides, printIsolatedElement, formatClassWithSuperscript } from '../../services/exportService.js';
 
 export default function PaperViewer({ paperData, onClose }) {
   const [activeTab, setActiveTab] = useState('paper');
+  const [copies, setCopies] = useState(1);
 
   if (!paperData) return null;
 
   const handlePrint = () => {
-    printElementById('printable-paper-core');
+    printIsolatedElement('printable-paper-core', copies);
   };
 
   const cleanExamTitle = (paperData.paperHeader?.examName || 'PRE-BOARD EXAMINATION')
@@ -17,9 +18,28 @@ export default function PaperViewer({ paperData, onClose }) {
 
   const classFormatted = formatClassWithSuperscript(paperData.paperHeader?.className || '12');
 
+  const renderFormattedQuestion = (text) => {
+    if (!text) return null;
+    const lines = text.split('\n');
+    return (
+      <div className="space-y-1">
+        {lines.map((line, idx) => {
+          const isOption = line.trim().startsWith('(A)') || line.trim().startsWith('(B)') || 
+                           line.trim().startsWith('(C)') || line.trim().startsWith('(D)') ||
+                           line.trim().startsWith('(क)') || line.trim().startsWith('(ख)') || 
+                           line.trim().startsWith('(ग)') || line.trim().startsWith('(घ)');
+          return (
+            <div key={idx} className={isOption ? 'pl-4 font-sans text-[11pt]' : 'text-[12pt]'}>
+              {line}
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl space-y-4 font-serif">
-      {/* Top Controls Toolbar */}
       <div className="no-print bg-slate-950 px-6 py-3 border-b border-slate-800 flex flex-wrap justify-between items-center gap-3">
         <div className="flex bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs font-sans font-semibold">
           <button
@@ -43,16 +63,21 @@ export default function PaperViewer({ paperData, onClose }) {
           >
             📊 Topic Blueprint
           </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('all')}
-            className={`px-3 py-1.5 rounded-lg transition ${activeTab === 'all' ? 'bg-emerald-600 text-white font-bold' : 'text-slate-400 hover:text-white'}`}
-          >
-            📑 Complete Evaluation Dossier
-          </button>
         </div>
 
         <div className="flex items-center gap-2 text-xs font-sans">
+          <div className="flex items-center gap-1.5 bg-slate-900 px-2 py-1 rounded-xl border border-slate-800 text-slate-300">
+            <span className="text-[11px] font-bold">Copies:</span>
+            <input
+              type="number"
+              min="1"
+              max="50"
+              value={copies}
+              onChange={(e) => setCopies(Math.max(1, parseInt(e.target.value, 10) || 1))}
+              className="w-12 bg-slate-950 text-center text-white font-bold rounded border border-slate-700 py-0.5 text-xs"
+            />
+          </div>
+
           <button
             type="button"
             onClick={handlePrint}
@@ -60,13 +85,15 @@ export default function PaperViewer({ paperData, onClose }) {
           >
             🖨️ Print Active Tab (A4)
           </button>
+
           <button
             type="button"
-            onClick={() => exportToDocx(paperData)}
-            className="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-xl font-semibold transition"
+            onClick={() => exportToThreeSeparateDocs(paperData)}
+            className="bg-emerald-600 hover:bg-emerald-500 text-white border border-emerald-500 px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1"
           >
-            📝 Word (DOCX)
+            📁 Download 3 Separate DOCX
           </button>
+
           <button
             type="button"
             onClick={() => exportToSlides(paperData)}
@@ -74,6 +101,7 @@ export default function PaperViewer({ paperData, onClose }) {
           >
             📽️ Slides
           </button>
+
           {onClose && (
             <button type="button" onClick={onClose} className="text-slate-400 hover:text-white px-2 py-1 text-sm font-bold">
               ✕
@@ -82,12 +110,10 @@ export default function PaperViewer({ paperData, onClose }) {
         </div>
       </div>
 
-      {/* Target Print Area */}
       <div className="p-4 sm:p-6 max-w-4xl mx-auto">
         <div id="printable-paper-core" className="bg-white text-black p-8 sm:p-12 rounded-xl shadow-xl space-y-4">
-          {(activeTab === 'paper' || activeTab === 'all') && (
+          {activeTab === 'paper' && (
             <div className="space-y-4">
-              {/* Official CBSE Header */}
               <div className="border-b-2 border-black pb-2 text-center relative">
                 <div className="absolute left-0 top-0 h-14 w-14 rounded-full border-2 border-black flex flex-col items-center justify-center bg-slate-100 font-bold text-xs leading-none">
                   <span className="text-[16px]">🏫</span>
@@ -113,7 +139,6 @@ export default function PaperViewer({ paperData, onClose }) {
                 </table>
               </div>
 
-              {/* Instructions */}
               <div className="p-3 border border-black rounded space-y-1">
                 <p className="text-[14pt] font-bold uppercase text-black">GENERAL INSTRUCTIONS:</p>
                 <ol className="list-decimal pl-5 text-[12pt] font-normal text-black space-y-0.5">
@@ -123,7 +148,6 @@ export default function PaperViewer({ paperData, onClose }) {
                 </ol>
               </div>
 
-              {/* Sections & 3-Column Table Grid */}
               <div className="space-y-5 pt-2">
                 {paperData.sections?.map((sec, sIdx) => (
                   <div key={sIdx} className="space-y-2 avoid-split">
@@ -144,7 +168,7 @@ export default function PaperViewer({ paperData, onClose }) {
                           <tr key={q.qNo} className="border-b border-black avoid-split">
                             <td className="border border-black p-2 align-top text-center font-normal">{q.qNo}</td>
                             <td className="border border-black p-2 align-top text-left font-normal leading-relaxed">
-                              <div className="whitespace-pre-line text-black font-normal">{q.questionText}</div>
+                              {renderFormattedQuestion(q.questionText)}
                             </td>
                             <td className="border border-black p-2 align-top text-center font-normal">[{q.marks}]</td>
                           </tr>
@@ -162,9 +186,8 @@ export default function PaperViewer({ paperData, onClose }) {
             </div>
           )}
 
-          {/* Marking Scheme */}
-          {(activeTab === 'answerKey' || activeTab === 'all') && (
-            <div className={`space-y-4 ${activeTab === 'all' ? 'page-break pt-6' : ''}`}>
+          {activeTab === 'answerKey' && (
+            <div className="space-y-4">
               <div className="border-b-2 border-black pb-2 text-center">
                 <p className="text-[14pt] font-bold uppercase text-black">CENTRAL BOARD OF SECONDARY EDUCATION</p>
                 <h1 className="text-[16pt] font-bold uppercase text-black">{paperData.paperHeader?.schoolName}</h1>
@@ -175,7 +198,7 @@ export default function PaperViewer({ paperData, onClose }) {
                 <thead>
                   <tr className="bg-gray-100 border-b border-black text-black">
                     <th className="border border-black p-2 w-12 text-center font-bold">Q.No</th>
-                    <th className="border border-black p-2 text-left font-bold">Step-Wise Value Points & Model Solution</th>
+                    <th className="border border-black p-2 text-left font-bold">Step-Wise Value Points, Formulas & Model Solution</th>
                     <th className="border border-black p-2 w-16 text-center font-bold">Marks</th>
                   </tr>
                 </thead>
@@ -194,9 +217,8 @@ export default function PaperViewer({ paperData, onClose }) {
             </div>
           )}
 
-          {/* Blueprint */}
-          {(activeTab === 'blueprint' || activeTab === 'all') && (
-            <div className={`space-y-4 ${activeTab === 'all' ? 'page-break pt-6' : ''}`}>
+          {activeTab === 'blueprint' && (
+            <div className="space-y-4">
               <div className="border-b-2 border-black pb-2 text-center">
                 <h2 className="text-[14pt] font-bold uppercase text-black">CBSE QUESTION PAPER BLUEPRINT MATRIX</h2>
                 <p className="text-xs text-black font-sans">Total Evaluation Marks: {paperData.paperHeader?.maxMarks}</p>
