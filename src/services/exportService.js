@@ -1,3 +1,16 @@
+// --- CRITICAL EXPORTS (TOP LEVEL) ---
+export function exportToDocx(paperData) {
+  exportToThreeSeparateDocs(paperData);
+}
+
+export function printElementById(elementId, copies = 1) {
+  printIsolatedElement(elementId, copies);
+}
+
+export function exportToSlides() {
+  alert("Classroom Projection Slides generated.");
+}
+
 export function formatClassWithSuperscript(clsStr) {
   const match = String(clsStr || '').match(/\d+/);
   if (!match) return clsStr ? String(clsStr).toUpperCase() : '12<SUP>TH</SUP>';
@@ -9,7 +22,7 @@ export function formatClassWithSuperscript(clsStr) {
   return `${num}<SUP>${suffix}</SUP>`;
 }
 
-// 100% Isolated Print Engine with options line-break preservation
+// 100% Isolated Print Engine (Zero app UI / dashboard leak)
 export function printIsolatedElement(elementId, copies = 1) {
   const targetEl = document.getElementById(elementId);
   if (!targetEl) {
@@ -40,7 +53,7 @@ export function printIsolatedElement(elementId, copies = 1) {
     <html>
       <head>
         <meta charset="utf-8">
-        <title>CBSE Examination Paper</title>
+        <title>CBSE Official Paper</title>
         <style>
           @page {
             size: A4 portrait;
@@ -74,11 +87,6 @@ export function printIsolatedElement(elementId, copies = 1) {
             padding: 6px 8px;
             vertical-align: top;
           }
-          .option-line {
-            display: block;
-            margin-top: 2px;
-            padding-left: 4px;
-          }
         </style>
       </head>
       <body>
@@ -93,10 +101,6 @@ export function printIsolatedElement(elementId, copies = 1) {
     iframe.contentWindow.print();
     document.body.removeChild(iframe);
   }, 450);
-}
-
-export function printElementById(elementId, copies = 1) {
-  printIsolatedElement(elementId, copies);
 }
 
 function wrapDocxHtml(title, school, exam, cls, sub, time, marks, innerContent) {
@@ -148,7 +152,7 @@ function triggerDownload(fileName, content) {
   document.body.removeChild(a);
 }
 
-// 3 Independent Clean DOCX Exports
+// 3 Separate DOCX files (Paper, Marking Scheme, Blueprint)
 export function exportToThreeSeparateDocs(paperData) {
   const school = (paperData?.paperHeader?.schoolName || 'ARDEN PROGRESSIVE SCHOOL').toUpperCase();
   const exam = (paperData?.paperHeader?.examName || 'PRE-BOARD EXAMINATION').replace(/\(\s*\d+%\s*SYLLABUS\s*\)/gi, '').trim().toUpperCase();
@@ -158,7 +162,7 @@ export function exportToThreeSeparateDocs(paperData) {
   const time = (paperData?.paperHeader?.timeAllowed || '3 HOURS').toUpperCase();
   const safeSubName = sub.replace(/[^a-zA-Z0-9\u0900-\u097F]/g, '_');
 
-  // 1. Question Paper DOCX
+  // File 1: Question Paper
   let paperBody = `<p style='font-size:14pt; font-weight:bold; margin:6pt 0 2pt 0;'>GENERAL INSTRUCTIONS:</p><ol style='font-size:12pt; margin:0 0 8pt 18pt;'>`;
   (paperData?.generalInstructions || ['All questions are compulsory.']).forEach(ins => { paperBody += `<li>${ins}</li>`; });
   paperBody += `</ol>`;
@@ -168,7 +172,6 @@ export function exportToThreeSeparateDocs(paperData) {
       <tr><td colspan='3' class='sec-row'>${sec.sectionTitle}</td></tr>
       <tr><th class='col-qno' style='font-weight:bold;'>Q.No</th><th class='col-qtext' style='font-weight:bold;'>Question Details</th><th class='col-marks' style='font-weight:bold;'>Marks</th></tr>`;
     sec.questions?.forEach((q) => {
-      // Ensure options are placed on separate lines with clean spacing
       const formattedQ = (q.questionText || '').replace(/\n/g, '<br/>');
       paperBody += `<tr><td class='col-qno'>${q.qNo}</td><td class='col-qtext'>${formattedQ}</td><td class='col-marks'>[${q.marks}]</td></tr>`;
     });
@@ -178,7 +181,7 @@ export function exportToThreeSeparateDocs(paperData) {
   const file1Content = wrapDocxHtml('Question Paper', school, exam, cls, sub, time, marks, paperBody);
   triggerDownload(`1_Question_Paper_${safeSubName}.doc`, file1Content);
 
-  // 2. Marking Scheme DOCX
+  // File 2: Detailed Marking Scheme
   setTimeout(() => {
     let ansBody = `<table class='cbse-grid'>
       <tr><th class='col-qno' style='font-weight:bold;'>Q.No</th><th class='col-qtext' style='font-weight:bold;'>Detailed Step-Wise Value Points, Formulas & Model Solution</th><th class='col-marks' style='font-weight:bold;'>Marks</th></tr>`;
@@ -192,7 +195,7 @@ export function exportToThreeSeparateDocs(paperData) {
     triggerDownload(`2_Marking_Scheme_AnswerKey_${safeSubName}.doc`, file2Content);
   }, 400);
 
-  // 3. Blueprint Matrix DOCX
+  // File 3: Blueprint Matrix
   setTimeout(() => {
     let bpBody = `<table class='cbse-grid'>
       <tr><th class='col-qtext' style='font-weight:bold; text-align:left;'>Syllabus Unit Focus</th><th style='width:20%; text-align:center; font-weight:bold;'>Questions Count</th><th class='col-marks' style='font-weight:bold;'>Marks</th></tr>`;
@@ -204,12 +207,4 @@ export function exportToThreeSeparateDocs(paperData) {
     const file3Content = wrapDocxHtml('Blueprint Matrix', school, `CBSE QUESTION PAPER BLUEPRINT MATRIX`, cls, sub, '', marks, bpBody);
     triggerDownload(`3_Blueprint_Matrix_${safeSubName}.doc`, file3Content);
   }, 800);
-}
-
-export function exportToDocx(paperData) {
-  exportToThreeSeparateDocs(paperData);
-}
-
-export function exportToSlides() {
-  alert("Classroom Projection Slides generated.");
 }

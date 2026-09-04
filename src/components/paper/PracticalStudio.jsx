@@ -3,7 +3,7 @@ import Button from '../common/Button.jsx';
 import { exportToDocx, printElementById } from '../../services/exportService.js';
 import { getSyllabusDataForClass, ALL_CLASSES } from '../../config/syllabus/index.js';
 
-const PracticalStudio = ({ onPracticalGenerated }) => {
+export default function PracticalStudio({ onPracticalGenerated }) {
   const [selectedClass, setSelectedClass] = useState('Class 12');
   const syllabusBundle = getSyllabusDataForClass(selectedClass);
   const availableSubjects = syllabusBundle ? Object.keys(syllabusBundle.subjects) : [];
@@ -32,7 +32,6 @@ const PracticalStudio = ({ onPracticalGenerated }) => {
 
     const fallbackTopic = selectedSubject || 'Laboratory Practical Skill';
     const isCS = selectedSubject.toLowerCase().includes('computer') || selectedSubject.toLowerCase().includes('it');
-    const isBio = selectedSubject.toLowerCase().includes('bio');
     const isChem = selectedSubject.toLowerCase().includes('chem');
 
     const experiments = [];
@@ -463,6 +462,4 @@ const PracticalStudio = ({ onPracticalGenerated }) => {
       )}
     </div>
   );
-};
-
-export default PracticalStudio;
+}

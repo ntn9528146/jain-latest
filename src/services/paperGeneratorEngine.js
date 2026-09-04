@@ -19,7 +19,7 @@ export function buildComprehensiveCbsePaper({
     const questions = [];
 
     for (let i = 0; i < sec.count; i++) {
-      const unit = activeUnits[i % activeUnits.length] || { name: `${subject} Core Unit` };
+      const unit = activeUnits[i % activeUnits.length] || { name: `${subject} Unit` };
       const sub = (unit.subtopics && unit.subtopics.length > 0)
         ? unit.subtopics[i % unit.subtopics.length]
         : unit.name;
@@ -73,9 +73,8 @@ export function buildComprehensiveCbsePaper({
 }
 
 function generateRealisticQuestion({ qNo, typeId, marks, subject, topic, unitName, index }) {
-  const isCS = subject.toLowerCase().includes('computer') || subject.toLowerCase().includes('it') || subject.toLowerCase().includes('informa');
+  const isCS = subject.toLowerCase().includes('computer') || subject.toLowerCase().includes('it');
   const isMath = subject.toLowerCase().includes('math');
-  const isScience = subject.toLowerCase().includes('physics') || subject.toLowerCase().includes('science') || subject.toLowerCase().includes('chem');
 
   if (typeId === 'mcq') {
     if (isCS) {
@@ -86,14 +85,14 @@ function generateRealisticQuestion({ qNo, typeId, marks, subject, topic, unitNam
           ans: `(B) 'rb+'\nExplanation: 'rb+' opens the binary file in read-and-write mode with file pointer at the beginning without truncating data.`
         },
         {
-          q: `Identify the valid SQL clause used to filter grouped rows in a query:`,
+          q: `Identify the valid SQL clause used to filter grouped rows in an aggregate query:`,
           opts: `(A) WHERE\n(B) ORDER BY\n(C) HAVING\n(D) GROUP FILTER`,
-          ans: `(C) HAVING\nExplanation: HAVING clause is applied after grouping to filter aggregated results.`
+          ans: `(C) HAVING\nExplanation: The HAVING clause is specifically evaluated after GROUP BY to filter grouped results.`
         },
         {
           q: `In a Python stack implementation using a list, which built-in method represents the POP operation?`,
           opts: `(A) stack.remove()\n(B) stack.delete()\n(C) stack.pop()\n(D) stack.push()`,
-          ans: `(C) stack.pop()\nExplanation: In Python, list.pop() deletes and returns the top-most item of the stack.`
+          ans: `(C) stack.pop()\nExplanation: In Python lists, pop() removes and returns the last element, conforming to LIFO.`
         }
       ];
       const item = csQuestions[index % csQuestions.length];
@@ -114,16 +113,16 @@ function generateRealisticQuestion({ qNo, typeId, marks, subject, topic, unitNam
 
     return {
       qNo, marks, topicName: unitName,
-      questionText: `Which of the following statements correctly applies to "${topic}" under standard CBSE guidelines?\n(A) It directly follows the fundamental conservation law.\n(B) It varies inversely with the primary parameter.\n(C) It remains independent of external perturbations.\n(D) Both (A) and (B).`,
-      answerKey: `Correct Option: (A)\nExplanation: According to the core principle of ${topic}, the fundamental conservation criterion is satisfied.`
+      questionText: `Which of the following statements correctly applies to "${topic}"?\n(A) It satisfies the fundamental conservation law under isolated state.\n(B) It varies inversely with the primary parameter.\n(C) It remains independent of ambient perturbation.\n(D) Both (A) and (B).`,
+      answerKey: `Correct Option: (A)\nExplanation: Governed by the foundational law of ${topic}.`
     };
   }
 
   if (typeId === 'ar') {
     return {
       qNo, marks, topicName: unitName,
-      questionText: `Given below are Assertion (A) and Reason (R):\nAssertion (A): The operational validity of "${topic}" is essential during system analysis.\nReason (R): It governs the underlying state transitions under isolated conditions.\nSelect the correct answer:\n(A) Both (A) and (R) are true and (R) is the correct explanation of (A).\n(B) Both (A) and (R) are true but (R) is not the correct explanation of (A).\n(C) (A) is true but (R) is false.\n(D) Both (A) and (R) are false.`,
-      answerKey: `Correct Option: (A)\nExplanation: Both assertions and analytical reasons are factually verified.`
+      questionText: `Given below are Assertion (A) and Reason (R):\nAssertion (A): Practical evaluation of "${topic}" is essential during system analysis.\nReason (R): It dictates the boundary constraints under standard testing conditions.\nSelect the correct option:\n(A) Both (A) and (R) are true and (R) is the correct explanation of (A).\n(B) Both (A) and (R) are true but (R) is not the correct explanation of (A).\n(C) (A) is true but (R) is false.\n(D) Both (A) and (R) are false.`,
+      answerKey: `Correct Option: (A)\nExplanation: Both assertions and functional reasons are empirically verified.`
     };
   }
 
@@ -131,29 +130,29 @@ function generateRealisticQuestion({ qNo, typeId, marks, subject, topic, unitNam
     return {
       qNo, marks: 2, topicName: unitName,
       questionText: `State the primary purpose of "${topic}". Mention two key rules or equations associated with its practical application in ${subject}.`,
-      answerKey: `• Definition and purpose of ${topic}: 1 Mark.\n• Two fundamental equations/rules (0.5 + 0.5): 1 Mark.`
+      answerKey: `• Core definition and working objective: 1 Mark.\n• Two governing rules/equations (0.5 + 0.5): 1 Mark.`
     };
   }
 
   if (typeId === 'sa') {
     return {
       qNo, marks: 3, topicName: unitName,
-      questionText: `Explain the detailed working methodology of "${topic}". Illustrate your answer with a neat labeled circuit diagram, mathematical proof, or code block as relevant to ${subject}.`,
-      answerKey: `• Conceptual statement and working principle: 1 Mark.\n• Well-labeled diagram / expression / code: 1 Mark.\n• Practical significance and final derivation step: 1 Mark.`
+      questionText: `Explain the working principle of "${topic}". Illustrate your answer with a neat labeled circuit diagram, mathematical proof, or code block as applicable to ${subject}.`,
+      answerKey: `• Conceptual statement: 1 Mark.\n• Diagram/proof/code illustration: 1 Mark.\n• Analysis and final derivation step: 1 Mark.`
     };
   }
 
   if (typeId === 'case_study') {
     return {
       qNo, marks: 4, topicName: unitName,
-      questionText: `Read the following source-based excerpt carefully and answer the questions:\n"During an operational setup involving ${topic}, an engineer recorded unexpected variations when the input parameters were increased by 50%."\n(i) Identify the governing theorem or function illustrated in this scenario. [1 Mark]\n(ii) State the consequence of this variation on output efficiency. [1 Mark]\n(iii) Suggest two corrective adjustments to stabilize the observed reading. [2 Marks]`,
-      answerKey: `(i) Governing Principle: ${topic} [1 Mark].\n(ii) Impact Analysis: Causes non-linear distortion [1 Mark].\n(iii) Two corrective measures (1 Mark each): Proper impedance matching and noise filtering [2 Marks].`
+      questionText: `Read the following source-based case study carefully and answer the questions:\n"During an operational setup involving ${topic}, unexpected deviations were observed when the operational frequency was adjusted by 25%."\n(i) Identify the governing principle illustrated here. [1 Mark]\n(ii) State the consequence of this variation on output efficiency. [1 Mark]\n(iii) Suggest two corrective adjustments to stabilize the system. [2 Marks]`,
+      answerKey: `(i) Governing Principle: ${topic} [1 Mark].\n(ii) Effect: Causes harmonic attenuation [1 Mark].\n(iii) Remedial measures (1 Mark each): Input calibration and filtering [2 Marks].`
     };
   }
 
   return {
     qNo, marks: 5, topicName: unitName,
-    questionText: `(a) Derive or formulate the complete theoretical expression for "${topic}" from fundamental principles.\n(b) A system configured according to this concept is deployed under edge constraints. Analyze the failure modes and write the comprehensive step-by-step resolution protocol.`,
-    answerKey: `(a) Detailed step-by-step derivation/formulation with diagrams: 3 Marks.\n(b) Edge failure diagnosis (1M) and remediation strategy (1M): 2 Marks.`
+    questionText: `(a) Derive or formulate the complete theoretical expression for "${topic}".\n(b) When configured under constrained boundary conditions, analyze the probable failure modes and provide a step-by-step resolution protocol.`,
+    answerKey: `(a) Comprehensive derivation/model with notation: 3 Marks.\n(b) Failure mode diagnosis (1M) and remediation protocol (1M): 2 Marks.`
   };
 }

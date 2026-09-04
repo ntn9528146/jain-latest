@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Button from '../common/Button.jsx';
 import { exportToDocx, printElementById } from '../../services/exportService.js';
 
-const ModeBulkUpload = ({ onPaperUploaded }) => {
+export default function ModeBulkUpload({ onPaperUploaded }) {
   const [uploadedDocs, setUploadedDocs] = useState([
     {
       id: 'DOC_101',
@@ -24,7 +24,6 @@ const ModeBulkUpload = ({ onPaperUploaded }) => {
     if (file) {
       setNewTitle(file.name.replace(/\.[^/.]+$/, ''));
       const reader = new FileReader();
-      // Read strictly as UTF-8 so Hindi/Devanagari characters never get corrupted
       reader.readAsText(file, 'UTF-8');
       reader.onload = (event) => {
         setPaperContent(event.target?.result || '');
@@ -203,6 +202,4 @@ const ModeBulkUpload = ({ onPaperUploaded }) => {
       )}
     </div>
   );
-};
-
-export default ModeBulkUpload;
+}

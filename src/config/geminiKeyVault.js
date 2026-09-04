@@ -1,56 +1,33 @@
-// 3-Gemini Key Rotation & Health Tracker Vault
-export const GEMINI_KEYS = [
-  {
-    id: 'key_1',
-    key: import.meta.env.VITE_GEMINI_API_KEY_1 || '',
-    isHealthy: true,
-    lastUsed: 0,
-    failCount: 0
-  },
-  {
-    id: 'key_2',
-    key: import.meta.env.VITE_GEMINI_API_KEY_2 || '',
-    isHealthy: true,
-    lastUsed: 0,
-    failCount: 0
-  },
-  {
-    id: 'key_3',
-    key: import.meta.env.VITE_GEMINI_API_KEY_3 || '',
-    isHealthy: true,
-    lastUsed: 0,
-    failCount: 0
-  }
+const KEY_POOL = [
+  { key: import.meta.env.VITE_GEMINI_API_KEY_1 || import.meta.env.VITE_GEMINI_KEY_1 || "", failed: false },
+  { key: import.meta.env.VITE_GEMINI_API_KEY_2 || import.meta.env.VITE_GEMINI_KEY_2 || "", failed: false },
+  { key: import.meta.env.VITE_GEMINI_API_KEY_3 || import.meta.env.VITE_GEMINI_KEY_3 || "", failed: false }
 ];
 
-let currentKeyIndex = 0;
+let currentIndex = 0;
 
 export function getActiveGeminiKey() {
-  const availableKeys = GEMINI_KEYS.filter(k => k.isHealthy && k.key.trim().length > 0);
-  
-  if (availableKeys.length === 0) {
-    // Agar koi key config nahi hai toh fallback blank return karega
-    const fallback = GEMINI_KEYS.find(k => k.key.trim().length > 0);
-    return fallback ? fallback.key : '';
+  const localKey = localStorage.getItem("gemini_api_key") || localStorage.getItem("VITE_GEMINI_API_KEY");
+  if (localKey && localKey.trim()) {
+    return localKey.trim();
   }
 
-  currentKeyIndex = (currentKeyIndex + 1) % availableKeys.length;
-  const selected = availableKeys[currentKeyIndex];
-  selected.lastUsed = Date.now();
-  return selected.key;
+  const availableKeys = KEY_POOL.filter(k => k.key && !k.failed);
+  if (availableKeys.length > 0) {
+    const chosen = availableKeys[currentIndex % availableKeys.length];
+    currentIndex = (currentIndex + 1) % availableKeys.length;
+    return chosen.key;
+  }
+
+  return KEY_POOL[0]?.key || "";
 }
 
-export function reportKeyFailure(failedKeyString) {
-  const target = GEMINI_KEYS.find(k => k.key === failedKeyString);
-  if (target) {
-    target.failCount += 1;
-    if (target.failCount >= 3) {
-      target.isHealthy = false;
-      // 1 minute baad wapas recovery test
-      setTimeout(() => {
-        target.isHealthy = true;
-        target.failCount = 0;
-      }, 60000);
-    }
+export function reportKeyFailure(failedKey) {
+  const match = KEY_POOL.find(k => k.key === failedKey);
+  if (match) {
+    match.failed = true;
+    console.warn("Rotating Gemini Key Account due to error or rate limit.");
   }
 }
+
+export default { getActiveGeminiKey, reportKeyFailure };
