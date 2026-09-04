@@ -1,17 +1,15 @@
 import React, { useState } from 'react';
 import { exportToDocx, exportToSlides } from '../../services/exportService.js';
 
-export default function PaperViewer({ paperData, onClose }) {
-  const [activeTab, setActiveTab] = useState('paper'); // 'paper' | 'answerKey' | 'blueprint' | 'all'
+const PaperViewer = ({ paperData, onClose }) => {
+  const [activeTab, setActiveTab] = useState('paper'); // paper | answerKey | blueprint | all
 
   if (!paperData) return null;
 
   const handlePrint = (mode = 'current') => {
     if (mode === 'all') {
       setActiveTab('all');
-      setTimeout(() => {
-        window.print();
-      }, 250);
+      setTimeout(() => window.print(), 250);
     } else {
       window.print();
     }
@@ -19,181 +17,213 @@ export default function PaperViewer({ paperData, onClose }) {
 
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl space-y-4">
-      {/* Top Controls Toolbar (Hidden during printing) */}
+      {/* Top Controls Toolbar */}
       <div className="no-print bg-slate-950 px-6 py-3 border-b border-slate-800 flex flex-wrap justify-between items-center gap-3">
-        {/* Navigation Tabs */}
         <div className="flex bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs font-semibold">
           <button
+            type="button"
             onClick={() => setActiveTab('paper')}
             className={`px-3 py-1.5 rounded-lg transition ${activeTab === 'paper' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'}`}
           >
-            📄 Question Paper
+            📄 Board Question Paper (3-Col Grid)
           </button>
           <button
+            type="button"
             onClick={() => setActiveTab('answerKey')}
             className={`px-3 py-1.5 rounded-lg transition ${activeTab === 'answerKey' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'}`}
           >
-            🔑 Marking Scheme & Answers
+            🔑 Marking Scheme & Step Values
           </button>
           <button
+            type="button"
             onClick={() => setActiveTab('blueprint')}
             className={`px-3 py-1.5 rounded-lg transition ${activeTab === 'blueprint' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'}`}
           >
-            📊 Topic Blueprint
+            📊 Topic Blueprint Matrix
           </button>
           <button
+            type="button"
             onClick={() => setActiveTab('all')}
-            className={`px-3 py-1.5 rounded-lg transition ${activeTab === 'all' ? 'bg-indigo-600 text-white font-bold' : 'text-slate-400 hover:text-white'}`}
+            className={`px-3 py-1.5 rounded-lg transition ${activeTab === 'all' ? 'bg-emerald-600 text-white font-bold' : 'text-slate-400 hover:text-white'}`}
           >
-            📑 Full Dossier (Combined)
+            📑 Complete Evaluation Dossier
           </button>
         </div>
 
-        {/* Print & Export Actions */}
         <div className="flex items-center gap-2 text-xs">
           <button
+            type="button"
             onClick={() => handlePrint(activeTab)}
-            className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition shadow-lg shadow-indigo-600/30"
+            className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition"
           >
-            🖨️ Print Current Tab
+            🖨️ Print Active Tab
           </button>
           <button
+            type="button"
             onClick={() => handlePrint('all')}
             className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition"
           >
-            🖨️ Print All (Paper + Answers + Blueprint)
+            🖨️ Print Complete Package
           </button>
           <button
+            type="button"
             onClick={() => exportToDocx(paperData)}
             className="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-xl font-semibold transition"
           >
-            📝 Word (DOCX)
+            📝 DOCX
           </button>
           <button
+            type="button"
             onClick={() => exportToSlides(paperData)}
             className="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-xl font-semibold transition"
           >
             📽️ Slides
           </button>
           {onClose && (
-            <button onClick={onClose} className="text-slate-400 hover:text-white px-2 py-1 text-sm font-bold">
+            <button type="button" onClick={onClose} className="text-slate-400 hover:text-white px-2 py-1 text-sm font-bold">
               ✕
             </button>
           )}
         </div>
       </div>
 
-      {/* Printable Body Container */}
+      {/* Main Document Body */}
       <div className="p-4 sm:p-6 max-w-4xl mx-auto">
-        {/* ================= PART 1: QUESTION PAPER ================= */}
+        {/* ================= 1. QUESTION PAPER (3-Column Layout with Borders) ================= */}
         {(activeTab === 'paper' || activeTab === 'all') && (
-          <div className="printable-document bg-white text-slate-900 p-8 sm:p-12 rounded-xl shadow-xl font-serif text-sm leading-relaxed space-y-6">
-            <div className="text-center border-b-2 border-slate-900 pb-4 space-y-1">
-              <p className="font-bold text-[10px] uppercase tracking-widest text-slate-600">CBSE BOARD EVALUATION SERIES 2026-27</p>
-              <h1 className="text-2xl font-black uppercase tracking-tight">{paperData.paperHeader.schoolName}</h1>
-              <h2 className="text-base font-bold uppercase">{paperData.paperHeader.examName}</h2>
-              <div className="flex justify-between items-center pt-3 text-xs font-sans font-bold border-t border-slate-300 mt-2">
-                <span>CLASS: {paperData.paperHeader.className}</span>
-                <span>SUBJECT: {paperData.paperHeader.subjectName}</span>
-                <span>TIME: {paperData.paperHeader.timeAllowed}</span>
-                <span>MAX. MARKS: {paperData.paperHeader.maxMarks}</span>
+          <div className="cbse-board-sheet bg-white text-black p-8 sm:p-12 rounded-xl shadow-xl space-y-4 font-serif">
+            <div className="text-center border-b-2 border-black pb-3 space-y-1">
+              <p className="text-[10pt] font-bold tracking-wider uppercase text-gray-700">CENTRAL BOARD OF SECONDARY EDUCATION - EVALUATION SERIES</p>
+              <h1 className="cbse-header-title text-xl tracking-tight text-black">{paperData.paperHeader?.schoolName}</h1>
+              <h2 className="text-sm font-bold uppercase text-black">{paperData.paperHeader?.examName}</h2>
+              <div className="flex justify-between items-center text-xs font-bold pt-2 border-t border-black mt-2">
+                <span>CLASS: {paperData.paperHeader?.className}</span>
+                <span>SUBJECT: {paperData.paperHeader?.subjectName}</span>
+                <span>TIME: {paperData.paperHeader?.timeAllowed}</span>
+                <span>MAX. MARKS: {paperData.paperHeader?.maxMarks}</span>
               </div>
             </div>
 
-            <div className="font-sans text-xs bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-1">
-              <p className="font-bold uppercase tracking-wider text-slate-700">General Instructions:</p>
-              <ol className="list-decimal pl-4 space-y-0.5 text-slate-600">
+            <div className="text-xs bg-gray-50 p-3 rounded border border-black space-y-1">
+              <p className="font-bold uppercase tracking-wider text-black">General Instructions:</p>
+              <ol className="list-decimal pl-4 space-y-0.5 text-black">
                 {paperData.generalInstructions?.map((ins, idx) => (
                   <li key={idx}>{ins}</li>
                 ))}
               </ol>
             </div>
 
+            {/* Sections & 3-Column Table Grid */}
             <div className="space-y-6 pt-2">
               {paperData.sections?.map((sec, sIdx) => (
-                <div key={sIdx} className="space-y-4 avoid-break-inside">
-                  <div className="text-center font-sans font-bold border-b border-slate-400 pb-1 text-xs uppercase tracking-wider text-slate-800">
+                <div key={sIdx} className="space-y-2 avoid-break-inside">
+                  <div className="text-center font-bold text-xs uppercase tracking-widest py-1 border-t-2 border-b-2 border-black bg-gray-100 text-black">
                     {sec.sectionTitle}
                   </div>
 
-                  <div className="space-y-3">
-                    {sec.questions?.map((q) => (
-                      <div key={q.qNo} className="flex justify-between items-start gap-4 text-justify avoid-break-inside">
-                        <div className="space-y-1 flex-1">
-                          <span className="font-bold mr-2">Q{q.qNo}.</span>
-                          <span className="whitespace-pre-line">{q.questionText}</span>
-                          {q.yearTag && (
-                            <span className="ml-2 font-sans text-[10px] font-bold text-indigo-700 bg-indigo-50 px-1 py-0.5 rounded border border-indigo-200">
-                              {q.yearTag}
-                            </span>
-                          )}
-                        </div>
-                        <span className="font-sans font-bold text-xs shrink-0">[{q.marks}]</span>
-                      </div>
-                    ))}
-                  </div>
+                  <table className="cbse-table-grid w-full border-collapse border border-black text-xs">
+                    <thead>
+                      <tr className="bg-gray-100 border-b border-black text-black">
+                        <th className="cbse-col-qno border border-black p-2">Q.No</th>
+                        <th className="cbse-col-text border border-black p-2 text-left">Question Text / Details</th>
+                        <th className="cbse-col-marks border border-black p-2">Marks</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sec.questions?.map((q) => (
+                        <tr key={q.qNo} className="border-b border-black avoid-break-inside">
+                          <td className="cbse-col-qno border border-black p-2 align-top text-center font-bold">
+                            {q.qNo}
+                          </td>
+                          <td className="cbse-col-text border border-black p-2 align-top text-justify">
+                            <span className="whitespace-pre-line text-black leading-relaxed">{q.questionText}</span>
+                            {q.yearTag && (
+                              <span className="inline-block ml-2 text-[10px] font-bold text-gray-800 bg-gray-200 px-1.5 py-0.5 rounded border border-gray-400">
+                                {q.yearTag}
+                              </span>
+                            )}
+                          </td>
+                          <td className="cbse-col-marks border border-black p-2 align-top text-center font-bold">
+                            [{q.marks}]
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               ))}
             </div>
 
-            <div className="text-center pt-6 border-t border-slate-300 text-xs font-sans text-slate-500 uppercase tracking-widest">
+            <div className="text-center pt-6 border-t border-black text-xs uppercase tracking-widest text-black font-bold">
               *** End of Question Paper ***
             </div>
           </div>
         )}
 
-        {/* ================= PART 2: MARKING SCHEME & ANSWERS ================= */}
+        {/* ================= 2. SEPARATE MARKING SCHEME ================= */}
         {(activeTab === 'answerKey' || activeTab === 'all') && (
-          <div className={`printable-document ${activeTab === 'all' ? 'page-break-before mt-8' : ''} bg-white text-slate-900 p-8 sm:p-12 rounded-xl shadow-xl space-y-5`}>
-            <div className="border-b-2 border-slate-900 pb-3 text-center">
-              <h2 className="text-lg font-black uppercase tracking-tight">CONFIDENTIAL - MARKING SCHEME & VALUE POINTS</h2>
-              <p className="text-xs font-sans font-semibold text-slate-600">
-                {paperData.paperHeader.examName} • {paperData.paperHeader.subjectName} (Class {paperData.paperHeader.className})
+          <div className={`cbse-board-sheet ${activeTab === 'all' ? 'page-break-before mt-8' : ''} bg-white text-black p-8 sm:p-12 rounded-xl shadow-xl space-y-4 font-serif`}>
+            <div className="border-b-2 border-black pb-2 text-center">
+              <h2 className="text-base font-bold uppercase">CONFIDENTIAL: OFFICIAL MARKING SCHEME & VALUE POINTS</h2>
+              <p className="text-xs font-bold text-black">
+                {paperData.paperHeader?.examName} • {paperData.paperHeader?.subjectName} ({paperData.paperHeader?.className})
               </p>
             </div>
 
-            <div className="divide-y divide-slate-300">
-              {paperData.sections?.flatMap((s) => s.questions)?.map((q) => (
-                <div key={q.qNo} className="py-3.5 space-y-1 avoid-break-inside text-xs">
-                  <div className="flex justify-between font-bold font-sans text-slate-900">
-                    <span>Question {q.qNo} [{q.marks} Mark{q.marks > 1 ? 's' : ''}]</span>
-                    <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-slate-100 border border-slate-300">
-                      {q.topicName || 'CBSE Core Unit'}
-                    </span>
-                  </div>
-                  <pre className="font-sans text-[11.5px] leading-relaxed whitespace-pre-wrap bg-slate-50 p-2.5 rounded border border-slate-200 text-slate-800">
-                    {q.answerKey}
-                  </pre>
-                </div>
-              ))}
-            </div>
+            <table className="cbse-table-grid w-full border-collapse border border-black text-xs">
+              <thead>
+                <tr className="bg-gray-100 border-b border-black text-black">
+                  <th className="cbse-col-qno border border-black p-2">Q.No</th>
+                  <th className="cbse-col-text border border-black p-2 text-left">Detailed Step-Wise Value Points / Key</th>
+                  <th className="cbse-col-marks border border-black p-2">Marks</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paperData.sections?.flatMap((s) => s.questions)?.map((q) => (
+                  <tr key={q.qNo} className="border-b border-black avoid-break-inside">
+                    <td className="cbse-col-qno border border-black p-2 align-top text-center font-bold">
+                      {q.qNo}
+                    </td>
+                    <td className="cbse-col-text border border-black p-2 align-top">
+                      <div className="font-bold text-[10px] text-gray-700 uppercase mb-1">
+                        Topic: {q.topicName || 'Core Curriculum'}
+                      </div>
+                      <pre className="font-serif text-xs whitespace-pre-wrap leading-relaxed text-black">
+                        {q.answerKey}
+                      </pre>
+                    </td>
+                    <td className="cbse-col-marks border border-black p-2 align-top text-center font-bold">
+                      [{q.marks}]
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
 
-        {/* ================= PART 3: TOPIC-WISE BLUEPRINT ================= */}
+        {/* ================= 3. TOPIC BLUEPRINT MATRIX ================= */}
         {(activeTab === 'blueprint' || activeTab === 'all') && (
-          <div className={`printable-document ${activeTab === 'all' ? 'page-break-before mt-8' : ''} bg-white text-slate-900 p-8 sm:p-12 rounded-xl shadow-xl space-y-4`}>
-            <div className="border-b-2 border-slate-900 pb-3">
-              <h2 className="text-base font-black uppercase">CBSE QUESTION PAPER BLUEPRINT & WEIGHTAGE MATRIX</h2>
-              <p className="text-xs font-sans text-slate-600">
-                Chapter-wise distribution verified against total {paperData.paperHeader.maxMarks} marks.
-              </p>
+          <div className={`cbse-board-sheet ${activeTab === 'all' ? 'page-break-before mt-8' : ''} bg-white text-black p-8 sm:p-12 rounded-xl shadow-xl space-y-4 font-serif`}>
+            <div className="border-b-2 border-black pb-2">
+              <h2 className="text-base font-bold uppercase">CBSE QUESTION PAPER BLUEPRINT & CHAPTER-WISE DISTRIBUTION</h2>
+              <p className="text-xs text-black">Mapped against total {paperData.paperHeader?.maxMarks} marks.</p>
             </div>
 
-            <table className="w-full text-left border border-slate-300 text-xs">
-              <thead className="bg-slate-100 uppercase text-[10px] font-bold border-b border-slate-300">
-                <tr>
-                  <th className="p-2.5 border-r border-slate-300">Unit / Chapter Focus</th>
-                  <th className="p-2.5 text-center border-r border-slate-300">Total Questions Formulated</th>
-                  <th className="p-2.5 text-right">Aggregate Marks Weightage</th>
+            <table className="cbse-table-grid w-full border-collapse border border-black text-xs">
+              <thead>
+                <tr className="bg-gray-100 border-b border-black text-black">
+                  <th className="border border-black p-2 text-left">Syllabus Unit / Chapter Name</th>
+                  <th className="border border-black p-2 text-center w-36">Questions Count</th>
+                  <th className="border border-black p-2 text-right w-36">Total Marks Assigned</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200 font-sans">
+              <tbody>
                 {paperData.blueprintSummary?.map((item, idx) => (
-                  <tr key={idx} className="avoid-break-inside">
-                    <td className="p-2.5 border-r border-slate-200 font-semibold">{item.unitName}</td>
-                    <td className="p-2.5 text-center border-r border-slate-200 font-mono">{item.questionsCount} Qs</td>
-                    <td className="p-2.5 text-right font-mono font-bold">{item.marksAssigned} Marks</td>
+                  <tr key={idx} className="border-b border-black avoid-break-inside">
+                    <td className="border border-black p-2 font-semibold text-black">{item.unitName}</td>
+                    <td className="border border-black p-2 text-center font-bold text-black">{item.questionsCount} Qs</td>
+                    <td className="border border-black p-2 text-right font-bold text-black">{item.marksAssigned} Marks</td>
                   </tr>
                 ))}
               </tbody>
@@ -203,4 +233,6 @@ export default function PaperViewer({ paperData, onClose }) {
       </div>
     </div>
   );
-}
+};
+
+export default PaperViewer;
