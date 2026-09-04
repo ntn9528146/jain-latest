@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Button from '../common/Button.jsx';
-import { exportToDocx } from '../../services/exportService.js';
+import { exportToDocx, printElementById } from '../../services/exportService.js';
 
 export default function ModeBulkUpload({ onPaperUploaded }) {
   const [uploadedDocs, setUploadedDocs] = useState([
@@ -10,7 +10,7 @@ export default function ModeBulkUpload({ onPaperUploaded }) {
       subject: 'Physics',
       date: '02 Sep 2026',
       totalMarks: 70,
-      content: 'Q1. State Gauss Law in electrostatics.\nQ2. Derive the expression for drift velocity of electrons.'
+      content: 'Q1. State Gauss Law in electrostatics.\nQ2. Derive the expression for drift velocity of electrons in a conductor.'
     }
   ]);
 
@@ -22,10 +22,10 @@ export default function ModeBulkUpload({ onPaperUploaded }) {
   const handleFileUpload = (e) => {
     const file = e.target.files?.[0];
     if (file) {
-      setNewTitle(file.name.replace(/\.[^/.]+$/, ""));
+      setNewTitle(file.name.replace(/\.[^/.]+$/, ''));
       const reader = new FileReader();
       reader.onload = (event) => {
-        setPaperContent(event.target?.result || 'Sample extracted file text...');
+        setPaperContent(event.target?.result || 'Extracted document content...');
       };
       reader.readAsText(file);
     }
@@ -48,24 +48,24 @@ export default function ModeBulkUpload({ onPaperUploaded }) {
     if (onPaperUploaded) onPaperUploaded(newDoc);
     setNewTitle('');
     setPaperContent('');
-    alert(`Successfully archived: ${newDoc.title}`);
+    alert(`Successfully saved: ${newDoc.title}`);
   };
 
   const handlePrintDoc = (doc) => {
     setSelectedForPrint(doc);
-    setTimeout(() => window.print(), 200);
+    setTimeout(() => {
+      printElementById('printable-selfupload-core');
+    }, 150);
   };
 
   return (
     <div className="space-y-6 text-xs">
-      {/* Upload Box (Hidden on Print) */}
       <div className="no-print bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4">
         <div>
           <h3 className="text-sm font-bold text-white">Mode 4: Self Upload & Bulk Archive Engine</h3>
           <p className="text-slate-400 mt-0.5">Upload a paper file or paste text directly to archive and print in official A4 format.</p>
         </div>
 
-        {/* File Browse Picker */}
         <div className="p-4 bg-slate-950 border-2 border-dashed border-slate-800 rounded-xl flex flex-col items-center justify-center gap-2 text-center">
           <span className="text-2xl">📁</span>
           <div>
@@ -119,7 +119,6 @@ export default function ModeBulkUpload({ onPaperUploaded }) {
         </form>
       </div>
 
-      {/* Uploaded Papers Table */}
       <div className="no-print bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3">
         <h4 className="text-sm font-bold text-white">Archived Self-Uploaded Papers ({uploadedDocs.length})</h4>
         <div className="border border-slate-800 rounded-xl overflow-hidden">
@@ -161,20 +160,22 @@ export default function ModeBulkUpload({ onPaperUploaded }) {
         </div>
       </div>
 
-      {/* Print Region for Self-Uploaded Paper */}
       {selectedForPrint && (
-        <div id="cbse-print-region" className="bg-white text-black p-8 sm:p-12 rounded-xl shadow-xl space-y-4 font-serif">
+        <div id="printable-selfupload-core" className="bg-white text-black p-8 sm:p-12 rounded-xl shadow-xl space-y-4 font-serif">
           <div className="text-center border-b-2 border-black pb-3">
-            <h1 className="text-xl font-bold uppercase text-black">ARDEN PROGRESSIVE SCHOOL</h1>
-            <h2 className="text-sm font-bold uppercase text-black">{selectedForPrint.title}</h2>
-            <div className="flex justify-between text-xs font-bold pt-2 border-t border-black mt-2">
-              <span>SUBJECT: {selectedForPrint.subject}</span>
-              <span>MAX. MARKS: {selectedForPrint.totalMarks}</span>
-              <span>TIME: 3 HOURS</span>
-            </div>
+            <p className="header-title text-xl font-bold uppercase text-black">ARDEN PROGRESSIVE SCHOOL</p>
+            <p className="header-sub text-sm font-bold uppercase text-black">{selectedForPrint.title}</p>
+            <table className="w-full border-t border-b border-black text-xs font-bold my-2">
+              <tbody>
+                <tr>
+                  <td className="text-left py-1">SUBJECT: {selectedForPrint.subject}</td>
+                  <td className="text-right py-1">MAX. MARKS: {selectedForPrint.totalMarks} | TIME: 3 HOURS</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
 
-          <div className="p-4 border border-black rounded text-xs whitespace-pre-wrap leading-relaxed text-black font-sans">
+          <div className="p-4 border border-black rounded text-xs whitespace-pre-wrap leading-relaxed text-black font-sans text-left">
             {selectedForPrint.content}
           </div>
         </div>

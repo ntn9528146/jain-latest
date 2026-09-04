@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Button from '../common/Button.jsx';
-import { exportToDocx } from '../../services/exportService.js';
+import { exportToDocx, printElementById } from '../../services/exportService.js';
 import { getSyllabusDataForClass, ALL_CLASSES } from '../../config/syllabus/index.js';
 
 export default function PracticalStudio({ onPracticalGenerated }) {
@@ -30,33 +30,33 @@ export default function PracticalStudio({ onPracticalGenerated }) {
       ? manualTopic.split('\n').filter((t) => t.trim())
       : currentUnits.flatMap((u) => u.subtopics || [u.name]);
 
-    const fallbackTopic = selectedSubject || 'Core Laboratory Skill';
+    const fallbackTopic = selectedSubject || 'Laboratory Practical Skill';
 
     const experiments = [];
     for (let i = 0; i < experimentCount; i++) {
-      const topic = (topicsPool.length > 0) ? topicsPool[i % topicsPool.length] : fallbackTopic;
+      const topic = topicsPool.length > 0 ? topicsPool[i % topicsPool.length] : fallbackTopic;
       experiments.push({
         expNo: i + 1,
-        title: `To design, conduct and document the experimental evaluation of ${topic}.`,
+        title: `To study, investigate and experimentally verify the characteristics of ${topic}.`,
         apparatus: 'Standard Laboratory Workstation / Apparatus / Hardware Setup',
-        principle: `According to standard CBSE practical guidelines for ${selectedSubject}.`,
+        principle: `According to official CBSE practical syllabus for ${selectedSubject}.`,
         procedure: [
-          'Verify workstation / apparatus layout with relevant laboratory precautions.',
-          'Record experimental observations across minimum 3 repeated trials.',
-          'Calculate deviations, identify errors and plot relevant graphs/data tables.',
-          'State experimental inference and precautions.'
+          'Verify experimental apparatus layout with relevant safety precautions.',
+          'Record observation sets across minimum 3 successive trials.',
+          'Calculate mean deviations, identify experimental error, and plot curves.',
+          'State laboratory inferences and precautionary measures.'
         ],
-        marking: 'Aim & Apparatus (1M) + Procedure (2M) + Table & Graphs (3M) + Result (1M) = 7 Marks'
+        marking: 'Aim & Apparatus (1M) + Procedure (2M) + Observations/Graphs (3M) + Result (1M) = 7 Marks'
       });
     }
 
     const vivaQuestions = [];
     for (let i = 0; i < vivaCount; i++) {
-      const topic = (topicsPool.length > 0) ? topicsPool[(i + 1) % topicsPool.length] : fallbackTopic;
+      const topic = topicsPool.length > 0 ? topicsPool[(i + 1) % topicsPool.length] : fallbackTopic;
       vivaQuestions.push({
         qNo: i + 1,
         question: `What is the core working principle and physical significance of "${topic}"?`,
-        modelAnswer: `Expected Answer: The student must clearly state the governing formula of ${topic}, describe the source of experimental discrepancies, and define precision.`
+        modelAnswer: `Candidate must state the governing formula of ${topic}, identify potential sources of experimental inaccuracies, and justify precision.`
       });
     }
 
@@ -65,17 +65,17 @@ export default function PracticalStudio({ onPracticalGenerated }) {
       sections: [
         '1. Student Declaration & Certificate of Authenticity',
         '2. Acknowledgement & Dedication',
-        '3. Objective, Significance and Scope of the Investigation',
-        '4. Theoretical Framework & CBSE Alignment',
-        '5. Experimental / Field Observation Records',
-        '6. Graphs, Code Blocks, Charts & Analysis Tables',
-        '7. Learning Outcomes, Bibliography & References'
+        '3. Objective, Significance and Scope of the Project',
+        '4. Theoretical Framework & CBSE Curriculum Alignment',
+        '5. Experimental / Data Collection Logs',
+        '6. Graphs, Code Blocks, Charts & Observation Tables',
+        '7. Conclusions, Bibliography & Web References'
       ]
     };
 
     const compiled = {
-      schoolName: "ARDEN PROGRESSIVE SCHOOL",
-      title: `CBSE Practical Examination & Assessment 2026-27`,
+      schoolName: 'ARDEN PROGRESSIVE SCHOOL',
+      title: 'CBSE Practical Examination & Assessment 2026-27',
       subject: selectedSubject,
       className: selectedClass,
       maxMarks: 30,
@@ -88,6 +88,10 @@ export default function PracticalStudio({ onPracticalGenerated }) {
     if (onPracticalGenerated) onPracticalGenerated(selectedSubject);
   };
 
+  const handlePrintPractical = () => {
+    printElementById('printable-practical-core');
+  };
+
   return (
     <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-5 text-xs">
       <div className="no-print flex justify-between items-center border-b border-slate-800 pb-3">
@@ -95,7 +99,7 @@ export default function PracticalStudio({ onPracticalGenerated }) {
           <h3 className="text-sm font-bold text-white flex items-center gap-2">
             🧪 Practical Exam, Viva Voce & Project Studio
             <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-              Multi-File Single-Click Engine
+              Multi-File Single-Click
             </span>
           </h3>
           <p className="text-slate-400 mt-0.5">
@@ -130,13 +134,12 @@ export default function PracticalStudio({ onPracticalGenerated }) {
             rows="3"
             value={manualTopic}
             onChange={(e) => setManualTopic(e.target.value)}
-            placeholder="e.g. Verification of Ohm's Law&#10;Study of Logic Gates&#10;Analysis of Fertilizer Samples..."
+            placeholder="e.g. Verification of Ohm's Law&#10;Logic Gates Simulation..."
             className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white font-mono text-[11px]"
           />
         </div>
       )}
 
-      {/* Class & Subject Dropdowns */}
       <div className="no-print grid grid-cols-1 sm:grid-cols-4 gap-3 bg-slate-950 p-4 rounded-xl border border-slate-800">
         <div>
           <label className="text-slate-400 text-[10px] uppercase block mb-1 font-bold">Select Class</label>
@@ -234,52 +237,54 @@ export default function PracticalStudio({ onPracticalGenerated }) {
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={() => window.print()}
-                className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs flex items-center gap-1"
+                onClick={handlePrintPractical}
+                className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs flex items-center gap-1 shadow-lg shadow-indigo-600/30"
               >
-                🖨️ Print Active Tab (A4)
+                🖨️ Print Active File (A4)
               </button>
               <button
                 type="button"
                 onClick={() => exportToDocx({ paperHeader: { schoolName: generatedStudio.schoolName, examName: `${generatedStudio.title} - ${activeFileTab.toUpperCase()}`, subjectName: generatedStudio.subject, className: generatedStudio.className, maxMarks: 30, timeAllowed: '2 Hours' } })}
                 className="bg-slate-800 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-xl text-xs font-semibold"
               >
-                📝 DOCX
+                📝 Word (DOCX)
               </button>
             </div>
           </div>
 
-          {/* Bound to #cbse-print-region for clean A4 printing */}
-          <div id="cbse-print-region" className="bg-white text-black p-8 sm:p-12 rounded-xl shadow-xl space-y-4 font-serif">
+          <div id="printable-practical-core" className="bg-white text-black p-8 sm:p-12 rounded-xl shadow-xl space-y-4 font-serif">
             {activeFileTab === 'practical' && (
               <div className="space-y-4">
                 <div className="text-center border-b-2 border-black pb-3">
-                  <h1 className="text-xl font-bold uppercase text-black">{generatedStudio.schoolName}</h1>
-                  <h2 className="text-sm font-bold uppercase text-black">LABORATORY PRACTICAL EXAMINATION</h2>
-                  <div className="flex justify-between text-xs font-bold pt-2 border-t border-black mt-2">
-                    <span>CLASS: {generatedStudio.className}</span>
-                    <span>SUBJECT: {generatedStudio.subject}</span>
-                    <span>MAX. MARKS: {generatedStudio.maxMarks}</span>
-                    <span>TIME: 2.5 HOURS</span>
-                  </div>
+                  <p className="header-title text-xl font-bold uppercase text-black">{generatedStudio.schoolName}</p>
+                  <p className="header-sub text-sm font-bold uppercase text-black">LABORATORY PRACTICAL EXAMINATION</p>
+                  <table className="w-full border-t border-b border-black text-xs font-bold my-2">
+                    <tbody>
+                      <tr>
+                        <td className="text-left py-1">CLASS: {generatedStudio.className}</td>
+                        <td className="text-center py-1">SUBJECT: {generatedStudio.subject}</td>
+                        <td className="text-right py-1">TIME: 2.5 HOURS | MAX. MARKS: {generatedStudio.maxMarks}</td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
 
-                <table className="cbse-table-grid w-full border-collapse border border-black text-xs">
+                <table className="cbse-grid w-full border-collapse border border-black text-xs">
                   <thead>
                     <tr className="bg-gray-100 border-b border-black text-black">
                       <th className="border border-black p-2 w-16 text-center">Exp. No</th>
-                      <th className="border border-black p-2 text-left">Experiment Aim & Laboratory Guidelines</th>
+                      <th className="border border-black p-2 text-left">Experiment Aim & Guidelines</th>
                       <th className="border border-black p-2 w-20 text-center">Weightage</th>
                     </tr>
                   </thead>
                   <tbody>
                     {generatedStudio.experiments.map((exp) => (
-                      <tr key={exp.expNo} className="border-b border-black avoid-break-inside">
+                      <tr key={exp.expNo} className="border-b border-black no-split">
                         <td className="border border-black p-2 text-center font-bold">{exp.expNo}</td>
-                        <td className="border border-black p-2 text-justify space-y-1 font-sans">
+                        <td className="border border-black p-2 text-left space-y-1 font-sans">
                           <p className="font-bold text-black">{exp.title}</p>
-                          <p className="text-gray-800 text-[11px]"><strong className="text-black">Apparatus Required:</strong> {exp.apparatus}</p>
-                          <p className="text-gray-800 text-[11px]"><strong className="text-black">Working Protocol:</strong> {exp.principle}</p>
+                          <p className="text-gray-800 text-[11px]"><strong className="text-black">Apparatus:</strong> {exp.apparatus}</p>
+                          <p className="text-gray-800 text-[11px]"><strong className="text-black">Protocol:</strong> {exp.principle}</p>
                         </td>
                         <td className="border border-black p-2 text-center font-bold">[7 Marks]</td>
                       </tr>
@@ -292,16 +297,20 @@ export default function PracticalStudio({ onPracticalGenerated }) {
             {activeFileTab === 'viva' && (
               <div className="space-y-4">
                 <div className="text-center border-b-2 border-black pb-3">
-                  <h1 className="text-xl font-bold uppercase text-black">{generatedStudio.schoolName}</h1>
-                  <h2 className="text-sm font-bold uppercase text-black">VIVA-VOCE QUESTION BANK (EXAMINER COPY)</h2>
-                  <div className="flex justify-between text-xs font-bold pt-2 border-t border-black mt-2">
-                    <span>CLASS: {generatedStudio.className}</span>
-                    <span>SUBJECT: {generatedStudio.subject}</span>
-                    <span>MAX. VIVA MARKS: 5 MARKS</span>
-                  </div>
+                  <p className="header-title text-xl font-bold uppercase text-black">{generatedStudio.schoolName}</p>
+                  <p className="header-sub text-sm font-bold uppercase text-black">VIVA-VOCE QUESTION BANK (EXAMINER COPY)</p>
+                  <table className="w-full border-t border-b border-black text-xs font-bold my-2">
+                    <tbody>
+                      <tr>
+                        <td className="text-left py-1">CLASS: {generatedStudio.className}</td>
+                        <td className="text-center py-1">SUBJECT: {generatedStudio.subject}</td>
+                        <td className="text-right py-1">MAX. VIVA MARKS: 5 MARKS</td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
 
-                <table className="cbse-table-grid w-full border-collapse border border-black text-xs">
+                <table className="cbse-grid w-full border-collapse border border-black text-xs">
                   <thead>
                     <tr className="bg-gray-100 border-b border-black text-black">
                       <th className="border border-black p-2 w-16 text-center">Q.No</th>
@@ -311,9 +320,9 @@ export default function PracticalStudio({ onPracticalGenerated }) {
                   </thead>
                   <tbody>
                     {generatedStudio.vivaQuestions.map((v) => (
-                      <tr key={v.qNo} className="border-b border-black avoid-break-inside font-sans">
+                      <tr key={v.qNo} className="border-b border-black no-split font-sans">
                         <td className="border border-black p-2 text-center font-bold">{v.qNo}</td>
-                        <td className="border border-black p-2 text-justify font-medium text-black">{v.question}</td>
+                        <td className="border border-black p-2 text-left font-medium text-black">{v.question}</td>
                         <td className="border border-black p-2 text-center font-bold">[1 Mark]</td>
                       </tr>
                     ))}
@@ -325,13 +334,17 @@ export default function PracticalStudio({ onPracticalGenerated }) {
             {activeFileTab === 'project' && (
               <div className="space-y-4">
                 <div className="text-center border-b-2 border-black pb-3">
-                  <h1 className="text-xl font-bold uppercase text-black">{generatedStudio.schoolName}</h1>
-                  <h2 className="text-sm font-bold uppercase text-black">INVESTIGATIVE PROJECT FILE - FORMAT & INDEX</h2>
-                  <div className="flex justify-between text-xs font-bold pt-2 border-t border-black mt-2">
-                    <span>CLASS: {generatedStudio.className}</span>
-                    <span>SUBJECT: {generatedStudio.subject}</span>
-                    <span>PROJECT WEIGHTAGE: 8 MARKS</span>
-                  </div>
+                  <p className="header-title text-xl font-bold uppercase text-black">{generatedStudio.schoolName}</p>
+                  <p className="header-sub text-sm font-bold uppercase text-black">INVESTIGATIVE PROJECT FILE - FORMAT & INDEX</p>
+                  <table className="w-full border-t border-b border-black text-xs font-bold my-2">
+                    <tbody>
+                      <tr>
+                        <td className="text-left py-1">CLASS: {generatedStudio.className}</td>
+                        <td className="text-center py-1">SUBJECT: {generatedStudio.subject}</td>
+                        <td className="text-right py-1">PROJECT WEIGHTAGE: 8 MARKS</td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
 
                 <div className="border border-black p-4 space-y-3 text-xs leading-relaxed font-sans">
@@ -349,16 +362,20 @@ export default function PracticalStudio({ onPracticalGenerated }) {
             {activeFileTab === 'answers' && (
               <div className="space-y-4">
                 <div className="text-center border-b-2 border-black pb-3">
-                  <h1 className="text-xl font-bold uppercase text-black">{generatedStudio.schoolName}</h1>
-                  <h2 className="text-sm font-bold uppercase text-black">CONFIDENTIAL: VIVA-VOCE MODEL ANSWERS</h2>
-                  <div className="flex justify-between text-xs font-bold pt-2 border-t border-black mt-2">
-                    <span>CLASS: {generatedStudio.className}</span>
-                    <span>SUBJECT: {generatedStudio.subject}</span>
-                    <span>EXAMINER ONLY</span>
-                  </div>
+                  <p className="header-title text-xl font-bold uppercase text-black">{generatedStudio.schoolName}</p>
+                  <p className="header-sub text-sm font-bold uppercase text-black">CONFIDENTIAL: VIVA-VOCE MODEL ANSWERS</p>
+                  <table className="w-full border-t border-b border-black text-xs font-bold my-2">
+                    <tbody>
+                      <tr>
+                        <td className="text-left py-1">CLASS: {generatedStudio.className}</td>
+                        <td className="text-center py-1">SUBJECT: {generatedStudio.subject}</td>
+                        <td className="text-right py-1">EXAMINER ONLY</td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
 
-                <table className="cbse-table-grid w-full border-collapse border border-black text-xs">
+                <table className="cbse-grid w-full border-collapse border border-black text-xs">
                   <thead>
                     <tr className="bg-gray-100 border-b border-black text-black">
                       <th className="border border-black p-2 w-16 text-center">Q.No</th>
@@ -368,9 +385,9 @@ export default function PracticalStudio({ onPracticalGenerated }) {
                   </thead>
                   <tbody>
                     {generatedStudio.vivaQuestions.map((v) => (
-                      <tr key={v.qNo} className="border-b border-black avoid-break-inside font-sans">
+                      <tr key={v.qNo} className="border-b border-black no-split font-sans">
                         <td className="border border-black p-2 text-center font-bold">{v.qNo}</td>
-                        <td className="border border-black p-2">
+                        <td className="border border-black p-2 text-left">
                           <p className="font-bold text-black mb-1">{v.question}</p>
                           <pre className="font-sans text-black whitespace-pre-wrap">{v.modelAnswer}</pre>
                         </td>
