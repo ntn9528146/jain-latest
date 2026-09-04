@@ -1,1 +1,7 @@
 node_modules
+
+# Secret keys and credentials
+.env
+.env.local
+API key.txt
+*.txt

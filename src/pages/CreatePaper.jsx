@@ -7,21 +7,20 @@ import PracticalStudio from '../components/paper/PracticalStudio.jsx';
 import PaperViewer from '../components/paper/PaperViewer.jsx';
 import ProfileModal from '../components/profile/ProfileModal.jsx';
 import { getFacultyPaperStats, incrementPaperCount } from '../services/paperStatsService.js';
-import { buildComprehensiveCbsePaper } from '../services/paperGeneratorEngine.js';
+import { executePaperPipeline } from '../services/geminiPipelineService.js';
 import { getSyllabusDataForClass } from '../config/syllabus/index.js';
 
 export default function CreatePaper({ faculty, onLogout }) {
-  const [activeMode, setActiveMode] = useState('cbse'); // cbse | manual | bulk | practical
+  const [activeMode, setActiveMode] = useState('cbse');
   const [stats, setStats] = useState({ totalTheoryPapers: 0, totalPracticalPapers: 0, bySubject: {} });
   const [showProfile, setShowProfile] = useState(false);
   const [userProfile, setUserProfile] = useState(faculty || {});
   const [loading, setLoading] = useState(false);
+  const [pipelineStatus, setPipelineStatus] = useState('');
   const [compiledPaper, setCompiledPaper] = useState(null);
 
   const loadStats = () => {
-    if (faculty) {
-      setStats(getFacultyPaperStats(faculty.id || faculty.email));
-    }
+    if (faculty) setStats(getFacultyPaperStats(faculty.id || faculty.email));
   };
 
   useEffect(() => {
@@ -29,15 +28,25 @@ export default function CreatePaper({ faculty, onLogout }) {
     if (faculty) setUserProfile(faculty);
   }, [faculty]);
 
-  const handleGeneratePaper = (config) => {
+  const handleGeneratePaper = async (config) => {
     setLoading(true);
-    setTimeout(() => {
-      const result = buildComprehensiveCbsePaper(config);
-      incrementPaperCount(faculty?.id || faculty?.email, config.selectedSubject || 'Academic Subject', false);
+    setPipelineStatus('Stage 1/4: Initializing Pipeline...');
+
+    try {
+      const result = await executePaperPipeline({
+        ...config,
+        onProgress: (p) => setPipelineStatus(p.text)
+      });
+
+      incrementPaperCount(faculty?.id || faculty?.email, config.selectedSubject || 'Subject', false);
       loadStats();
       setCompiledPaper(result);
+    } catch (err) {
+      alert("Error compiling paper: " + err.message);
+    } finally {
       setLoading(false);
-    }, 500);
+      setPipelineStatus('');
+    }
   };
 
   const defaultSyllabus = getSyllabusDataForClass('Class 12');
@@ -85,7 +94,7 @@ export default function CreatePaper({ faculty, onLogout }) {
         </div>
       </header>
 
-      {/* Creation Mode Navigation */}
+      {/* Mode Navigation */}
       <div className="bg-slate-900/60 border-b border-slate-800 px-6 py-2.5">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3 text-xs">
           <span className="text-slate-400 font-semibold uppercase tracking-wider text-[11px]">Academic Studios:</span>
@@ -123,6 +132,16 @@ export default function CreatePaper({ faculty, onLogout }) {
       </div>
 
       <main className="flex-1 p-6 max-w-7xl w-full mx-auto space-y-6">
+        {loading && (
+          <div className="p-4 rounded-2xl bg-indigo-950/40 border border-indigo-500/30 flex items-center justify-between text-xs text-indigo-300">
+            <div className="flex items-center gap-3">
+              <div className="h-4 w-4 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin"></div>
+              <span className="font-semibold">{pipelineStatus}</span>
+            </div>
+            <span className="font-mono text-[10px] text-indigo-400">Triple-Key Auto Failover Active</span>
+          </div>
+        )}
+
         {compiledPaper && (
           <PaperViewer paperData={compiledPaper} onClose={() => setCompiledPaper(null)} />
         )}

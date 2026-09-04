@@ -2,13 +2,12 @@ import React, { useState } from 'react';
 import { exportToPrint, exportToDocx, exportToSlides } from '../../services/exportService.js';
 
 export default function PaperViewer({ paperData, onClose }) {
-  const [activeTab, setActiveTab] = useState('paper'); // paper | answerKey | blueprint
+  const [activeTab, setActiveTab] = useState('paper');
 
   if (!paperData) return null;
 
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl space-y-4">
-      {/* Top Controls */}
       <div className="bg-slate-950 px-6 py-3 border-b border-slate-800 flex flex-wrap justify-between items-center gap-3">
         <div className="flex bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs font-semibold">
           <button
@@ -50,7 +49,6 @@ export default function PaperViewer({ paperData, onClose }) {
       </div>
 
       <div className="p-6 max-w-4xl mx-auto">
-        {/* A4 Paper View */}
         {activeTab === 'paper' && (
           <div className="bg-white text-slate-900 p-8 sm:p-12 rounded-xl shadow-xl font-serif text-sm leading-relaxed space-y-6">
             <div className="text-center border-b-2 border-slate-900 pb-4 space-y-1">
@@ -107,7 +105,6 @@ export default function PaperViewer({ paperData, onClose }) {
           </div>
         )}
 
-        {/* Model Answers & Marking Scheme */}
         {activeTab === 'answerKey' && (
           <div className="bg-slate-950 p-6 rounded-xl border border-slate-800 space-y-4 text-xs">
             <div className="flex justify-between items-center border-b border-slate-800 pb-3">
@@ -133,7 +130,6 @@ export default function PaperViewer({ paperData, onClose }) {
           </div>
         )}
 
-        {/* Topic-Wise Blueprint Breakdown Matrix */}
         {activeTab === 'blueprint' && (
           <div className="bg-slate-950 p-6 rounded-xl border border-slate-800 space-y-4 text-xs">
             <div>

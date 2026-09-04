@@ -4,6 +4,39 @@ export const primarySyllabus = {
   defaultInternalMarks: 20,
   classes: ['Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5'],
   subjects: {
+    'Mathematics': {
+      units: [
+        {
+          id: 'pri_math_1',
+          name: 'Numbers & Arithmetic Operations',
+          subtopics: ['Numbers up to 5-digits, Place/Face Value', 'Addition & Subtraction with carrying', 'Multiplication Tables & Long Division']
+        },
+        {
+          id: 'pri_math_2',
+          name: 'Fractions, Decimals & Measurement',
+          subtopics: ['Introduction to Fractions & Decimals', 'Units of Length, Weight and Capacity', 'Indian Currency & Money Word Problems']
+        },
+        {
+          id: 'pri_math_3',
+          name: 'Geometry, Time & Data Handling',
+          subtopics: ['Perimeter and Area of 2D shapes', 'Clock Reading, Elapsed Time & Calendar', 'Pictographs and Simple Bar Graphs']
+        }
+      ]
+    },
+    'Environmental Studies (EVS) / Science': {
+      units: [
+        {
+          id: 'pri_evs_1',
+          name: 'Living Organisms & Nature',
+          subtopics: ['Parts of a Plant & Photosynthesis basics', 'Animal Classification, Habitats & Food Chain', 'Human Organ Systems (Digestive, Respiratory)']
+        },
+        {
+          id: 'pri_evs_2',
+          name: 'Our Surroundings, Matter & Resources',
+          subtopics: ['Water Cycle & Water Conservation', 'Light, Shadow, Force and Energy basics', 'Community Helpers, Local Governance & Safety Rules']
+        }
+      ]
+    },
     'English Language & Literature': {
       units: [
         {
@@ -32,39 +65,6 @@ export const primarySyllabus = {
         }
       ]
     },
-    'Mathematics': {
-      units: [
-        {
-          id: 'pri_math_1',
-          name: 'Number System & Basic Operations',
-          subtopics: ['Numbers up to 5-digits, Place/Face Value', 'Addition & Subtraction with carrying', 'Multiplication Tables & Long Division']
-        },
-        {
-          id: 'pri_math_2',
-          name: 'Fractions, Decimals & Measurement',
-          subtopics: ['Introduction to Fractions & Decimals', 'Units of Length, Weight and Capacity', 'Indian Currency & Money Word Problems']
-        },
-        {
-          id: 'pri_math_3',
-          name: 'Geometry, Time & Data Handling',
-          subtopics: ['Perimeter and Area of 2D shapes', 'Clock Reading, Elapsed Time & Calendar', 'Pictographs and Simple Bar Graphs']
-        }
-      ]
-    },
-    'Environmental Studies (EVS) / General Science': {
-      units: [
-        {
-          id: 'pri_evs_1',
-          name: 'Living Organisms & Human Body',
-          subtopics: ['Parts of a Plant & Photosynthesis basics', 'Animal Classification, Habitats & Food Chain', 'Human Organ Systems (Digestive, Respiratory)']
-        },
-        {
-          id: 'pri_evs_2',
-          name: 'Our Surroundings, Matter & Resources',
-          subtopics: ['Water Cycle & Water Conservation', 'Light, Shadow, Force and Energy basics', 'Community Helpers, Local Governance & Safety Rules']
-        }
-      ]
-    },
     'Social Science (Classes 3-5)': {
       units: [
         {
@@ -74,21 +74,12 @@ export const primarySyllabus = {
         }
       ]
     },
-    'Computer Science & IT Fundamentals': {
+    'Computer Science Fundamentals': {
       units: [
         {
           id: 'pri_cs_1',
-          name: 'Computer Hardware & Creative Tools',
+          name: 'Hardware & Creative Tools',
           subtopics: ['Input, Output and Storage Devices', 'Operating System Basics & Desktop Navigation', 'Drawing in Paint, Typing & Word Processing in MS Word']
-        }
-      ]
-    },
-    'Third Language (Sanskrit / French / Regional)': {
-      units: [
-        {
-          id: 'pri_l3_1',
-          name: 'Basic Vocabulary & Alphabet',
-          subtopics: ['Alphabet and Phonetics', 'Greetings, Numbers 1 to 20, Family terms', 'Simple sentence framing']
         }
       ]
     }
