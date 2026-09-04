@@ -8,9 +8,8 @@ import PaperViewer from '../components/paper/PaperViewer.jsx';
 import ProfileModal from '../components/profile/ProfileModal.jsx';
 import { getFacultyPaperStats, incrementPaperCount } from '../services/paperStatsService.js';
 import { executePaperPipeline } from '../services/geminiPipelineService.js';
-import { getSyllabusDataForClass } from '../config/syllabus/index.js';
 
-export default function CreatePaper({ faculty, onLogout }) {
+const CreatePaper = ({ faculty, onLogout }) => {
   const [activeMode, setActiveMode] = useState('cbse');
   const [stats, setStats] = useState({ totalTheoryPapers: 0, totalPracticalPapers: 0, bySubject: {} });
   const [showProfile, setShowProfile] = useState(false);
@@ -48,8 +47,6 @@ export default function CreatePaper({ faculty, onLogout }) {
       setPipelineStatus('');
     }
   };
-
-  const defaultSyllabus = getSyllabusDataForClass('Class 12');
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
@@ -94,7 +91,6 @@ export default function CreatePaper({ faculty, onLogout }) {
         </div>
       </header>
 
-      {/* Mode Navigation */}
       <div className="bg-slate-900/60 border-b border-slate-800 px-6 py-2.5">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3 text-xs">
           <span className="text-slate-400 font-semibold uppercase tracking-wider text-[11px]">Academic Studios:</span>
@@ -138,7 +134,7 @@ export default function CreatePaper({ faculty, onLogout }) {
               <div className="h-4 w-4 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin"></div>
               <span className="font-semibold">{pipelineStatus}</span>
             </div>
-            <span className="font-mono text-[10px] text-indigo-400">Triple-Key Auto Failover Active</span>
+            <span className="font-mono text-[10px] text-indigo-400">Multi-Stage Zero Error Execution</span>
           </div>
         )}
 
@@ -152,9 +148,6 @@ export default function CreatePaper({ faculty, onLogout }) {
 
         {!compiledPaper && activeMode === 'practical' && (
           <PracticalStudio
-            selectedClass="Class 12"
-            selectedSubject="Computer Science (Code 083)"
-            units={defaultSyllabus?.subjects['Computer Science (Code 083)']?.units || []}
             onPracticalGenerated={(sub) => {
               incrementPaperCount(faculty?.id || faculty?.email, sub, true);
               loadStats();
@@ -186,4 +179,6 @@ export default function CreatePaper({ faculty, onLogout }) {
       )}
     </div>
   );
-}
+};
+
+export default CreatePaper;

@@ -1,57 +1,74 @@
 import React, { useState } from 'react';
 import Button from '../common/Button.jsx';
 import { exportToDocx } from '../../services/exportService.js';
+import { getSyllabusDataForClass, ALL_CLASSES } from '../../config/syllabus/index.js';
 
-export default function PracticalStudio({ selectedClass, selectedSubject, units = [], onPracticalGenerated }) {
+const PracticalStudio = ({ onPracticalGenerated }) => {
+  const [selectedClass, setSelectedClass] = useState('Class 12');
+  const syllabusBundle = getSyllabusDataForClass(selectedClass);
+  const availableSubjects = syllabusBundle ? Object.keys(syllabusBundle.subjects) : [];
+  const [selectedSubject, setSelectedSubject] = useState(availableSubjects[0] || 'Physics (Code 042)');
+
   const [activeSubTab, setActiveSubTab] = useState('auto');
   const [manualTopic, setManualTopic] = useState('');
   const [experimentCount, setExperimentCount] = useState(2);
   const [vivaCount, setVivaCount] = useState(5);
   const [generatedStudio, setGeneratedStudio] = useState(null);
 
+  const handleClassChange = (newClass) => {
+    setSelectedClass(newClass);
+    const nextBundle = getSyllabusDataForClass(newClass);
+    const subjects = nextBundle ? Object.keys(nextBundle.subjects) : [];
+    setSelectedSubject(subjects[0] || '');
+  };
+
+  const currentUnits = syllabusBundle?.subjects[selectedSubject]?.units || [];
+
   const handleGeneratePractical = () => {
     const topicsPool = activeSubTab === 'manual' && manualTopic.trim()
       ? manualTopic.split('\n').filter((t) => t.trim())
-      : units.flatMap((u) => u.subtopics || [u.name]);
+      : currentUnits.flatMap((u) => u.subtopics || [u.name]);
+
+    const fallbackTopic = selectedSubject || 'Core Laboratory Skill';
 
     const experiments = [];
     for (let i = 0; i < experimentCount; i++) {
-      const topic = topicsPool[i % topicsPool.length] || selectedSubject;
+      const topic = (topicsPool.length > 0) ? topicsPool[i % topicsPool.length] : fallbackTopic;
       experiments.push({
         expNo: i + 1,
         title: `To investigate, demonstrate and document the practical implementation of ${topic}.`,
-        apparatus: 'Standard Laboratory Workstation / Apparatus / Hardware Components',
-        theory: `Based on standard CBSE experimental guidelines for ${selectedSubject}.`,
+        apparatus: 'Standard Laboratory Workstation / Apparatus / Hardware Setup',
+        theory: `Based on official CBSE practical curriculum guidelines for ${selectedSubject}.`,
         steps: [
-          'Set up apparatus / environment following standard laboratory safeguards.',
-          'Take experimental readings / write execution test cases across minimum 3 iterations.',
-          'Calculate deviations, identify errors and plot relevant graph/tables.',
-          'State experimental conclusion and precaution.'
+          'Set up apparatus / workstation following laboratory safety protocols.',
+          'Record experimental readings or execute test scenarios across minimum 3 trials.',
+          'Calculate errors / deviations, plot graphs or compile result tables.',
+          'State conclusions, practical inferences, and precautionary measures.'
         ],
-        marking: 'Aim & Apparatus (1M) + Procedure (2M) + Observation/Execution (3M) + Result (1M) = 7 Marks'
+        marking: 'Aim & Apparatus (1M) + Principle & Procedure (2M) + Observation/Tabulation (3M) + Result (1M) = 7 Marks'
       });
     }
 
     const vivaQuestions = [];
     for (let i = 0; i < vivaCount; i++) {
-      const topic = topicsPool[(i + 2) % topicsPool.length] || selectedSubject;
+      const topic = (topicsPool.length > 0) ? topicsPool[(i + 1) % topicsPool.length] : fallbackTopic;
       vivaQuestions.push({
         qNo: i + 1,
-        question: `What is the significance and underlying scientific/technical principle of ${topic}?`,
-        expectedAnswer: `Expected Answer: The candidate must state the governing formula/law of ${topic}, identify potential sources of experimental error, and justify data precision.`
+        question: `What is the core working principle and significance of ${topic} during experimental analysis?`,
+        expectedAnswer: `Expected Answer: The candidate must explain the fundamental governing laws of ${topic}, state potential sources of experimental inaccuracies, and justify precision.`
       });
     }
 
     const projectFileGuideline = {
-      projectTitle: `Investigative Academic Project: Comprehensive Study of ${topicsPool[0] || selectedSubject}`,
+      projectTitle: `Comprehensive Investigative Academic Project: ${topicsPool[0] || fallbackTopic}`,
       sections: [
         '1. Certificate of Authenticity & Student Declaration',
         '2. Acknowledgement & Dedication',
-        '3. Objective and Scope of the Investigation',
-        '4. Theoretical Framework & CBSE Alignment',
-        '5. Experimental / Coding / Field Data Collection',
-        '6. Observations, Charts, Source Code & Data Tables',
-        '7. Conclusions, Bibliography & Web References'
+        '3. Aim, Objectives and Scope of the Investigation',
+        '4. Theoretical Framework & CBSE Syllabus Alignment',
+        '5. Experimental / Data Collection / Implementation Records',
+        '6. Observations, Charts, Code Blocks & Statistical Tables',
+        '7. Learning Outcomes, Bibliography & References'
       ]
     };
 
@@ -77,22 +94,24 @@ export default function PracticalStudio({ selectedClass, selectedSubject, units 
           <h3 className="text-sm font-bold text-white flex items-center gap-2">
             🧪 Practical Exam, Viva Voce & Project File Studio
             <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-              CBSE Assessment
+              Dynamic CBSE Selector
             </span>
           </h3>
           <p className="text-slate-400 mt-0.5">
-            Compile and print laboratory experiments, viva voce banks with model answers, and project file formats.
+            Select any class and subject to compile laboratory experiments, viva sheets, and project files.
           </p>
         </div>
 
         <div className="flex bg-slate-950 p-1 rounded-xl border border-slate-800 text-[11px]">
           <button
+            type="button"
             onClick={() => setActiveSubTab('auto')}
             className={`px-3 py-1 rounded-lg font-semibold ${activeSubTab === 'auto' ? 'bg-indigo-600 text-white' : 'text-slate-400'}`}
           >
             Auto from CBSE Syllabus
           </button>
           <button
+            type="button"
             onClick={() => setActiveSubTab('manual')}
             className={`px-3 py-1 rounded-lg font-semibold ${activeSubTab === 'manual' ? 'bg-indigo-600 text-white' : 'text-slate-400'}`}
           >
@@ -110,39 +129,59 @@ export default function PracticalStudio({ selectedClass, selectedSubject, units 
             rows="3"
             value={manualTopic}
             onChange={(e) => setManualTopic(e.target.value)}
-            placeholder="e.g. Logic Gate Simulation with IC 7404&#10;Python MySQL School Library Management System&#10;Titration of Oxalic Acid vs KMnO4..."
+            placeholder="e.g. Verification of Ohm's Law&#10;Study of Logic Gates&#10;Analysis of Fertilizer Samples..."
             className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white font-mono text-[11px]"
           />
         </div>
       )}
 
-      <div className="no-print grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-950 p-4 rounded-xl border border-slate-800">
+      {/* Class & Subject Dropdowns */}
+      <div className="no-print grid grid-cols-1 sm:grid-cols-4 gap-3 bg-slate-950 p-4 rounded-xl border border-slate-800">
         <div>
-          <span className="text-slate-400 text-[10px] uppercase block">Selected Class</span>
-          <span className="font-bold text-white">{selectedClass}</span>
+          <label className="text-slate-400 text-[10px] uppercase block mb-1 font-bold">Select Class</label>
+          <select
+            value={selectedClass}
+            onChange={(e) => handleClassChange(e.target.value)}
+            className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5 text-white font-bold"
+          >
+            {ALL_CLASSES.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
         </div>
+
         <div>
-          <span className="text-slate-400 text-[10px] uppercase block">Selected Subject</span>
-          <span className="font-bold text-indigo-300">{selectedSubject}</span>
+          <label className="text-slate-400 text-[10px] uppercase block mb-1 font-bold">Select Subject</label>
+          <select
+            value={selectedSubject}
+            onChange={(e) => setSelectedSubject(e.target.value)}
+            className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5 text-indigo-300 font-bold"
+          >
+            {availableSubjects.map((sub) => (
+              <option key={sub} value={sub}>{sub}</option>
+            ))}
+          </select>
         </div>
+
         <div>
-          <span className="text-slate-400 text-[10px] uppercase block">Lab Experiments</span>
+          <label className="text-slate-400 text-[10px] uppercase block mb-1 font-bold">Lab Experiments</label>
           <select
             value={experimentCount}
             onChange={(e) => setExperimentCount(Number(e.target.value))}
-            className="bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-white font-bold"
+            className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5 text-white font-bold"
           >
             <option value={1}>1 Experiment</option>
             <option value={2}>2 Experiments</option>
             <option value={3}>3 Experiments</option>
           </select>
         </div>
+
         <div>
-          <span className="text-slate-400 text-[10px] uppercase block">Viva Questions</span>
+          <label className="text-slate-400 text-[10px] uppercase block mb-1 font-bold">Viva Questions</label>
           <select
             value={vivaCount}
             onChange={(e) => setVivaCount(Number(e.target.value))}
-            className="bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-white font-bold"
+            className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5 text-white font-bold"
           >
             <option value={3}>3 Viva Questions</option>
             <option value={5}>5 Viva Questions</option>
@@ -157,19 +196,22 @@ export default function PracticalStudio({ selectedClass, selectedSubject, units 
         </Button>
       </div>
 
-      {/* Generated Practical Deck Display & Printable View */}
       {generatedStudio && (
         <div className="space-y-4 pt-4 border-t border-slate-800">
           <div className="no-print flex justify-between items-center">
-            <span className="text-sm font-bold text-emerald-400">Generated Practical Assessment Deck</span>
+            <span className="text-sm font-bold text-emerald-400">
+              Generated Practical Deck ({generatedStudio.subject} - {generatedStudio.className})
+            </span>
             <div className="flex gap-2">
               <button
+                type="button"
                 onClick={() => window.print()}
                 className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs shadow-lg shadow-indigo-600/30"
               >
                 🖨️ Print Practical & Viva Deck (A4)
               </button>
               <button
+                type="button"
                 onClick={() => exportToDocx({ paperHeader: { schoolName: generatedStudio.schoolName, examName: generatedStudio.title, subjectName: generatedStudio.subject, className: generatedStudio.className, maxMarks: 30, timeAllowed: '2 Hours' } })}
                 className="bg-slate-800 text-slate-200 border border-slate-700 font-bold px-3 py-1.5 rounded-xl text-xs"
               >
@@ -178,7 +220,7 @@ export default function PracticalStudio({ selectedClass, selectedSubject, units 
             </div>
           </div>
 
-          <div className="printable-document bg-white text-slate-900 p-8 sm:p-12 rounded-xl shadow-xl space-y-6">
+          <div className="printable-document bg-white text-slate-900 p-8 sm:p-12 rounded-xl shadow-xl space-y-6 font-sans">
             <div className="text-center border-b-2 border-slate-900 pb-3">
               <h2 className="text-xl font-black uppercase">{generatedStudio.schoolName}</h2>
               <h3 className="text-sm font-bold uppercase">{generatedStudio.title}</h3>
@@ -190,7 +232,6 @@ export default function PracticalStudio({ selectedClass, selectedSubject, units 
               </div>
             </div>
 
-            {/* Part 1: Experiments */}
             <div className="space-y-3">
               <h4 className="font-bold border-b border-slate-300 pb-1 uppercase tracking-wider text-xs">
                 Part A: Laboratory Practical Experiments
@@ -204,7 +245,6 @@ export default function PracticalStudio({ selectedClass, selectedSubject, units 
               ))}
             </div>
 
-            {/* Part 2: Viva Voce */}
             <div className="space-y-3 pt-2 page-break-before">
               <h4 className="font-bold border-b border-slate-300 pb-1 uppercase tracking-wider text-xs">
                 Part B: Viva-Voce Question Bank with Expected Answers
@@ -219,7 +259,6 @@ export default function PracticalStudio({ selectedClass, selectedSubject, units 
               </div>
             </div>
 
-            {/* Part 3: Project Guidelines */}
             <div className="space-y-2 pt-2 avoid-break-inside">
               <h4 className="font-bold border-b border-slate-300 pb-1 uppercase tracking-wider text-xs">
                 Part C: Project File Structure & Guidelines
@@ -238,4 +277,6 @@ export default function PracticalStudio({ selectedClass, selectedSubject, units 
       )}
     </div>
   );
-}
+};
+
+export default PracticalStudio;
