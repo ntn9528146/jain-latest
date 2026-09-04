@@ -7,7 +7,8 @@ import PracticalStudio from '../components/paper/PracticalStudio.jsx';
 import PaperViewer from '../components/paper/PaperViewer.jsx';
 import ProfileModal from '../components/profile/ProfileModal.jsx';
 import { getFacultyPaperStats, incrementPaperCount } from '../services/paperStatsService.js';
-import { executePaperPipeline } from '../services/geminiPipelineService.js';
+import { executePaperPipeline } from '../services/geminiPipelineService.js'; 
+import { resolveSubjectRegistry } from "../config/cbseSubjectMatrices.js";
 
 const CreatePaper = ({ faculty, onLogout }) => {
   const [activeMode, setActiveMode] = useState('cbse');
