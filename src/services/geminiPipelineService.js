@@ -1,5 +1,6 @@
 import { getActiveGeminiKey, reportKeyFailure } from '../config/geminiKeyVault.js';
 import { resolveSubjectRegistry } from '../config/cbseSubjectMatrices.js';
+import { generateQuestionSvg } from './diagramEngine.js';
 
 export function getOfficialCbseMatrix(subject = '', selectedClass = '', targetMarks = null) {
   const profile = resolveSubjectRegistry(subject, selectedClass);
@@ -17,17 +18,11 @@ function cleanAndRepairJson(raw) {
     .replace(/^```/gim, '')
     .trim();
 
-  // 1. Direct try
   try {
     return JSON.parse(text);
   } catch (e1) {
-    // 2. Fix unescaped newlines inside strings
     let sanitized = text.replace(/([":]\s*"[^"\\]*(\\[\s\S][^"\\]*)*)\n/g, '$1\\n');
-    
-    // 3. Fix unquoted keys or trailing commas before closing braces
     sanitized = sanitized.replace(/,\s*([}\]])/g, '$1');
-
-    // 4. Fix missing quotes around answerKey/questionText
     sanitized = sanitized.replace(/"(answerKey|questionText|topicName)"\s*:\s*([^"{\[\d\n][^\n,}]*)/g, (match, k, v) => {
       return `"${k}": "${v.trim().replace(/"/g, '\\"')}"`;
     });
@@ -35,21 +30,19 @@ function cleanAndRepairJson(raw) {
     try {
       return JSON.parse(sanitized);
     } catch (e2) {
-      // 5. Extract JSON object substring if model added commentary text
       const firstBrace = text.indexOf('{');
       const lastBrace = text.lastIndexOf('}');
       if (firstBrace !== -1 && lastBrace !== -1) {
-        const sliced = text.substring(firstBrace, lastBrace + 1).replace(/,\s*([}\]])/g, '$1');
-        return JSON.parse(sliced);
+        return JSON.parse(text.substring(firstBrace, lastBrace + 1).replace(/,\s*([}\]])/g, '$1'));
       }
-      throw new Error(`JSON Compilation Failed: ${e1.message}`);
+      throw new Error(`JSON Structure Parsing Failed: ${e1.message}`);
     }
   }
 }
 
-export const executePaperPipeline = async (options = {}) => {
+export async function executePaperPipeline(options = {}) {
   const selectedClass = String(options.selectedClass || options.className || 'Class 12');
-  const rawSub = String(options.subject || options.selectedSubject || 'Accountancy');
+  const rawSub = String(options.subject || options.selectedSubject || 'Hindi');
   const subject = rawSub.replace(/\s*\([^)]*\)/g, '').trim();
   const examType = String(options.examType || options.examName || 'Pre-Board Examination').replace(/\(\s*\d+%\s*SYLLABUS\s*\)/gi, '').trim();
   const isPYQ = Boolean(options.isPYQ || options.includePYQ || examType.toLowerCase().includes('pyq'));
@@ -64,14 +57,14 @@ export const executePaperPipeline = async (options = {}) => {
   const finalMarks = options.theoryMarks || options.maxMarks || profile.marks;
   const totalExpectedQuestions = activeSections.reduce((acc, curr) => acc + Number(curr.count || 0), 0);
 
-  onProgress({ stage: 1, text: `CBSE Pattern Locked: Exact ${totalExpectedQuestions} Qs | ${finalMarks} Marks` });
+  onProgress({ stage: 1, text: `CBSE Official Pattern Locked: Exactly ${totalExpectedQuestions} Questions (${finalMarks} Marks)` });
 
   let apiKey = getActiveGeminiKey();
   if (!apiKey) {
     apiKey = localStorage.getItem('gemini_api_key') || localStorage.getItem('VITE_GEMINI_API_KEY');
   }
   if (!apiKey) {
-    throw new Error('Gemini API Key missing! Please configure key in .env or settings');
+    throw new Error('Gemini API Key missing! Please configure key.');
   }
 
   const activeUnits = Array.isArray(options.activeUnits) ? options.activeUnits : [];
@@ -80,32 +73,33 @@ export const executePaperPipeline = async (options = {}) => {
     : `${subject} CBSE Class ${selectedClass} Official Curriculum`;
 
   const secPrompt = activeSections.map((s, idx) => 
-    `Section ${String.fromCharCode(65 + idx)}: Exactly ${s.count} Qs of ${s.marks} Marks each (${s.label})`
+    `Section ${String.fromCharCode(65 + idx)}: Exactly ${s.count} Qs (${s.label})`
   ).join('\n');
 
-  const prompt = `You are a Senior CBSE Chief Board Examiner for ${subject} (${selectedClass}).
-OFFICIAL INSTRUCTIONS:
-${profile.instructions.join('\n')}
-
-MANDATORY RULES:
-1. QUESTION COUNT: Total questions must be EXACTLY ${totalExpectedQuestions}, numbered 1 to ${totalExpectedQuestions}.
+  const prompt = `You are a Senior CBSE Chief Board Paper Setter for ${subject} (${selectedClass}).
+MANDATORY BOARD REQUIREMENTS:
+1. TOTAL QUESTION COUNT: Must be EXACTLY ${totalExpectedQuestions}. Questions numbered continuously from 1 to ${totalExpectedQuestions}.
 2. BLUEPRINT:
 ${secPrompt}
-3. MARKS SUM: Exactly ${finalMarks}.
-4. NO INTERNAL CODES: Do not print subject code in question stem.
-5. ${isPYQ ? 'Append tags like [CBSE 2023].' : 'No fake year tags.'}
-6. ${isHindi ? 'Strictly in pure Devnagari Hindi (मङ्गल font).' : 'Strictly in CBSE Board English.'}
-7. MARKING SCHEME: Provide exact step-wise marking points in answerKey for every question.
-8. RETURN ONLY VALID RFC8259 JSON. No markdown backticks.
+3. TOTAL MARKS: Must tally to exactly ${finalMarks}.
+4. LANGUAGE SPECIFICATION:
+${isHindi 
+  ? 'STRICTLY WRITE IN PURE DEVNAGARI HINDI (मङ्गल Font Style). All questions, passages, and marking schemes must be authentic Hindi.' 
+  : 'Write in high academic CBSE standard English.'}
+5. DETAILED MARKING SCHEME:
+   - For every question, write an EXHAUSTIVE, step-by-step textbook answer in answerKey.
+   - For numericals: Formula, substitution, calculation, and final unit.
+   - For diagrams/charts: Clearly label parts and explain graph axes.
+6. NO DUMMY DATA: All questions must be dynamically generated from topics: ${syllabusTopics}.
+7. Return ONLY valid RFC8259 JSON without markdown fences.
 
 School: ARDEN PROGRESSIVE SCHOOL
 Exam: ${examType}
 Class: ${selectedClass}
 Subject: ${subject}
 Max Marks: ${finalMarks}
-Topics: ${syllabusTopics}
 
-JSON Format:
+JSON Schema:
 {
   "paperHeader": {
     "schoolName": "ARDEN PROGRESSIVE SCHOOL",
@@ -124,9 +118,9 @@ JSON Format:
         {
           "qNo": 1,
           "marks": 1,
-          "topicName": "Topic Name",
-          "questionText": "Question stem\\n(A) Option 1\\n(B) Option 2\\n(C) Option 3\\n(D) Option 4",
-          "answerKey": "(A) Correct Option [1 Mark]"
+          "topicName": "Topic",
+          "questionText": "Question statement",
+          "answerKey": "Step-by-step exhaustive explanation"
         }
       ]
     }
@@ -136,7 +130,7 @@ JSON Format:
   ]
 }`;
 
-  onProgress({ stage: 3, text: `Gemini 3.6 Flash generating official ${totalExpectedQuestions}-question paper...` });
+  onProgress({ stage: 3, text: `Gemini 3.6 Flash generating ${totalExpectedQuestions} questions live from Google AI...` });
 
   const targetUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`;
 
@@ -162,8 +156,21 @@ JSON Format:
   const rawText = resData.candidates?.[0]?.content?.parts?.[0]?.text || '';
   const paperJson = cleanAndRepairJson(rawText);
 
+  // Vector SVG Diagrams Integration
+  if (Array.isArray(paperJson.sections)) {
+    paperJson.sections.forEach(sec => {
+      if (Array.isArray(sec.questions)) {
+        sec.questions.forEach(q => {
+          const combined = `${q.questionText} ${q.answerKey} ${q.topicName}`;
+          const svg = generateQuestionSvg(combined, q.topicName);
+          if (svg) q.diagramSvg = svg;
+        });
+      }
+    });
+  }
+
   onProgress({ stage: 4, text: `CBSE Paper Ready (${totalExpectedQuestions} Questions Verified)` });
   return paperJson;
-};
+}
 
 export default executePaperPipeline;

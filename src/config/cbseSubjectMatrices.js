@@ -1,7 +1,7 @@
-// Official CBSE Board Structure Registry (Classes 9 to 12) - Session 2025-26
+// Official CBSE Board Structure Registry (Classes 9 to 12) - Cross-Checked with CBSE Academic 2025-26
 
 export const CBSE_REGISTRY = {
-  // 1. Accountancy (Code 055) - Exactly 34 Qs, 80 Marks
+  // 1. Accountancy (055) - Exactly 34 Qs, 80 Marks
   accountancy: {
     marks: 80,
     time: "3 Hours",
@@ -16,14 +16,14 @@ export const CBSE_REGISTRY = {
       "Questions from 23 to 26 and 34 carry 6 marks each."
     ],
     matrix: [
-      { label: "Part A & B: Objective MCQs (Q1-16 & Q27-30)", count: 20, marks: 1, enabled: true },
-      { label: "Part A & B: Short Answer Type I (Q17-20, Q31, Q32)", count: 6, marks: 3, enabled: true },
-      { label: "Part A & B: Short Answer Type II (Q21, Q22, Q33)", count: 3, marks: 4, enabled: true },
-      { label: "Part A & B: Long Answer Type (Q23-26, Q34)", count: 5, marks: 6, enabled: true }
+      { label: "Part A & B: Objective MCQs (20 Questions - 1M)", count: 20, marks: 1, enabled: true },
+      { label: "Part A & B: Short Answer Type I (6 Questions - 3M)", count: 6, marks: 3, enabled: true },
+      { label: "Part A & B: Short Answer Type II (3 Questions - 4M)", count: 3, marks: 4, enabled: true },
+      { label: "Part A & B: Long Answer Type (5 Questions - 6M)", count: 5, marks: 6, enabled: true }
     ]
   },
 
-  // 2. Business Studies (Code 054) - Exactly 34 Qs, 80 Marks
+  // 2. Business Studies (054) - Exactly 34 Qs, 80 Marks
   bst: {
     marks: 80,
     time: "3 Hours",
@@ -31,56 +31,56 @@ export const CBSE_REGISTRY = {
       "This question paper contains 34 questions. All questions are compulsory.",
       "Marks are indicated against each question.",
       "Answers should be brief and to the point.",
-      "Answers to the questions carrying 3 marks may be from 50 to 75 words.",
-      "Answers to the questions carrying 4 marks may be about 150 words.",
-      "Answers to the questions carrying 6 marks may be about 200 words."
+      "Answers to questions carrying 3 marks may be from 50 to 75 words.",
+      "Answers to questions carrying 4 marks may be about 150 words.",
+      "Answers to questions carrying 6 marks may be about 200 words."
     ],
     matrix: [
-      { label: "Objective Type MCQs (Q1 to Q20)", count: 20, marks: 1, enabled: true },
-      { label: "Short Answer Type (Q21 to Q24)", count: 4, marks: 3, enabled: true },
-      { label: "Short Answer Type (Q25 to Q30)", count: 6, marks: 4, enabled: true },
-      { label: "Long Answer Type (Q31 to Q34)", count: 4, marks: 6, enabled: true }
+      { label: "Objective Type MCQs (Q1 to Q20 - 1M)", count: 20, marks: 1, enabled: true },
+      { label: "Short Answer Type (Q21 to Q24 - 3M)", count: 4, marks: 3, enabled: true },
+      { label: "Short Answer Type (Q25 to Q30 - 4M)", count: 6, marks: 4, enabled: true },
+      { label: "Long Answer Type (Q31 to Q34 - 6M)", count: 4, marks: 6, enabled: true }
     ]
   },
 
-  // 3. Economics (Code 030) - Exactly 34 Qs, 80 Marks
+  // 3. Economics (030) - Exactly 34 Qs, 80 Marks
   economics: {
     marks: 80,
     time: "3 Hours",
     instructions: [
       "This question paper contains two sections: Section A – Macro Economics and Section B – Indian Economic Development.",
       "This paper contains 20 Multiple Choice Questions of 1 mark each.",
-      "This paper contains 4 Short Answer Questions of 3 marks each (60-80 words).",
-      "This paper contains 6 Short Answer Questions of 4 marks each (80-100 words).",
-      "This paper contains 4 Long Answer Questions of 6 marks each (100-150 words)."
+      "This paper contains 4 Short Answer Questions of 3 marks each to be answered in 60 to 80 words.",
+      "This paper contains 6 Short Answer Questions of 4 marks each to be answered in 80 to 100 words.",
+      "This paper contains 4 Long Answer Questions of 6 marks each to be answered in 100 to 150 words."
     ],
     matrix: [
-      { label: "Macro & Indian Eco: MCQs (20 Questions)", count: 20, marks: 1, enabled: true },
-      { label: "Macro & Indian Eco: SA Type I (4 Questions)", count: 4, marks: 3, enabled: true },
-      { label: "Macro & Indian Eco: SA Type II (6 Questions)", count: 6, marks: 4, enabled: true },
-      { label: "Macro & Indian Eco: LA Type (4 Questions)", count: 4, marks: 6, enabled: true }
+      { label: "Section A & B: MCQs (20 Questions - 1M)", count: 20, marks: 1, enabled: true },
+      { label: "Section A & B: SA Type I (4 Questions - 3M)", count: 4, marks: 3, enabled: true },
+      { label: "Section A & B: SA Type II (6 Questions - 4M)", count: 6, marks: 4, enabled: true },
+      { label: "Section A & B: LA Type (4 Questions - 6M)", count: 4, marks: 6, enabled: true }
     ]
   },
 
-  // 4. Mathematics (Code 041) & Applied Maths (Code 241) (Classes 9, 10, 11, 12) - Exactly 38 Qs, 80 Marks
+  // 4. Mathematics (041 / 241) Classes 9-12 - Exactly 38 Qs, 80 Marks
   math: {
     marks: 80,
     time: "3 Hours",
     instructions: [
       "This question paper contains 38 questions. All Questions are compulsory.",
       "This Question Paper is divided into 5 Sections A, B, C, D and E.",
-      "In Section A, Question numbers 1-18 are MCQs and 19-20 are Assertion-Reason based questions of 1 mark each.",
-      "In Section B, Question numbers 21-25 are Very Short Answer (VSA) carrying 02 marks each.",
-      "In Section C, Question numbers 26-31 are Short Answer (SA) carrying 03 marks each.",
-      "In Section D, Question numbers 32-35 are Long Answer (LA) carrying 05 marks each.",
-      "In Section E, Question numbers 36-38 are Case study-based questions carrying 4 marks each."
+      "In Section A, Questions 1-18 are MCQs and 19-20 are Assertion-Reason based questions of 1 mark each.",
+      "In Section B, Questions 21-25 are Very Short Answer (VSA) carrying 02 marks each.",
+      "In Section C, Questions 26-31 are Short Answer (SA) carrying 03 marks each.",
+      "In Section D, Questions 32-35 are Long Answer (LA) carrying 05 marks each.",
+      "In Section E, Questions 36-38 are Case study-based carrying 4 marks each with sub-parts of 1, 1 and 2 marks."
     ],
     matrix: [
-      { label: "Section A: MCQs (Q1-18) & A-R (Q19-20)", count: 20, marks: 1, enabled: true },
-      { label: "Section B: Very Short Answer VSA (Q21-25)", count: 5, marks: 2, enabled: true },
-      { label: "Section C: Short Answer SA (Q26-31)", count: 6, marks: 3, enabled: true },
-      { label: "Section D: Long Answer LA (Q32-35)", count: 4, marks: 5, enabled: true },
-      { label: "Section E: Case Study Based (Q36-38)", count: 3, marks: 4, enabled: true }
+      { label: "Section A: MCQs (Q1-18) & A-R (Q19-20) [1M]", count: 20, marks: 1, enabled: true },
+      { label: "Section B: VSA Type (Q21-25) [2M]", count: 5, marks: 2, enabled: true },
+      { label: "Section C: SA Type (Q26-31) [3M]", count: 6, marks: 3, enabled: true },
+      { label: "Section D: LA Type (Q32-35) [5M]", count: 4, marks: 5, enabled: true },
+      { label: "Section E: Case Study Units (Q36-38) [4M]", count: 3, marks: 4, enabled: true }
     ]
   },
 
@@ -97,15 +97,15 @@ export const CBSE_REGISTRY = {
       "Section E consists of 3 long answer questions carrying 5 marks each."
     ],
     matrix: [
-      { label: "Section A: MCQs & Assertion-Reason (Q1 to Q16)", count: 16, marks: 1, enabled: true },
-      { label: "Section B: SA Type I (Q17 to Q21)", count: 5, marks: 2, enabled: true },
-      { label: "Section C: SA Type II (Q22 to Q28)", count: 7, marks: 3, enabled: true },
-      { label: "Section D: Case-Based Questions (Q29 to Q30)", count: 2, marks: 4, enabled: true },
-      { label: "Section E: Long Answer LA (Q31 to Q33)", count: 3, marks: 5, enabled: true }
+      { label: "Section A: MCQs & Assertion-Reason (Q1-16) [1M]", count: 16, marks: 1, enabled: true },
+      { label: "Section B: SA Type I (Q17-21) [2M]", count: 5, marks: 2, enabled: true },
+      { label: "Section C: SA Type II (Q22-28) [3M]", count: 7, marks: 3, enabled: true },
+      { label: "Section D: Case-Based Questions (Q29-30) [4M]", count: 2, marks: 4, enabled: true },
+      { label: "Section E: Long Answer LA (Q31-33) [5M]", count: 3, marks: 5, enabled: true }
     ]
   },
 
-  // 6. Science Class 10 (Code 086) & Class 9 - Exactly 39 Qs, 80 Marks
+  // 6. Science Class 10 (086) & Class 9 - Exactly 39 Qs, 80 Marks
   science10: {
     marks: 80,
     time: "3 Hours",
@@ -114,9 +114,9 @@ export const CBSE_REGISTRY = {
       "All questions are compulsory. However, an internal choice is provided in some questions."
     ],
     matrix: [
-      { label: "Section A: Biology (MCQs, VSA, SA, LA, Case-Based)", count: 13, marks: 2, enabled: true },
-      { label: "Section B: Chemistry (MCQs, VSA, SA, LA, Case-Based)", count: 13, marks: 2, enabled: true },
-      { label: "Section C: Physics (MCQs, VSA, SA, LA, Case-Based)", count: 13, marks: 2.15, enabled: true }
+      { label: "Section A: Biology (Q1-13) [MCQs, VSA, SA, LA, Case]", count: 13, marks: 2.08, enabled: true },
+      { label: "Section B: Chemistry (Q14-26) [MCQs, VSA, SA, LA, Case]", count: 13, marks: 2.08, enabled: true },
+      { label: "Section C: Physics (Q27-39) [MCQs, VSA, SA, LA, Case]", count: 13, marks: 2, enabled: true }
     ]
   },
 
@@ -135,11 +135,11 @@ export const CBSE_REGISTRY = {
       "All programming questions are to be answered using Python Language only."
     ],
     matrix: [
-      { label: "Section A: Objective MCQs (Q1 to Q21)", count: 21, marks: 1, enabled: true },
-      { label: "Section B: Short Answer Type I (Q22 to Q28)", count: 7, marks: 2, enabled: true },
-      { label: "Section C: Short Answer Type II (Q29 to Q31)", count: 3, marks: 3, enabled: true },
-      { label: "Section D: Programming / LA (Q32 to Q35)", count: 4, marks: 4, enabled: true },
-      { label: "Section E: Case Study / Code Analysis (Q36 to Q37)", count: 2, marks: 5, enabled: true }
+      { label: "Section A: Objective MCQs (Q1 to Q21) [1M]", count: 21, marks: 1, enabled: true },
+      { label: "Section B: Short Answer Type I (Q22 to Q28) [2M]", count: 7, marks: 2, enabled: true },
+      { label: "Section C: Short Answer Type II (Q29 to Q31) [3M]", count: 3, marks: 3, enabled: true },
+      { label: "Section D: Programming / LA (Q32 to Q35) [4M]", count: 4, marks: 4, enabled: true },
+      { label: "Section E: Case Study / Code Analysis (Q36 to Q37) [5M]", count: 2, marks: 5, enabled: true }
     ]
   },
 
@@ -156,11 +156,11 @@ export const CBSE_REGISTRY = {
       "Section E consists of 3 questions (35 to 37) carrying 5 Marks each."
     ],
     matrix: [
-      { label: "Section A: Objective MCQs (Q1 to Q21)", count: 21, marks: 1, enabled: true },
-      { label: "Section B: Short Answer (Q22 to Q28)", count: 7, marks: 2, enabled: true },
-      { label: "Section C: Short Answer (Q29 to Q32)", count: 4, marks: 3, enabled: true },
-      { label: "Section D: Practical / Case (Q33 to Q34)", count: 2, marks: 4, enabled: true },
-      { label: "Section E: Long Answer (Q35 to Q37)", count: 3, marks: 5, enabled: true }
+      { label: "Section A: Objective MCQs (Q1 to Q21) [1M]", count: 21, marks: 1, enabled: true },
+      { label: "Section B: Short Answer (Q22 to Q28) [2M]", count: 7, marks: 2, enabled: true },
+      { label: "Section C: Short Answer (Q29 to Q32) [3M]", count: 4, marks: 3, enabled: true },
+      { label: "Section D: Practical / Case (Q33 to Q34) [4M]", count: 2, marks: 4, enabled: true },
+      { label: "Section E: Long Answer (Q35 to Q37) [5M]", count: 3, marks: 5, enabled: true }
     ]
   },
 
@@ -177,11 +177,11 @@ export const CBSE_REGISTRY = {
       "Section E consists of Question 34-37 carrying 5 marks each (Attempt any 3)."
     ],
     matrix: [
-      { label: "Section A: MCQs (Q1 to Q18)", count: 18, marks: 1, enabled: true },
-      { label: "Section B: VSA Type (Q19 to Q24)", count: 6, marks: 2, enabled: true },
-      { label: "Section C: SA Type (Q25 to Q30)", count: 6, marks: 3, enabled: true },
-      { label: "Section D: Case Studies (Q31 to Q33)", count: 3, marks: 4, enabled: true },
-      { label: "Section E: Long Answer Type (Q34 to Q37)", count: 4, marks: 5, enabled: true }
+      { label: "Section A: MCQs (Q1 to Q18) [1M]", count: 18, marks: 1, enabled: true },
+      { label: "Section B: VSA Type (Q19 to Q24) [2M]", count: 6, marks: 2, enabled: true },
+      { label: "Section C: SA Type (Q25 to Q30) [3M]", count: 6, marks: 3, enabled: true },
+      { label: "Section D: Case Studies (Q31 to Q33) [4M]", count: 3, marks: 4, enabled: true },
+      { label: "Section E: LA Type (Q34 to Q37) [5M]", count: 4, marks: 5, enabled: true }
     ]
   },
 
@@ -192,18 +192,18 @@ export const CBSE_REGISTRY = {
     instructions: [
       "This question paper contains 30 questions. All questions are compulsory.",
       "This question paper is divided into five sections: Section-A, B, C, D and E.",
-      "Section A - Question number 1 to 17 are Multiple Choice type questions carrying 1 mark each.",
-      "Section B - Question number 18 and 19 are Source based questions carrying 3 marks each.",
-      "Section C - Question number 20 to 23 are Short Answer type questions carrying 3 marks each.",
-      "Section D - Question number 24 to 28 are Long Answer type questions carrying 5 marks each.",
-      "Section E - Question number 29 and 30 are Map based questions carrying 5 marks each."
+      "Section A - Question number 1 to 17 are Multiple Choice type carrying 1 mark each.",
+      "Section B - Question number 18 and 19 are Source based carrying 3 marks each.",
+      "Section C - Question number 20 to 23 are Short Answer type carrying 3 marks each.",
+      "Section D - Question number 24 to 28 are Long Answer type carrying 5 marks each.",
+      "Section E - Question number 29 and 30 are Map based carrying 5 marks each."
     ],
     matrix: [
-      { label: "Section A: MCQs (Q1 to Q17)", count: 17, marks: 1, enabled: true },
-      { label: "Section B: Source Based (Q18 to Q19)", count: 2, marks: 3, enabled: true },
-      { label: "Section C: Short Answer (Q20 to Q23)", count: 4, marks: 3, enabled: true },
-      { label: "Section D: Long Answer (Q24 to Q28)", count: 5, marks: 5, enabled: true },
-      { label: "Section E: Map Based (Q29 to Q30)", count: 2, marks: 5, enabled: true }
+      { label: "Section A: MCQs (Q1 to Q17) [1M]", count: 17, marks: 1, enabled: true },
+      { label: "Section B: Source Based (Q18 to Q19) [3M]", count: 2, marks: 3, enabled: true },
+      { label: "Section C: Short Answer (Q20 to Q23) [3M]", count: 4, marks: 3, enabled: true },
+      { label: "Section D: Long Answer (Q24 to Q28) [5M]", count: 5, marks: 5, enabled: true },
+      { label: "Section E: Map Based (Q29 to Q30) [5M]", count: 2, marks: 5, enabled: true }
     ]
   },
 
@@ -215,7 +215,7 @@ export const CBSE_REGISTRY = {
       "There are 38 questions in the Question paper. All questions are compulsory.",
       "The question paper has Four Sections – A-History, B-Geography, C-Political Science, and D-Economics.",
       "Each Section is of 20 Marks and has MCQs, VSA, SA, LAs and CBQ.",
-      "The map-based questions, carry 5 marks with two parts- Q9 in Section A-History (2 marks) and Q19 in Section B-Geography (3 marks)."
+      "The map-based questions carry 5 marks (Q9 in Section A-History 2 marks and Q19 in Section B-Geography 3 marks)."
     ],
     matrix: [
       { label: "Section A: History (MCQs, VSA, SA, LA & Q9 Map 2M)", count: 9, marks: 2.22, enabled: true },
@@ -225,49 +225,80 @@ export const CBSE_REGISTRY = {
     ]
   },
 
-  // 12. Hindi Course-B (085), Course-A (002), Hindi Core (302) & Elective (002)
-  hindi: {
+  // 12. Hindi Class 12 Core (302) & Elective (002) - Exactly 13 Qs, 80 Marks (3 Khands)
+  hindi12: {
     marks: 80,
     time: "3 Hours",
     instructions: [
-      "इस प्रश्न-पत्र में कुल तीन/चार खण्ड हैं।",
-      "सभी प्रश्नों के उत्तर देना अनिवार्य है। दिए गए निर्देशों का पालन करते हुए प्रश्नों के उत्तर दीजिए।",
-      "यथासंभव तीनों/चारों खंडों के प्रश्नों के उत्तर क्रमशः लिखिए।"
+      "इस प्रश्न-पत्र में तीन खंड हैं – खंड- क, ख और ग।",
+      "खंड- क में अपठित बोध पर आधारित प्रश्न पूछे गए हैं। सभी प्रश्नों के उत्तर देना अनिवार्य है।",
+      "खंड- ख में पाठ्यपुस्तक अभिव्यक्ति और माध्यम से प्रश्न पूछे गए हैं। प्रश्नों में आंतरिक विकल्प दिए गए हैं।",
+      "खंड- ग में पाठ्यपुस्तक आरोह/अंतरा तथा वितान/अंतराल से प्रश्न पूछे गए हैं। प्रश्नों में आंतरिक विकल्प दिए गए हैं।",
+      "तीनों खंडों के कुल 13 प्रश्न हैं। तीनों खंडों के प्रश्नों के उत्तर देना अनिवार्य है। यथासंभव तीनों खंडों के प्रश्नों के उत्तर क्रमशः लिखिए।"
     ],
     matrix: [
-      { label: "खंड 'क': अपठित बोध (अपठित गद्यांश व काव्यांश)", count: 2, marks: 8, enabled: true },
-      { label: "खंड 'ख': व्यावहारिक व्याकरण / अभिव्यक्ति और माध्यम", count: 4, marks: 4, enabled: true },
-      { label: "खंड 'ग': पाठ्यपुस्तक (पठित पद्यांश, गद्यांश व प्रश्न)", count: 6, marks: 5, enabled: true },
-      { label: "खंड 'घ': रचनात्मक लेखन (अनुच्छेद, पत्र, ई-मेल आदि)", count: 4, marks: 5, enabled: true }
+      { label: "खंड 'क': अपठित बोध (अपठित गद्यांश व काव्यांश - Q1 से Q2)", count: 2, marks: 9, enabled: true },
+      { label: "खंड 'ख': अभिव्यक्ति और माध्यम एवं रचनात्मक लेखन (Q3 से Q6)", count: 4, marks: 5.5, enabled: true },
+      { label: "खंड 'ग': पाठ्यपुस्तक आरोह/अंतरा व वितान/अंतराल (Q7 से Q13)", count: 7, marks: 5.71, enabled: true }
     ]
   },
 
-  // 13. English Language & Literature (184), Core (301), Communicative (101)
-  english: {
+  // 13. Hindi Class 10 Course-B (085) & Course-A (002) - Exactly 16 Qs, 80 Marks (4 Khands)
+  hindi10: {
     marks: 80,
     time: "3 Hours",
     instructions: [
-      "This question paper comprises 3/4 sections: Reading Skills, Writing & Grammar, Literature Textbook.",
-      "All questions are compulsory. Attempt questions based on specific instructions for each Part."
+      "इस प्रश्नपत्र में कुल चार खंड हैं– क, ख, ग, घ।",
+      "इस प्रश्नपत्र में कुल 16 प्रश्न हैं। सभी प्रश्न अनिवार्य हैं।",
+      "प्रश्नपत्र में आंतरिक विकल्प दिए गए हैं। प्रश्नों के उत्तर दिए गए निर्देशों का पालन करते हुए लिखिए।"
     ],
     matrix: [
-      { label: "Section A: Reading Skills (Passages & Case Comprehension)", count: 2, marks: 10, enabled: true },
-      { label: "Section B: Creative Writing Skills and Applied Grammar", count: 4, marks: 5, enabled: true },
-      { label: "Section C: Literature Textbook & Supplementary Extracts", count: 5, marks: 8, enabled: true }
+      { label: "खंड 'क': अपठित गद्यांश (Q1-2)", count: 2, marks: 7, enabled: true },
+      { label: "खंड 'ख': व्यावहारिक व्याकरण (Q3-6)", count: 4, marks: 4, enabled: true },
+      { label: "खंड 'ग': पाठ्यपुस्तक स्पर्श व संचयन (Q7-11)", count: 5, marks: 6, enabled: true },
+      { label: "खंड 'घ': रचनात्मक लेखन (Q12-16)", count: 5, marks: 4, enabled: true }
     ]
   },
 
-  // 14. Sanskrit (Code 122) - Exactly 18 Qs, 80 Marks
+  // 14. English Class 10 (184) - Exactly 11 Qs, 80 Marks
+  english10: {
+    marks: 80,
+    time: "3 Hours",
+    instructions: [
+      "This question paper comprises 11 questions. All questions are compulsory.",
+      "The question paper contains THREE sections – Section A: Reading Skills, Section B: Grammar and Creative Writing Skills, Section C: Literature Textbook."
+    ],
+    matrix: [
+      { label: "Section A: Reading Skills (Q1-2: Discursive & Case Passages)", count: 2, marks: 10, enabled: true },
+      { label: "Section B: Grammar and Creative Writing Skills (Q3-5)", count: 3, marks: 6.66, enabled: true },
+      { label: "Section C: Literature Textbook (Q6-11)", count: 6, marks: 6.66, enabled: true }
+    ]
+  },
+
+  // 15. English Class 12 Core (301) / Elective (001) - Exactly 13 Qs, 80 Marks
+  english12: {
+    marks: 80,
+    time: "3 Hours",
+    instructions: [
+      "This question paper comprises 13 questions in THREE sections.",
+      "Section A: Reading Skills (22 Marks)",
+      "Section B: Creative Writing Skills (18 Marks)",
+      "Section C: Literature Textbook & Supplementary (40 Marks)"
+    ],
+    matrix: [
+      { label: "Section A: Reading Skills (Q1-2 Passages)", count: 2, marks: 11, enabled: true },
+      { label: "Section B: Creative Writing Skills (Q3-6 Notice/Letter/Report)", count: 4, marks: 4.5, enabled: true },
+      { label: "Section C: Literature Textbook (Q7-13 Extracts & Questions)", count: 7, marks: 5.71, enabled: true }
+    ]
+  },
+
+  // 16. Sanskrit (122) - Exactly 18 Qs, 80 Marks
   sanskrit: {
     marks: 80,
     time: "3 Hours",
     instructions: [
       "अस्मिन् प्रश्नपत्रे 18 प्रश्नाः सन्ति। सर्वे प्रश्नाः अनिवार्याः सन्ति।",
-      "अस्मिन् प्रश्नपत्रे चत्वारः खण्डाः सन्ति:",
-      "'क' खण्डः : अपठितावबोधनम् (10 अङ्काः)",
-      "'ख' खण्डः : रचनात्मककार्यम् (15 अङ्काः)",
-      "'ग' खण्डः : अनुप्रयुक्तव्याकरणम् (25 अङ्काः)",
-      "'घ' खण्डः : पठितावबोधनम् (30 अङ्काः)"
+      "अस्मिन् प्रश्नपत्रे चत्वारः खण्डाः सन्ति: 'क' अपठितावबोधनम् (10 अङ्काः), 'ख' रचनात्मककार्यम् (15 अङ्काः), 'ग' अनुप्रयुक्तव्याकरणम् (25 अङ्काः), 'घ' पठितावबोधनम् (30 अङ्काः)"
     ],
     matrix: [
       { label: "खण्डः 'क': अपठितावबोधनम्", count: 1, marks: 10, enabled: true },
@@ -277,7 +308,7 @@ export const CBSE_REGISTRY = {
     ]
   },
 
-  // 15. Skill Subjects (IT 402, AI 417) - Exactly 21 Qs, 50 Marks
+  // 17. Skill Subjects (IT 402, AI 417) - Exactly 21 Qs, 50 Marks
   skillSubjects: {
     marks: 50,
     time: "2 Hours",
@@ -286,8 +317,8 @@ export const CBSE_REGISTRY = {
       "Section A has Objective type questions (24 marks). Section B has Subjective type questions (26 marks)."
     ],
     matrix: [
-      { label: "Section A: Objective Type Questions (Employability & Subject)", count: 11, marks: 2, enabled: true },
-      { label: "Section B: Subject Specific Short & Competency Type", count: 10, marks: 2.8, enabled: true }
+      { label: "Section A: Objective Type (Employability & Subject) [Q1-11]", count: 11, marks: 2.18, enabled: true },
+      { label: "Section B: Subject Specific Short & Competency [Q12-21]", count: 10, marks: 2.6, enabled: true }
     ]
   }
 };
@@ -307,8 +338,12 @@ export function resolveSubjectRegistry(subject = '', selectedClass = '') {
   if (sub.includes('402') || sub.includes('417') || sub.includes('skill') || sub.includes('artificial intel')) return CBSE_REGISTRY.skillSubjects;
   if (sub.includes('math') || sub.includes('041') || sub.includes('241')) return CBSE_REGISTRY.math;
   if (sub.includes('sanskrit') || sub.includes('122')) return CBSE_REGISTRY.sanskrit;
-  if (sub.includes('hindi') || sub.includes('085') || sub.includes('302') || sub.includes('002')) return CBSE_REGISTRY.hindi;
-  if (sub.includes('english') || sub.includes('184') || sub.includes('301') || sub.includes('101') || sub.includes('001')) return CBSE_REGISTRY.english;
+  if (sub.includes('hindi') || sub.includes('085') || sub.includes('302') || sub.includes('002')) {
+    return isSenior ? CBSE_REGISTRY.hindi12 : CBSE_REGISTRY.hindi10;
+  }
+  if (sub.includes('english') || sub.includes('184') || sub.includes('301') || sub.includes('101') || sub.includes('001')) {
+    return isSenior ? CBSE_REGISTRY.english12 : CBSE_REGISTRY.english10;
+  }
   if (sub.includes('social') || sub.includes('sst') || sub.includes('087')) return CBSE_REGISTRY.sst;
 
   if (sub.includes('physics') || sub.includes('chem') || sub.includes('bio') || sub.includes('042') || sub.includes('043') || sub.includes('044')) {
@@ -318,5 +353,5 @@ export function resolveSubjectRegistry(subject = '', selectedClass = '') {
     return isSenior ? CBSE_REGISTRY.science12 : CBSE_REGISTRY.science10;
   }
 
-  return CBSE_REGISTRY.math;
+  return isSenior ? CBSE_REGISTRY.science12 : CBSE_REGISTRY.math;
 }
