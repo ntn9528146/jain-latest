@@ -42,11 +42,12 @@ function cleanAndRepairJson(raw) {
 
 export async function executePaperPipeline(options = {}) {
   const selectedClass = String(options.selectedClass || options.className || 'Class 12');
-  const rawSub = String(options.subject || options.selectedSubject || 'Hindi');
+  const rawSub = String(options.subject || options.selectedSubject || 'Hindi Core');
   const subject = rawSub.replace(/\s*\([^)]*\)/g, '').trim();
   const examType = String(options.examType || options.examName || 'Pre-Board Examination').replace(/\(\s*\d+%\s*SYLLABUS\s*\)/gi, '').trim();
   const isPYQ = Boolean(options.isPYQ || options.includePYQ || examType.toLowerCase().includes('pyq'));
   const isHindi = subject.toLowerCase().includes('hindi') || rawSub.toLowerCase().includes('hindi');
+  const isPracticalStudio = Boolean(options.isPractical || options.mode === 'practical' || examType.toLowerCase().includes('practical'));
   const onProgress = typeof options.onProgress === 'function' ? options.onProgress : () => {};
 
   const profile = resolveSubjectRegistry(subject, selectedClass);
@@ -67,30 +68,36 @@ export async function executePaperPipeline(options = {}) {
     throw new Error('Gemini API Key missing! Please configure key.');
   }
 
-  const activeUnits = Array.isArray(options.activeUnits) ? options.activeUnits : [];
-  const syllabusTopics = activeUnits.length > 0 
-    ? activeUnits.flatMap((u) => u?.subtopics || [u?.name || 'Core Curriculum']).join('; ')
-    : `${subject} CBSE Class ${selectedClass} Official Curriculum`;
-
   const secPrompt = activeSections.map((s, idx) => 
     `Section ${String.fromCharCode(65 + idx)}: Exactly ${s.count} Qs (${s.label})`
   ).join('\n');
 
-  const prompt = `You are a Senior CBSE Chief Board Paper Setter for ${subject} (${selectedClass}).
-MANDATORY BOARD REQUIREMENTS:
-1. TOTAL QUESTION COUNT: Must be EXACTLY ${totalExpectedQuestions}. Questions numbered continuously from 1 to ${totalExpectedQuestions}.
+  // Practical/Viva prompt customization vs Theory prompt
+  const modeInstruction = isPracticalStudio
+    ? (isHindi
+        ? `MODE: CBSE व्यावहारिक/परियोजना मूल्यांकन (ALS & Portfolio). हिंदी में कोई प्रयोगशाला (Laboratory/Apparatus) प्रयोग नहीं होते हैं। आपको शुद्ध हिंदी में: (1) श्रवण एवं वाचन कौशल (ASL) प्रश्न, (2) परियोजना कार्य शीर्षक व शोध रूपरेखा, और (3) शिक्षक के लिए संपूर्ण 10 मौखिक (Viva-Voce) प्रश्न व उनके आदर्श उत्तर तैयार करने हैं।`
+        : `MODE: CBSE Practical & Viva Voce Assessment. Generate genuine subject experiments/programs/viva questions. NO DUMMY PLACEHOLDERS.`)
+    : `MODE: CBSE Official Board Examination. Complete theory paper.`;
+
+  const prompt = `You are a Senior CBSE Chief Board Paper Setter & Evaluator for ${subject} (${selectedClass}).
+${modeInstruction}
+
+MANDATORY RULES:
+1. QUESTION COUNT: Must have EXACTLY ${totalExpectedQuestions} questions, continuously numbered 1 to ${totalExpectedQuestions}.
 2. BLUEPRINT:
 ${secPrompt}
-3. TOTAL MARKS: Must tally to exactly ${finalMarks}.
+3. MARKS SUM: Exactly ${finalMarks}.
 4. LANGUAGE SPECIFICATION:
 ${isHindi 
-  ? 'STRICTLY WRITE IN PURE DEVNAGARI HINDI (मङ्गल Font Style). All questions, passages, and marking schemes must be authentic Hindi.' 
+  ? 'STRICTLY WRITE IN PURE DEVNAGARI HINDI (मङ्गल Font Style). Do not use English words in Hindi questions or solutions.' 
   : 'Write in high academic CBSE standard English.'}
-5. DETAILED MARKING SCHEME:
-   - For every question, write an EXHAUSTIVE, step-by-step textbook answer in answerKey.
-   - For numericals: Formula, substitution, calculation, and final unit.
-   - For diagrams/charts: Clearly label parts and explain graph axes.
-6. NO DUMMY DATA: All questions must be dynamically generated from topics: ${syllabusTopics}.
+5. EXHAUSTIVE MARKING SCHEME (NO SHORTCUTS / NO GENERAL HINTS):
+   - For writing skills (Letter/Article/Notice): You MUST write the FULL model letter or essay in answerKey. DO NOT JUST GIVE FORMAT POINTS.
+   - For numericals: Full formula + substitution + calculation steps + final unit.
+   - For derivations: Complete line-by-line mathematical derivation.
+   - For literature: Complete model answer addressing every part of the question.
+   - For diagram-based physics/biology/chemistry questions: Write detailed labels for graphs and circuit parts.
+6. NO DUMMY SAVED DATA: Compile everything freshly using official CBSE curriculum.
 7. Return ONLY valid RFC8259 JSON without markdown fences.
 
 School: ARDEN PROGRESSIVE SCHOOL
@@ -120,7 +127,7 @@ JSON Schema:
           "marks": 1,
           "topicName": "Topic",
           "questionText": "Question statement",
-          "answerKey": "Step-by-step exhaustive explanation"
+          "answerKey": "EXHAUSTIVE step-by-step complete solution"
         }
       ]
     }
@@ -130,7 +137,7 @@ JSON Schema:
   ]
 }`;
 
-  onProgress({ stage: 3, text: `Gemini 3.6 Flash generating ${totalExpectedQuestions} questions live from Google AI...` });
+  onProgress({ stage: 3, text: `Gemini 3.6 Flash generating official ${totalExpectedQuestions} questions with deep answer key...` });
 
   const targetUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`;
 
@@ -156,7 +163,7 @@ JSON Schema:
   const rawText = resData.candidates?.[0]?.content?.parts?.[0]?.text || '';
   const paperJson = cleanAndRepairJson(rawText);
 
-  // Vector SVG Diagrams Integration
+  // Auto-inject Vector Diagrams where diagrams are specified
   if (Array.isArray(paperJson.sections)) {
     paperJson.sections.forEach(sec => {
       if (Array.isArray(sec.questions)) {

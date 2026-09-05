@@ -1,7 +1,43 @@
-// Official CBSE Board Structure Registry (Classes 9 to 12) - Cross-Checked with CBSE Academic 2025-26
+// Official CBSE Board Structure Registry (Classes 9 to 12) - Verified 2025-26
 
 export const CBSE_REGISTRY = {
-  // 1. Accountancy (055) - Exactly 34 Qs, 80 Marks
+  // 1. Hindi Core (Code 302, Class 12) - Exactly 12 Questions, 80 Marks
+  hindiCore12: {
+    marks: 80,
+    time: "3 घंटे",
+    instructions: [
+      "यह प्रश्न-पत्र तीन खण्डों में विभाजित है।",
+      "खंड - क में अपठित बोध पर आधारित प्रश्न पूछे गए हैं। सभी प्रश्नों के उत्तर देना अनिवार्य है।",
+      "खंड - ख में पाठ्यपुस्तक अभिव्यक्ति और माध्यम से प्रश्न पूछे गए हैं। प्रश्नों में आंतरिक विकल्प दिए गए हैं।",
+      "खंड - ग में पाठ्यपुस्तक आरोह तथा वितान से प्रश्न पूछे गए हैं। प्रश्नों में आंतरिक विकल्प दिए गए हैं।",
+      "तीनों खंडों के प्रश्नों के उत्तर देना अनिवार्य है।",
+      "यथासंभव तीनों खंडों के प्रश्नों के उत्तर क्रमशः लिखिए।"
+    ],
+    matrix: [
+      { label: "खंड क: अपठित गद्यांश (प्रश्न 1) एवं अपठित पद्यांश (प्रश्न 2)", count: 2, marks: 9, enabled: true },
+      { label: "खंड ख: अभिव्यक्ति और माध्यम - रचनात्मक लेख व प्रश्न (प्रश्न 3 से 5)", count: 3, marks: 7.33, enabled: true },
+      { label: "खंड ग: आरोह भाग-2 व वितान भाग-2 प्रश्न (प्रश्न 6 से 12)", count: 7, marks: 5.71, enabled: true }
+    ]
+  },
+
+  // 2. Hindi Course-B (085) / Course-A (002) Class 10 - Exactly 16 Questions, 80 Marks
+  hindi10: {
+    marks: 80,
+    time: "3 घंटे",
+    instructions: [
+      "इस प्रश्नपत्र में कुल चार खंड हैं– क, ख, ग, घ।",
+      "इस प्रश्नपत्र में कुल 16 प्रश्न हैं। सभी प्रश्न अनिवार्य हैं।",
+      "प्रश्नपत्र में आंतरिक विकल्प दिए गए हैं। प्रश्नों के उत्तर दिए गए निर्देशों का पालन करते हुए लिखिए।"
+    ],
+    matrix: [
+      { label: "खंड 'क': अपठित गद्यांश व काव्यांश (Q1-2)", count: 2, marks: 7, enabled: true },
+      { label: "खंड 'ख': व्यावहारिक व्याकरण (Q3-6)", count: 4, marks: 4, enabled: true },
+      { label: "खंड 'ग': पाठ्यपुस्तक स्पर्श व संचयन (Q7-11)", count: 5, marks: 6, enabled: true },
+      { label: "खंड 'घ': रचनात्मक लेखन (Q12-16)", count: 5, marks: 4, enabled: true }
+    ]
+  },
+
+  // 3. Accountancy (055, Class 12) - Exactly 34 Questions, 80 Marks
   accountancy: {
     marks: 80,
     time: "3 Hours",
@@ -23,14 +59,13 @@ export const CBSE_REGISTRY = {
     ]
   },
 
-  // 2. Business Studies (054) - Exactly 34 Qs, 80 Marks
+  // 4. Business Studies (054, Class 12) - Exactly 34 Questions, 80 Marks
   bst: {
     marks: 80,
     time: "3 Hours",
     instructions: [
       "This question paper contains 34 questions. All questions are compulsory.",
       "Marks are indicated against each question.",
-      "Answers should be brief and to the point.",
       "Answers to questions carrying 3 marks may be from 50 to 75 words.",
       "Answers to questions carrying 4 marks may be about 150 words.",
       "Answers to questions carrying 6 marks may be about 200 words."
@@ -43,16 +78,16 @@ export const CBSE_REGISTRY = {
     ]
   },
 
-  // 3. Economics (030) - Exactly 34 Qs, 80 Marks
+  // 5. Economics (030, Class 12) - Exactly 34 Questions, 80 Marks
   economics: {
     marks: 80,
     time: "3 Hours",
     instructions: [
       "This question paper contains two sections: Section A – Macro Economics and Section B – Indian Economic Development.",
       "This paper contains 20 Multiple Choice Questions of 1 mark each.",
-      "This paper contains 4 Short Answer Questions of 3 marks each to be answered in 60 to 80 words.",
-      "This paper contains 6 Short Answer Questions of 4 marks each to be answered in 80 to 100 words.",
-      "This paper contains 4 Long Answer Questions of 6 marks each to be answered in 100 to 150 words."
+      "This paper contains 4 Short Answer Questions of 3 marks each.",
+      "This paper contains 6 Short Answer Questions of 4 marks each.",
+      "This paper contains 4 Long Answer Questions of 6 marks each."
     ],
     matrix: [
       { label: "Section A & B: MCQs (20 Questions - 1M)", count: 20, marks: 1, enabled: true },
@@ -62,7 +97,7 @@ export const CBSE_REGISTRY = {
     ]
   },
 
-  // 4. Mathematics (041 / 241) Classes 9-12 - Exactly 38 Qs, 80 Marks
+  // 6. Mathematics (041 / 241, Classes 9-12) - Exactly 38 Questions, 80 Marks
   math: {
     marks: 80,
     time: "3 Hours",
@@ -73,7 +108,7 @@ export const CBSE_REGISTRY = {
       "In Section B, Questions 21-25 are Very Short Answer (VSA) carrying 02 marks each.",
       "In Section C, Questions 26-31 are Short Answer (SA) carrying 03 marks each.",
       "In Section D, Questions 32-35 are Long Answer (LA) carrying 05 marks each.",
-      "In Section E, Questions 36-38 are Case study-based carrying 4 marks each with sub-parts of 1, 1 and 2 marks."
+      "In Section E, Questions 36-38 are Case study-based carrying 4 marks each."
     ],
     matrix: [
       { label: "Section A: MCQs (Q1-18) & A-R (Q19-20) [1M]", count: 20, marks: 1, enabled: true },
@@ -84,7 +119,7 @@ export const CBSE_REGISTRY = {
     ]
   },
 
-  // 5. Senior Sciences (Physics 042, Chemistry 043, Biology 044) - Exactly 33 Qs, 70 Marks
+  // 7. Senior Sciences (Physics 042, Chemistry 043, Biology 044) - Exactly 33 Questions, 70 Marks
   science12: {
     marks: 70,
     time: "3 Hours",
@@ -105,7 +140,7 @@ export const CBSE_REGISTRY = {
     ]
   },
 
-  // 6. Science Class 10 (086) & Class 9 - Exactly 39 Qs, 80 Marks
+  // 8. Secondary Science Class 10 (086) - Exactly 39 Questions, 80 Marks
   science10: {
     marks: 80,
     time: "3 Hours",
@@ -120,7 +155,7 @@ export const CBSE_REGISTRY = {
     ]
   },
 
-  // 7. Computer Science Class 12 (083) & Class 11 - Exactly 37 Qs, 70 Marks
+  // 9. Computer Science (083) & Informatics Practices (065) - Exactly 37 Questions, 70 Marks
   cs: {
     marks: 70,
     time: "3 Hours",
@@ -143,71 +178,7 @@ export const CBSE_REGISTRY = {
     ]
   },
 
-  // 8. Informatics Practices Class 12 (065) & Class 11 - Exactly 37 Qs, 70 Marks
-  ip: {
-    marks: 70,
-    time: "3 Hours",
-    instructions: [
-      "The examination paper contains five sections: Section A to Section E.",
-      "Section A consists of 21 questions (1 to 21) carrying 1 Mark each.",
-      "Section B consists of 7 questions (22 to 28) carrying 2 Marks each.",
-      "Section C consists of 4 questions (29 to 32) carrying 3 Marks each.",
-      "Section D consists of 2 questions (33 to 34) carrying 4 Marks each.",
-      "Section E consists of 3 questions (35 to 37) carrying 5 Marks each."
-    ],
-    matrix: [
-      { label: "Section A: Objective MCQs (Q1 to Q21) [1M]", count: 21, marks: 1, enabled: true },
-      { label: "Section B: Short Answer (Q22 to Q28) [2M]", count: 7, marks: 2, enabled: true },
-      { label: "Section C: Short Answer (Q29 to Q32) [3M]", count: 4, marks: 3, enabled: true },
-      { label: "Section D: Practical / Case (Q33 to Q34) [4M]", count: 2, marks: 4, enabled: true },
-      { label: "Section E: Long Answer (Q35 to Q37) [5M]", count: 3, marks: 5, enabled: true }
-    ]
-  },
-
-  // 9. Physical Education Class 12 (048) - Exactly 37 Qs, 70 Marks
-  ped: {
-    marks: 70,
-    time: "3 Hours",
-    instructions: [
-      "The question paper consists of 5 sections and 37 Questions.",
-      "Section A consists of question 1-18 carrying 1 mark each and is multiple choice.",
-      "Section B consists of questions 19-24 carrying 2 marks each (Attempt any 5).",
-      "Section C consists of Question 25-30 carrying 3 marks each (Attempt any 5).",
-      "Section D consists of Question 31-33 carrying 4 marks each and are case studies.",
-      "Section E consists of Question 34-37 carrying 5 marks each (Attempt any 3)."
-    ],
-    matrix: [
-      { label: "Section A: MCQs (Q1 to Q18) [1M]", count: 18, marks: 1, enabled: true },
-      { label: "Section B: VSA Type (Q19 to Q24) [2M]", count: 6, marks: 2, enabled: true },
-      { label: "Section C: SA Type (Q25 to Q30) [3M]", count: 6, marks: 3, enabled: true },
-      { label: "Section D: Case Studies (Q31 to Q33) [4M]", count: 3, marks: 4, enabled: true },
-      { label: "Section E: LA Type (Q34 to Q37) [5M]", count: 4, marks: 5, enabled: true }
-    ]
-  },
-
-  // 10. Geography Class 12 (029) - Exactly 30 Qs, 70 Marks
-  geography: {
-    marks: 70,
-    time: "3 Hours",
-    instructions: [
-      "This question paper contains 30 questions. All questions are compulsory.",
-      "This question paper is divided into five sections: Section-A, B, C, D and E.",
-      "Section A - Question number 1 to 17 are Multiple Choice type carrying 1 mark each.",
-      "Section B - Question number 18 and 19 are Source based carrying 3 marks each.",
-      "Section C - Question number 20 to 23 are Short Answer type carrying 3 marks each.",
-      "Section D - Question number 24 to 28 are Long Answer type carrying 5 marks each.",
-      "Section E - Question number 29 and 30 are Map based carrying 5 marks each."
-    ],
-    matrix: [
-      { label: "Section A: MCQs (Q1 to Q17) [1M]", count: 17, marks: 1, enabled: true },
-      { label: "Section B: Source Based (Q18 to Q19) [3M]", count: 2, marks: 3, enabled: true },
-      { label: "Section C: Short Answer (Q20 to Q23) [3M]", count: 4, marks: 3, enabled: true },
-      { label: "Section D: Long Answer (Q24 to Q28) [5M]", count: 5, marks: 5, enabled: true },
-      { label: "Section E: Map Based (Q29 to Q30) [5M]", count: 2, marks: 5, enabled: true }
-    ]
-  },
-
-  // 11. Social Science Class 10 (087) & Class 9 - Exactly 38 Qs, 80 Marks
+  // 10. Social Science Class 10 (087) - Exactly 38 Questions, 80 Marks
   sst: {
     marks: 80,
     time: "3 Hours",
@@ -225,42 +196,7 @@ export const CBSE_REGISTRY = {
     ]
   },
 
-  // 12. Hindi Class 12 Core (302) & Elective (002) - Exactly 13 Qs, 80 Marks (3 Khands)
-  hindi12: {
-    marks: 80,
-    time: "3 Hours",
-    instructions: [
-      "इस प्रश्न-पत्र में तीन खंड हैं – खंड- क, ख और ग।",
-      "खंड- क में अपठित बोध पर आधारित प्रश्न पूछे गए हैं। सभी प्रश्नों के उत्तर देना अनिवार्य है।",
-      "खंड- ख में पाठ्यपुस्तक अभिव्यक्ति और माध्यम से प्रश्न पूछे गए हैं। प्रश्नों में आंतरिक विकल्प दिए गए हैं।",
-      "खंड- ग में पाठ्यपुस्तक आरोह/अंतरा तथा वितान/अंतराल से प्रश्न पूछे गए हैं। प्रश्नों में आंतरिक विकल्प दिए गए हैं।",
-      "तीनों खंडों के कुल 13 प्रश्न हैं। तीनों खंडों के प्रश्नों के उत्तर देना अनिवार्य है। यथासंभव तीनों खंडों के प्रश्नों के उत्तर क्रमशः लिखिए।"
-    ],
-    matrix: [
-      { label: "खंड 'क': अपठित बोध (अपठित गद्यांश व काव्यांश - Q1 से Q2)", count: 2, marks: 9, enabled: true },
-      { label: "खंड 'ख': अभिव्यक्ति और माध्यम एवं रचनात्मक लेखन (Q3 से Q6)", count: 4, marks: 5.5, enabled: true },
-      { label: "खंड 'ग': पाठ्यपुस्तक आरोह/अंतरा व वितान/अंतराल (Q7 से Q13)", count: 7, marks: 5.71, enabled: true }
-    ]
-  },
-
-  // 13. Hindi Class 10 Course-B (085) & Course-A (002) - Exactly 16 Qs, 80 Marks (4 Khands)
-  hindi10: {
-    marks: 80,
-    time: "3 Hours",
-    instructions: [
-      "इस प्रश्नपत्र में कुल चार खंड हैं– क, ख, ग, घ।",
-      "इस प्रश्नपत्र में कुल 16 प्रश्न हैं। सभी प्रश्न अनिवार्य हैं।",
-      "प्रश्नपत्र में आंतरिक विकल्प दिए गए हैं। प्रश्नों के उत्तर दिए गए निर्देशों का पालन करते हुए लिखिए।"
-    ],
-    matrix: [
-      { label: "खंड 'क': अपठित गद्यांश (Q1-2)", count: 2, marks: 7, enabled: true },
-      { label: "खंड 'ख': व्यावहारिक व्याकरण (Q3-6)", count: 4, marks: 4, enabled: true },
-      { label: "खंड 'ग': पाठ्यपुस्तक स्पर्श व संचयन (Q7-11)", count: 5, marks: 6, enabled: true },
-      { label: "खंड 'घ': रचनात्मक लेखन (Q12-16)", count: 5, marks: 4, enabled: true }
-    ]
-  },
-
-  // 14. English Class 10 (184) - Exactly 11 Qs, 80 Marks
+  // 11. English Language & Literature (184, Class 10) - Exactly 11 Questions
   english10: {
     marks: 80,
     time: "3 Hours",
@@ -269,56 +205,23 @@ export const CBSE_REGISTRY = {
       "The question paper contains THREE sections – Section A: Reading Skills, Section B: Grammar and Creative Writing Skills, Section C: Literature Textbook."
     ],
     matrix: [
-      { label: "Section A: Reading Skills (Q1-2: Discursive & Case Passages)", count: 2, marks: 10, enabled: true },
-      { label: "Section B: Grammar and Creative Writing Skills (Q3-5)", count: 3, marks: 6.66, enabled: true },
+      { label: "Section A: Reading Skills (Q1-2: Discursive & Factual Passages)", count: 2, marks: 10, enabled: true },
+      { label: "Section B: Grammar & Creative Writing Skills (Q3-5)", count: 3, marks: 6.66, enabled: true },
       { label: "Section C: Literature Textbook (Q6-11)", count: 6, marks: 6.66, enabled: true }
     ]
   },
 
-  // 15. English Class 12 Core (301) / Elective (001) - Exactly 13 Qs, 80 Marks
+  // 12. English Core (301, Class 12) - Exactly 13 Questions
   english12: {
     marks: 80,
     time: "3 Hours",
     instructions: [
-      "This question paper comprises 13 questions in THREE sections.",
-      "Section A: Reading Skills (22 Marks)",
-      "Section B: Creative Writing Skills (18 Marks)",
-      "Section C: Literature Textbook & Supplementary (40 Marks)"
+      "This question paper comprises 13 questions in THREE sections: Section A: Reading, Section B: Writing, Section C: Literature."
     ],
     matrix: [
-      { label: "Section A: Reading Skills (Q1-2 Passages)", count: 2, marks: 11, enabled: true },
-      { label: "Section B: Creative Writing Skills (Q3-6 Notice/Letter/Report)", count: 4, marks: 4.5, enabled: true },
-      { label: "Section C: Literature Textbook (Q7-13 Extracts & Questions)", count: 7, marks: 5.71, enabled: true }
-    ]
-  },
-
-  // 16. Sanskrit (122) - Exactly 18 Qs, 80 Marks
-  sanskrit: {
-    marks: 80,
-    time: "3 Hours",
-    instructions: [
-      "अस्मिन् प्रश्नपत्रे 18 प्रश्नाः सन्ति। सर्वे प्रश्नाः अनिवार्याः सन्ति।",
-      "अस्मिन् प्रश्नपत्रे चत्वारः खण्डाः सन्ति: 'क' अपठितावबोधनम् (10 अङ्काः), 'ख' रचनात्मककार्यम् (15 अङ्काः), 'ग' अनुप्रयुक्तव्याकरणम् (25 अङ्काः), 'घ' पठितावबोधनम् (30 अङ्काः)"
-    ],
-    matrix: [
-      { label: "खण्डः 'क': अपठितावबोधनम्", count: 1, marks: 10, enabled: true },
-      { label: "खण्डः 'ख': रचनात्मककार्यम्", count: 4, marks: 3.75, enabled: true },
-      { label: "खण्डः 'ग': अनुप्रयुक्तव्याकरणम्", count: 7, marks: 3.57, enabled: true },
-      { label: "खण्डः 'घ': पठितावबोधनम्", count: 6, marks: 5, enabled: true }
-    ]
-  },
-
-  // 17. Skill Subjects (IT 402, AI 417) - Exactly 21 Qs, 50 Marks
-  skillSubjects: {
-    marks: 50,
-    time: "2 Hours",
-    instructions: [
-      "This question paper consists of 21 questions in two sections: Section A & Section B.",
-      "Section A has Objective type questions (24 marks). Section B has Subjective type questions (26 marks)."
-    ],
-    matrix: [
-      { label: "Section A: Objective Type (Employability & Subject) [Q1-11]", count: 11, marks: 2.18, enabled: true },
-      { label: "Section B: Subject Specific Short & Competency [Q12-21]", count: 10, marks: 2.6, enabled: true }
+      { label: "Section A: Reading Skills (Passages 1 & 2)", count: 2, marks: 11, enabled: true },
+      { label: "Section B: Creative Writing Skills (Notice, Letter, Article/Report)", count: 4, marks: 4.5, enabled: true },
+      { label: "Section C: Literature Textbook & Supplementary Extracts", count: 7, marks: 5.71, enabled: true }
     ]
   }
 };
@@ -328,30 +231,19 @@ export function resolveSubjectRegistry(subject = '', selectedClass = '') {
   const cls = selectedClass.toLowerCase();
   const isSenior = cls.includes('11') || cls.includes('12');
 
+  if (sub.includes('hindi')) {
+    return isSenior ? CBSE_REGISTRY.hindiCore12 : CBSE_REGISTRY.hindi10;
+  }
   if (sub.includes('account') || sub.includes('055')) return CBSE_REGISTRY.accountancy;
   if (sub.includes('business') || sub.includes('054') || sub.includes('bst')) return CBSE_REGISTRY.bst;
   if (sub.includes('eco') || sub.includes('030')) return CBSE_REGISTRY.economics;
-  if (sub.includes('geo') || sub.includes('029')) return CBSE_REGISTRY.geography;
-  if (sub.includes('physical') || sub.includes('048') || sub.includes('ped')) return CBSE_REGISTRY.ped;
-  if (sub.includes('computer') || sub.includes('083')) return CBSE_REGISTRY.cs;
-  if (sub.includes('informatics') || sub.includes('065') || sub.includes('ip')) return CBSE_REGISTRY.ip;
-  if (sub.includes('402') || sub.includes('417') || sub.includes('skill') || sub.includes('artificial intel')) return CBSE_REGISTRY.skillSubjects;
   if (sub.includes('math') || sub.includes('041') || sub.includes('241')) return CBSE_REGISTRY.math;
-  if (sub.includes('sanskrit') || sub.includes('122')) return CBSE_REGISTRY.sanskrit;
-  if (sub.includes('hindi') || sub.includes('085') || sub.includes('302') || sub.includes('002')) {
-    return isSenior ? CBSE_REGISTRY.hindi12 : CBSE_REGISTRY.hindi10;
-  }
-  if (sub.includes('english') || sub.includes('184') || sub.includes('301') || sub.includes('101') || sub.includes('001')) {
-    return isSenior ? CBSE_REGISTRY.english12 : CBSE_REGISTRY.english10;
-  }
+  if (sub.includes('computer') || sub.includes('083') || sub.includes('ip') || sub.includes('065')) return CBSE_REGISTRY.cs;
   if (sub.includes('social') || sub.includes('sst') || sub.includes('087')) return CBSE_REGISTRY.sst;
-
-  if (sub.includes('physics') || sub.includes('chem') || sub.includes('bio') || sub.includes('042') || sub.includes('043') || sub.includes('044')) {
-    return isSenior ? CBSE_REGISTRY.science12 : CBSE_REGISTRY.science10;
-  }
-  if (sub.includes('science')) {
+  if (sub.includes('english')) return isSenior ? CBSE_REGISTRY.english12 : CBSE_REGISTRY.english10;
+  if (sub.includes('physics') || sub.includes('chem') || sub.includes('bio')) {
     return isSenior ? CBSE_REGISTRY.science12 : CBSE_REGISTRY.science10;
   }
 
-  return isSenior ? CBSE_REGISTRY.science12 : CBSE_REGISTRY.math;
+  return isSenior ? CBSE_REGISTRY.hindiCore12 : CBSE_REGISTRY.science10;
 }
