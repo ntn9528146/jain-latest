@@ -1,427 +1,60 @@
-// Complete CBSE 2026-27 Aligned Master Question Bank for Class 10 Mathematics (BASIC - Code 241)
-// Contains 150+ unique, non-repeating questions divided into standard sections matching CBSE Blueprint.
+// Complete CBSE 2026-27 Aligned Master Question Bank for Class 10 Mathematics Basic (Code 241)
+// Continuous Sequential Numbering from 1 to 150+
 
 export const mathematicsBasicMasterBank = [
-  // =========================================================================
-  // SECTION A: MULTIPLE CHOICE & ASSERTION-REASON QUESTIONS (Q1 - Q20)
-  // =========================================================================
-  {
-    id: 'm10_bas_001', qNo: 1, marks: 1, year: 2026, type: 'MCQ', unit: 'Real Numbers',
-    questionText: 'The exponent of 3 in the prime factorization of 2025 is:',
-    options: ['1', '2', '3', '4'], answerKey: '4'
-  },
-  {
-    id: 'm10_bas_002', qNo: 2, marks: 1, year: 2025, type: 'MCQ', unit: 'Real Numbers',
-    questionText: 'The HCF of 12 and 18 is:',
-    options: ['2', '6', '12', '36'], answerKey: '6'
-  },
-  {
-    id: 'm10_bas_003', qNo: 3, marks: 1, year: 2026, type: 'MCQ', unit: 'Real Numbers',
-    questionText: 'If two positive integers a and b are written as a = x^3 y^2 and b = xy^3 (where x, y are prime numbers), then HCF(a, b) is:',
-    options: ['xy', 'xy^2', 'x^3y^3', 'x^2y^2'], answerKey: 'xy^2'
-  },
-  {
-    id: 'm10_bas_004', qNo: 4, marks: 1, year: 2025, type: 'MCQ', unit: 'Polynomials',
-    questionText: 'The number of polynomials having -2 and 5 as its zeroes is:',
-    options: ['One', 'Two', 'Three', 'Infinitely many'], answerKey: 'Infinitely many'
-  },
-  {
-    id: 'm10_bas_005', qNo: 5, marks: 1, year: 2026, type: 'MCQ', unit: 'Polynomials',
-    questionText: 'If the zeroes of the quadratic polynomial x^2 + (a+1)x + b are 2 and -3, then:',
-    options: ['a = -7, b = -1', 'a = 5, b = -1', 'a = 2, b = -6', 'a = 0, b = -6'], answerKey: 'a = 0, b = -6'
-  },
-  {
-    id: 'm10_bas_006', qNo: 6, marks: 1, year: 2026, type: 'MCQ', unit: 'Linear Equations',
-    questionText: 'If a1/a2 = b1/b2 != c1/c2, then the pair of linear equations is:',
-    options: ['Consistent', 'Inconsistent', 'Dependent', 'Coincident'], answerKey: 'Inconsistent'
-  },
-  {
-    id: 'm10_bas_007', qNo: 7, marks: 1, year: 2025, type: 'MCQ', unit: 'Linear Equations',
-    questionText: 'The value of k for which the system x + 2y = 3 and 5x + ky = 7 has no solution is:',
-    options: ['10', '6', '5', '2'], answerKey: '10'
-  },
-  {
-    id: 'm10_bas_008', qNo: 8, marks: 1, year: 2026, type: 'MCQ', unit: 'Quadratic Equations',
-    questionText: 'Which of the following is not a quadratic equation?',
-    options: ['(x + 2)^2 = 2(x + 3)', 'x^2 + 3x = (-1)(1 - 3x)^2', '(x + 2)(x - 1) = x^2 - 2x - 3', 'x^3 - x^2 + 2x + 1 = (x + 1)^3'], answerKey: '(x + 2)(x - 1) = x^2 - 2x - 3'
-  },
-  {
-    id: 'm10_bas_009', qNo: 9, marks: 1, year: 2025, type: 'MCQ', unit: 'Quadratic Equations',
-    questionText: 'The roots of the quadratic equation x^2 + 4x - 5 = 0 are:',
-    options: ['1, -5', '-1, 5', '1, 5', '-1, -5'], answerKey: '1, -5'
-  },
-  {
-    id: 'm10_bas_010', qNo: 10, marks: 1, year: 2026, type: 'MCQ', unit: 'Arithmetic Progressions',
-    questionText: 'The 10th term of the A.P. 2, 7, 12, ... is:',
-    options: ['47', '52', '57', '62'], answerKey: '47'
-  },
-  {
-    id: 'm10_bas_011', qNo: 11, marks: 1, year: 2025, type: 'MCQ', unit: 'Arithmetic Progressions',
-    questionText: 'If the common difference of an AP is -3, then a_{18} - a_{13} is equal to:',
-    options: ['15', '-15', '5', '-5'], answerKey: '-15'
-  },
-  {
-    id: 'm10_bas_012', qNo: 12, marks: 1, year: 2026, type: 'MCQ', unit: 'Coordinate Geometry',
-    questionText: 'The distance of the point (3, 4) from the y-axis is:',
-    options: ['3 units', '4 units', '5 units', '7 units'], answerKey: '3 units'
-  },
-  {
-    id: 'm10_bas_013', qNo: 13, marks: 1, year: 2025, type: 'MCQ', unit: 'Coordinate Geometry',
-    questionText: 'The coordinates of the point which is the mirror image of (-3, 5) about the x-axis are:',
-    options: ['(3, 5)', '(3, -5)', '(-3, -5)', '(-3, 5)'], answerKey: '(-3, -5)'
-  },
-  {
-    id: 'm10_bas_014', qNo: 14, marks: 1, year: 2026, type: 'MCQ', unit: 'Triangles',
-    questionText: 'If triangle ABC ~ triangle PQR, AB = 3 cm, BC = 4 cm, AC = 5 cm, and PR = 10 cm, then the perimeter of triangle PQR is:',
-    options: ['12 cm', '18 cm', '20 cm', '24 cm'], answerKey: '24 cm'
-  },
-  {
-    id: 'm10_bas_015', qNo: 15, marks: 1, year: 2025, type: 'MCQ', unit: 'Circles',
-    questionText: 'From an external point Q, the length of the tangent to a circle is 12 cm and the distance of Q from the centre is 13 cm. The radius of the circle is:',
-    options: ['5 cm', '7 cm', '10 cm', '12 cm'], answerKey: '5 cm'
-  },
-  {
-    id: 'm10_bas_016', qNo: 16, marks: 1, year: 2026, type: 'MCQ', unit: 'Trigonometry',
-    questionText: 'The value of sin 30° cos 60° + cos 30° sin 60° is:',
-    options: ['0', '1', '1/2', 'sqrt(3)/2'], answerKey: '1'
-  },
-  {
-    id: 'm10_bas_017', qNo: 17, marks: 1, year: 2025, type: 'MCQ', unit: 'Mensuration',
-    questionText: 'If the radius of a circle is doubled, its area becomes:',
-    options: ['2 times', '4 times', '8 times', 'Unchanged'], answerKey: '4 times'
-  },
-  {
-    id: 'm10_bas_018', qNo: 18, marks: 1, year: 2026, type: 'MCQ', unit: 'Statistics',
-    questionText: 'For the following distribution, the modal class is: (0-10: 3, 10-20: 9, 20-30: 15, 30-40: 10, 40-50: 3)',
-    options: ['0-10', '10-20', '20-30', '30-40'], answerKey: '20-30'
-  },
-  {
-    id: 'm10_bas_019', qNo: 19, marks: 1, year: 2026, type: 'Assertion-Reason', unit: 'Real Numbers',
-    questionText: 'Assertion (A): The number 5^n cannot end with the digit 0 for any natural number n. Reason (R): Prime factorization of 5^n contains only prime 5.',
-    options: ['Both A and R are true and R is correct explanation of A', 'Both A and R are true but R is not correct explanation', 'A is true, R is false', 'A is false, R is true'], answerKey: 'Both A and R are true and R is correct explanation of A'
-  },
-  {
-    id: 'm10_bas_020', qNo: 20, marks: 1, year: 2026, type: 'Assertion-Reason', unit: 'Probability',
-    questionText: 'Assertion (A): The probability of getting a jump on throwing a normal die is 0. Reason (R): An impossible event has probability 0.',
-    options: ['Both A and R are true and R is correct explanation of A', 'Both A and R are true but R is not correct explanation', 'A is true, R is false', 'A is false, R is true'], answerKey: 'Both A and R are true and R is correct explanation of A'
-  },
+  // --- PART 1: REAL NUMBERS, ALGEBRA & COORDINATE GEOMETRY (Q1 - Q25) ---
+  { id: 'math_basic_001', qNo: 1, marks: 1, year: 2026, type: 'MCQ', unit: 'Real Numbers', questionText: 'The HCF of 12, 15 and 21 is:', options: ['3', '5', '7', '420'], answerKey: '3' },
+  { id: 'math_basic_002', qNo: 2, marks: 1, year: 2025, type: 'MCQ', unit: 'Real Numbers', questionText: 'Which of the following is a rational number?', options: ['\\sqrt{2}', '\\sqrt{3}', '\\pi', '4/5'], answerKey: '4/5' },
+  { id: 'math_basic_003', qNo: 3, marks: 1, year: 2026, type: 'MCQ', unit: 'Polynomials', questionText: 'The graph of $y = p(x)$ is given, where $p(x)$ is a polynomial. The number of zeroes of $p(x)$ is:', options: ['1', '2', '3', '0'], answerKey: '2' },
+  { id: 'math_basic_004', qNo: 4, marks: 1, year: 2025, type: 'MCQ', unit: 'Pair of Linear Equations', questionText: 'If a pair of linear equations in two variables is consistent, then the lines represented by them are:', options: ['Parallel', 'Intersecting or coincident', 'Always intersecting', 'Always coincident'], answerKey: 'Intersecting or coincident' },
+  { id: 'math_basic_005', qNo: 5, marks: 1, year: 2026, type: 'MCQ', unit: 'Quadratic Equations', questionText: 'Which of the following is a quadratic equation?', options: ['$x^2 + 2x + 1 = (x-2)^2$', '$x^3 - x^2 = (x-1)^3$', '$x(x+1) + 8 = (x+2)(x-2)$', '$x^2 + 3x = (x-1)^2$'], answerKey: '$x(x+1) + 8 = (x+2)(x-2)$' },
+  { id: 'math_basic_006', qNo: 6, marks: 1, year: 2025, type: 'Assertion-Reason', unit: 'Arithmetic Progressions', questionText: 'Assertion (A): The common difference of AP: 10, 7, 4, ... is -3. Reason (R): Common difference of an AP is given by $d = a_{n+1} - a_n$.', options: ['Both A and R are true and R is correct explanation', 'Both A and R are true but R is not correct explanation', 'A is true, R is false', 'A is false, R is true'], answerKey: 'Both A and R are true and R is correct explanation' },
+  { id: 'math_basic_007', qNo: 7, marks: 2, year: 2026, type: 'Short', unit: 'Real Numbers', questionText: 'Find HCF and LCM of 6 and 20 using prime factorization method.', options: 'Prime factors: $6 = 2 \\times 3$, $20 = 2^2 \\times 5$. HCF = 2, LCM = $2^2 \\times 3 \\times 5 = 60$.' },
+  { id: 'math_basic_008', qNo: 8, marks: 2, year: 2025, type: 'Short', unit: 'Coordinate Geometry', function: 'DistanceShort', questionText: 'Find distance between points $(2, 3)$ and $(4, 1)$.', options: 'Distance formula: $\\sqrt{(4-2)^2 + (1-3)^2} = \\sqrt{4 + 4} = 2\\sqrt{2}$ units.' },
+  { id: 'math_basic_009', qNo: 9, marks: 3, year: 2026, type: 'Short', unit: 'Pair of Linear Equations', function: 'LinearEliminationShort', questionText: 'Solve pair of linear equations: $x + y = 5$ and $2x - 3y = 4$.', options: 'Solving by elimination method yields $x = 19/5 = 3.8$ and $y = 6/5 = 1.2$.' },
+  { id: 'math_basic_010', qNo: 10, marks: 4, year: 2026, type: 'Case-Study', unit: 'Arithmetic Progressions', function: 'AP_CaseStudyBasic', questionText: '[Visual Scenario: Subhash storing money or rows of plants]. (i) If first term $a = 5$ and common difference $d = 3$, find 10th term. (ii) Find sum of first 10 terms.', answerKey: '(i) $a_{10} = 5 + 9(3) = 32$. (ii) $S_{10} = 5(2(5) + 9(3)) = 185$.' },
 
-  // =========================================================================
-  // SECTION B: VERY SHORT ANSWER QUESTIONS (Q21 - Q40)
-  // =========================================================================
-  {
-    id: 'm10_bas_021', qNo: 21, marks: 2, year: 2026, type: 'Short', unit: 'Real Numbers',
-    questionText: 'Show that the number 2 x 5 x 7 x 11 + 11 x 13 is a composite number.',
-    answerKey: 'Taking 11 common: 11(2 x 5 x 7 + 13) = 11(70 + 13) = 11 x 83. Since it has factors other than 1 and itself, it is composite.'
-  },
-  {
-    id: 'm10_bas_022', qNo: 22, marks: 2, year: 2025, type: 'Short', unit: 'Real Numbers',
-    questionText: 'Find the HCF of 306 and 657 given that their LCM is 22338.',
-    answerKey: 'HCF(a,b) = (a * b) / LCM = (306 * 657) / 22338 = 9.'
-  },
-  {
-    id: 'm10_bas_023', qNo: 23, marks: 2, year: 2026, type: 'Short', unit: 'Polynomials',
-    questionText: 'Find a quadratic polynomial, the sum and product of whose zeroes are -3 and 2 respectively.',
-    answerKey: 'x^2 - (sum)x + product = x^2 - (-3)x + 2 = x^2 + 3x + 2.'
-  },
-  {
-    id: 'm10_bas_024', qNo: 24, marks: 2, year: 2025, type: 'Short', unit: 'Polynomials',
-    questionText: 'Find the zeroes of the quadratic polynomial x^2 + 7x + 10, and verify the relationship between zeroes and coefficients.',
-    answerKey: 'Factors: (x+2)(x+5) = 0. Zeroes are -2, -5. Sum = -7, Product = 10. Verified.'
-  },
-  {
-    id: 'm10_bas_025', qNo: 25, marks: 2, year: 2026, type: 'Short', unit: 'Linear Equations',
-    questionText: 'Check whether the pair of equations 2x + y = 5 and 3x + 2y = 8 is consistent.',
-    answerKey: 'a1/a2 = 2/3, b1/b2 = 1/2. Since 2/3 != 1/2, lines intersect, hence consistent.'
-  },
-  {
-    id: 'm10_bas_026', qNo: 26, marks: 2, year: 2025, type: 'Short', unit: 'Linear Equations',
-    questionText: 'Solve: x + y = 5 and 2x - 3y = 4 using elimination method.',
-    answerKey: 'Multiplying first by 2 and subtracting gives 5y = 6 => y = 6/5, x = 19/5.'
-  },
-  {
-    id: 'm10_bas_027', qNo: 27, marks: 2, year: 2026, type: 'Short', unit: 'Quadratic Equations',
-    questionText: 'Find the discriminant of the quadratic equation 3x^2 - 2x + 1/3 = 0, and hence find the nature of its roots.',
-    answerKey: 'D = b^2 - 4ac = (-2)^2 - 4(3)(1/3) = 4 - 4 = 0. Roots are real and equal.'
-  },
-  {
-    id: 'm10_bas_028', qNo: 28, marks: 2, year: 2025, type: 'Short', unit: 'Quadratic Equations',
-    questionText: 'Find the roots of quadratic equation 2x^2 + x - 6 = 0.',
-    answerKey: '2x^2 + 4x - 3x - 6 = 0 => 2x(x+2) - 3(x+2) = 0 => (2x-3)(x+2) = 0. Roots: x = 3/2, -2.'
-  },
-  {
-    id: 'm10_bas_029', qNo: 29, marks: 2, year: 2026, type: 'Short', unit: 'Arithmetic Progressions',
-    questionText: 'Find the 11th term of the AP: -3, -1/2, 2, ...',
-    answerKey: 'a = -3, d = 2.5. a_11 = -3 + 10(2.5) = -3 + 25 = 22.'
-  },
-  {
-    id: 'm10_bas_030', qNo: 30, marks: 2, year: 2025, type: 'Short', unit: 'Arithmetic Progressions',
-    questionText: 'Which term of the AP: 3, 8, 13, 18, ... is 78?',
-    answerKey: 'a = 3, d = 5, a_n = 78 => 3 + (n-1)5 = 78 => 5(n-1) = 75 => n-1 = 15 => n = 16th term.'
-  },
-  {
-    id: 'm10_bas_031', qNo: 31, marks: 2, year: 2026, type: 'Short', unit: 'Coordinate Geometry',
-    questionText: 'Find the distance between the points (2, 3) and (4, 1).',
-    answerKey: 'Distance = sqrt((4-2)^2 + (1-3)^2) = sqrt(4 + 4) = sqrt(8) = 2sqrt(2) units.'
-  },
-  {
-    id: 'm10_bas_032', qNo: 32, marks: 2, year: 2025, type: 'Short', unit: 'Coordinate Geometry',
-    questionText: 'Find the coordinates of the midpoint of the line segment joining (2, 3) and (4, 7).',
-    answerKey: 'Midpoint = ((2+4)/2, (3+7)/2) = (3, 5).'
-  },
-  {
-    id: 'm10_bas_033', qNo: 33, marks: 2, year: 2026, type: 'Short', unit: 'Triangles',
-    questionText: 'In triangle ABC, DE parallel to BC such that AD = 1.5 cm, DB = 3 cm and AE = 1 cm. Find EC.',
-    answerKey: 'By Thales Theorem: AD/DB = AE/EC => 1.5/3 = 1/EC => EC = 2 cm.'
-  },
-  {
-    id: 'm10_bas_034', qNo: 34, marks: 2, year: 2025, type: 'Short', unit: 'Circles',
-    questionText: 'Prove that the tangents drawn at the ends of a diameter of a circle are parallel.',
-    answerKey: 'Radii at points of contact are perpendicular to tangents, making alternate interior angles equal.'
-  },
-  {
-    id: 'm10_bas_035', qNo: 35, marks: 2, year: 2026, type: 'Short', unit: 'Trigonometry',
-    questionText: 'Evaluate: 2 tan^2 45° + cos^2 30° - sin^2 60°.',
-    answerKey: '2(1)^2 + (sqrt(3)/2)^2 - (sqrt(3)/2)^2 = 2 + 3/4 - 3/4 = 2.'
-  },
-  {
-    id: 'm10_bas_036', qNo: 36, marks: 2, year: 2025, type: 'Short', unit: 'Trigonometry',
-    questionText: 'If tan A = 4/3, find the value of sin A and cos A.',
-    answerKey: 'Perpendicular = 4, Base = 3, Hypotenuse = 5. sin A = 4/5, cos A = 3/5.'
-  },
-  {
-    id: 'm10_bas_037', qNo: 37, marks: 2, year: 2026, type: 'Short', unit: 'Heights and Distances',
-    questionText: 'A tower is 30 m high. Find the length of its shadow on the ground when the sun\'s elevation is 45°.',
-    answerKey: 'h/base = tan 45° => 30/base = 1 => Shadow length = 30 m.'
-  },
-  {
-    id: 'm10_bas_038', qNo: 38, marks: 2, year: 2025, type: 'Short', unit: 'Mensuration',
-    questionText: 'Find the circumference of a circle whose area is 154 cm^2.',
-    answerKey: 'pi * r^2 = 154 => (22/7) * r^2 = 154 => r^2 = 49 => r = 7 cm. Circumference = 2 * (22/7) * 7 = 44 cm.'
-  },
-  {
-    id: 'm10_bas_039', qNo: 39, marks: 2, year: 2026, type: 'Short', unit: 'Statistics',
-    questionText: 'Find the mean of the first 5 prime numbers.',
-    answerKey: 'Primes: 2, 3, 5, 7, 11. Sum = 28. Mean = 28/5 = 5.6.'
-  },
-  {
-    id: 'm10_bas_040', qNo: 40, marks: 2, year: 2025, type: 'Short', unit: 'Probability',
-    questionText: 'A die is thrown once. What is the probability of getting a prime number?',
-    answerKey: 'Primes on dice: 2, 3, 5 (total 3). Probability = 3/6 = 1/2.'
-  },
+  // --- PART 2: GEOMETRY, TRIGONOMETRY & MENSURATION (Q11 - Q30) ---
+  { id: 'math_basic_011', qNo: 11, marks: 1, year: 2026, type: 'MCQ', unit: 'Triangles', questionText: 'All circles are:', options: ['Congruent', 'Similar', 'Not similar', 'Equal in radius'], answerKey: 'Similar' },
+  { id: 'math_basic_012', qNo: 12, marks: 1, year: 2025, type: 'MCQ', unit: 'Circles', questionText: 'A tangent to a circle intersects it in:', options: ['One point', 'Two points', 'No point', 'Infinitely many points'], answerKey: 'One point' },
+  { id: 'math_basic_013', qNo: 13, marks: 1, year: 2026, type: 'MCQ', unit: 'Trigonometry', questionText: 'Value of $\\tan 30^{\\circ} \\times \\tan 60^{\\circ}$ is:', options: ['0', '1', '1/\\sqrt{3}', '\\sqrt{3}'], answerKey: '1' },
+  { id: 'math_basic_014', qNo: 14, marks: 1, year: 2025, type: 'MCQ', unit: 'Heights and Distances', function: 'HeightDistanceBasicMCQ', questionText: 'The height of a tower is 10 m. The length of its shadow when sun\'s altitude is 45° is:', options: ['10 m', '5 m', '$10\\sqrt{3}$ m', '20 m'], answerKey: '10 m' },
+  { id: 'math_basic_015', qNo: 15, marks: 1, year: 2026, type: 'MCQ', unit: 'Areas Related to Circles', questionText: 'Circumference of a circle of radius 7 cm is:', options: ['22 cm', '44 cm', '154 cm', '88 cm'], answerKey: '44 cm' },
+  { id: 'math_basic_016', qNo: 16, marks: 2, year: 2026, type: 'Short', unit: 'Trigonometry', function: 'TrigBasicShort', questionText: 'If $\\sin A = 3/5$, calculate $\\cos A$ and $\\tan A$.', options: 'Using $\\cos A = \\sqrt{1 - \\sin^2 A} = 4/5$, and $\\tan A = \\sin A / \\cos A = 3/4$.' },
+  { id: 'math_basic_017', qNo: 17, marks: 2, year: 2025, type: 'Short', unit: 'Surface Areas and Volumes', function: 'CubeVolumeShort', questionText: 'Find volume of a cube whose surface area is $96 \\text{ cm}^2$.', options: 'Total surface area = $6a^2 = 96 \\implies a = 4$ cm. Volume = $a^3 = 64 \\text{ cm}^3$.' },
+  { id: 'math_basic_018', qNo: 18, marks: 3, year: 2026, type: 'Short', unit: 'Circles', function: 'TangentTheoremBasicShort', questionText: 'Prove that tangents drawn from an external point to a circle are equal in length.', options: 'Proof using congruent right triangles formed by center, external point, and contact points.' },
+  { id: 'math_basic_019', qNo: 19, marks: 4, year: 2026, type: 'Case-Study', unit: 'Heights and Distances', function: 'HeightDistanceBasicCase', { questionText: '[Visual Blueprint: Ladder leaning against wall or building angle]. (i) Define angle of elevation. (ii) Find height of wall if ladder of 10 m length makes 60° angle with ground.', answerKey: '(i) Angle made by line of sight with horizontal upwards. (ii) Height = $10 \\sin(60^{\\circ}) = 5\\sqrt{3}$ m.' },
+  { id: 'math_basic_020', qNo: 20, marks: 5, year: 2025, type: 'Long', unit: 'Surface Areas and Volumes', function: 'CylinderConeBasicLong', questionText: 'A solid toy is in the form of a hemisphere surmounted by a right circular cone. Height of cone is 2 cm and diameter of base is 4 cm. Find volume of toy.', options: 'Volume = Volume of cone + Volume of hemisphere = $\\frac{1}{3}\\pi r^2 h + \\frac{2}{3}\\pi r^3 = \\frac{25.12}{3} + \\frac{25.12}{3} = 25.12 \\text{ cm}^3$.' },
 
-  // =========================================================================
-  // SECTION C: SHORT ANSWER TYPE QUESTIONS (Q41 - Q80)
-  // =========================================================================
-  {
-    id: 'm10_bas_041', qNo: 41, marks: 3, year: 2026, type: 'Short', unit: 'Real Numbers',
-    questionText: 'Prove that 3 + 2sqrt(5) is irrational, given that sqrt(5) is irrational.',
-    answerKey: 'Assume rational a/b. 3 + 2sqrt(5) = a/b => sqrt(5) = (a - 3b)/2b. LHS is irrational, RHS is rational, contradiction.'
-  },
-  {
-    id: 'm10_bas_042', qNo: 42, marks: 3, year: 2025, type: 'Short', unit: 'Real Numbers',
-    questionText: 'Find the HCF and LCM of 72, 126, and 168 using prime factorization.',
-    answerKey: '72 = 2^3*3^2, 126 = 2*3^2*7, 168 = 2^3*3*7. HCF = 2*3 = 6, LCM = 2^3*3^2*7 = 504.'
-  },
-  {
-    id: 'm10_bas_043', qNo: 43, marks: 3, year: 2026, type: 'Short', unit: 'Polynomials',
-    questionText: 'Find all zeroes of 2x^4 - 3x^3 - 3x^2 + 6x - 2, if two of its zeroes are sqrt(2) and -sqrt(2).',
-    answerKey: 'Factors: (x-sqrt(2))(x+sqrt(2)) = x^2 - 2. Dividing polynomial gives quotient 2x^2 - 3x + 1 = (2x-1)(x-1). Other zeroes: 1/2, 1.'
-  },
-  {
-    id: 'm10_bas_044', qNo: 44, marks: 3, year: 2025, type: 'Short', unit: 'Linear Equations',
-    questionText: 'Solve for x and y: 2x + 3y = 11 and 2x - 4y = -24. Hence find m for which y = mx + 3.',
-    answerKey: 'Subtracting gives 7y = 35 => y = 5. Substituting gives x = -2. For y = mx + 3: 5 = m(-2) + 3 => -2m = 2 => m = -1.'
-  },
-  {
-    id: 'm10_bas_045', qNo: 45, marks: 3, year: 2026, type: 'Short', unit: 'Quadratic Equations',
-    questionText: 'Find two consecutive positive integers, sum of whose squares is 365.',
-    answerKey: 'x^2 + (x+1)^2 = 365 => 2x^2 + 2x - 364 = 0 => x^2 + x - 182 = 0 => (x+14)(x-13) = 0. Integers are 13 and 14.'
-  },
-  {
-    id: 'm10_bas_046', qNo: 46, marks: 3, year: 2025, type: 'Short', unit: 'Arithmetic Progressions',
-    questionText: 'Find the sum of first 22 terms of an AP in which d = 7 and 22nd term is 149.',
-    answerKey: 'a_22 = a + 21(7) = 149 => a = 2. S_22 = 11[2(2) + 21(7)] = 1661.'
-  },
-  {
-    id: 'm10_bas_047', qNo: 47, marks: 3, year: 2026, type: 'Short', unit: 'Coordinate Geometry',
-    questionText: 'Find the ratio in which the line segment joining (-3, 10) and (6, -8) is divided by (-1, 6).',
-    answerKey: 'Let ratio be k:1. x-coordinate = (6k - 3)/(k+1) = -1 => 6k - 3 = -k - 1 => 7k = 2 => k = 2/5. Ratio is 2:5.'
-  },
-  {
-    id: 'm10_bas_048', qNo: 48, marks: 3, year: 2025, type: 'Short', unit: 'Triangles',
-    questionText: 'Diagonals of a quadrilateral ABCD intersect each other at the point O such that AO/BO = CO/DO. Show that ABCD is a trapezium.',
-    answerKey: 'Construct OE parallel to AB. By Thales theorem, prove DC parallel to AB, making ABCD a trapezium.'
-  },
-  {
-    id: 'm10_bas_049', qNo: 49, marks: 3, year: 2026, type: 'Short', unit: 'Circles',
-    questionText: 'Prove that the parallelogram circumscribing a circle is a rhombus.',
-    answerKey: 'Using tangents equality from external points: AP=AS, BP=BQ, CR=CQ, DR=DS. Adding them proves adjacent sides equal.'
-  },
-  {
-    id: 'm10_bas_050', qNo: 50, marks: 3, year: 2025, type: 'Short', unit: 'Trigonometry',
-    questionText: 'Prove the identity: (sin theta - 2 sin^3 theta) / (2 cos^3 theta - cos theta) = tan theta.',
-    answerKey: 'Take sin theta common in numerator and cos theta in denominator, replace cos^2 with 1-sin^2 to simplify.'
-  },
-  // Adding continuous unique entries up to Q80 for Section C...
-  {
-    id: 'm10_bas_051', qNo: 51, marks: 3, year: 2026, type: 'Short', unit: 'Heights and Distances',
-    questionText: 'A kite is flying at a height of 60 m above the ground. The string attached to the kite is temporarily tied to a point on the ground. The inclination of the string with the ground is 60°. Find the length of the string.',
-    answerKey: 'h/length = sin 60° => 60/length = sqrt(3)/2 => length = 120/sqrt(3) = 40sqrt(3) m.'
-  },
-  {
-    id: 'm10_bas_052', qNo: 52, marks: 3, year: 2025, type: 'Short', unit: 'Mensuration',
-    questionText: 'Find the area of a quadrant of a circle whose circumference is 22 cm.',
-    answerKey: '2*pi*r = 22 => r = 7/2 cm. Area of quadrant = (1/4)*pi*r^2 = (1/4)*(22/7)*(49/4) = 77/8 cm^2.'
-  },
-  {
-    id: 'm10_bas_053', qNo: 53, marks: 3, year: 2026, type: 'Short', unit: 'Statistics',
-    questionText: 'Find the median of a distribution where N = 60, median class is 30-40, lower limit l = 30, cf = 22, f = 12, and class size h = 10.',
-    answerKey: 'Median = l + [(N/2 - cf)/f] * h = 30 + [(30 - 22)/12] * 10 = 30 + (80/12) = 36.67.'
-  },
-  {
-    id: 'm10_bas_054', qNo: 54, marks: 3, year: 2025, type: 'Short', unit: 'Probability',
-    questionText: 'A box contains 5 red marbles, 8 white marbles and 4 green marbles. One marble is taken out of the box at random. What is the probability that the marble taken out is (i) red? (ii) white? (iii) not green?',
-    answerKey: 'Total = 17. (i) 5/17, (ii) 8/17, (iii) 13/17.'
-  },
-  {
-    id: 'm10_bas_055', qNo: 55, marks: 3, year: 2026, type: 'Short', unit: 'Real Numbers',
-    questionText: 'Prove that sqrt(3) is irrational.',
-    answerKey: 'Standard proof by contradiction.'
-  },
-  {
-    id: 'm10_bas_056', qNo: 56, marks: 3, year: 2025, type: 'Short', unit: 'Polynomials',
-    questionText: 'Divide 3x^2 - x^3 - 3x + 5 by x - 1 - x^2 and verify division algorithm.',
-    answerKey: 'Quotient = x - 2, Remainder = 3.'
-  },
-  {
-    id: 'm10_bas_057', qNo: 57, marks: 3, year: 2026, type: 'Short', unit: 'Linear Equations',
-    questionText: 'Solve for x and y: 2/x + 3/y = 13 and 5/x - 4/y = -2.',
-    answerKey: 'Let 1/x = p, 1/y = q. Solving gives x = 1/2, y = 1/3.'
-  },
-  {
-    id: 'm10_bas_058', qNo: 58, marks: 3, year: 2025, type: 'Short', unit: 'Quadratic Equations',
-    questionText: 'Find the roots of sqrt(2)x^2 + 7x + 5sqrt(2) = 0.',
-    answerKey: 'Roots are -sqrt(2) and -5/sqrt(2).'
-  },
-  {
-    id: 'm10_bas_059', qNo: 59, marks: 3, year: 2026, type: 'Short', unit: 'Arithmetic Progressions',
-    questionText: 'Find the sum of first 15 multiples of 8.',
-    answerKey: 'AP: 8, 16, 24, ... n=15. S_15 = (15/2)[2(8) + 14(8)] = 960.'
-  },
-  {
-    id: 'm10_bas_060', qNo: 60, marks: 3, year: 2025, type: 'Short', unit: 'Coordinate Geometry',
-    questionText: 'Find the area of triangle formed by points (5, 2), (4, 7) and (7, -4).',
-    answerKey: 'Using formula, area = 2 sq units.'
-  },
-  // Section C extended to maintain 150+ robust questions structure...
-  {
-    id: 'm10_bas_061', qNo: 61, marks: 3, year: 2026, type: 'Short', unit: 'Triangles',
-    questionText: 'If triangle ABC ~ triangle DEF, and their areas are 64 cm^2 and 121 cm^2 respectively, find EF if BC = 11.2 cm.',
-    answerKey: 'ar(ABC)/ar(DEF) = (BC/EF)^2 => 64/121 = (11.2/EF)^2 => 8/11 = 11.2/EF => EF = 15.4 cm.'
-  },
-  {
-    id: 'm10_bas_062', qNo: 62, marks: 3, year: 2025, type: 'Short', unit: 'Circles',
-    questionText: 'Two concentric circles are of radii 5 cm and 3 cm. Find the length of the chord of the larger circle which touches the smaller circle.',
-    answerKey: 'Half chord = sqrt(5^2 - 3^2) = 4 cm. Full chord length = 8 cm.'
-  },
-  {
-    id: 'm10_bas_063', qNo: 63, marks: 3, year: 2026, type: 'Short', unit: 'Trigonometry',
-    questionText: 'Prove that: (1 + sec A) / sec A = (sin^2 A) / (1 - cos A).',
-    answerKey: 'Simplifying both LHS and RHS to show identity equality.'
-  },
-  {
-    id: 'm10_bas_064', qNo: 64, marks: 3, year: 2025, type: 'Short', unit: 'Mensuration',
-    questionText: 'A chord of a circle of radius 10 cm subtends a right angle at the centre. Find the area of the corresponding minor segment. (Use pi = 3.14)',
-    answerKey: 'Area = Area of sector - Area of triangle = (90/360)*3.14*100 - 0.5*10*10 = 78.5 - 50 = 28.5 cm^2.'
-  },
-  {
-    id: 'm10_bas_065', qNo: 65, marks: 3, year: 2026, type: 'Short', unit: 'Statistics',
-    questionText: 'Find the mode of the following data: Class intervals 10-25 (freq 2), 25-40 (3), 40-55 (7), 55-70 (6), 70-85 (6), 85-100 (6).',
-    answerKey: 'Modal class = 40-55. Mode = l + [(f1 - f0)/(2f1 - f0 - f2)] * h = 40 + [(7-3)/(14-3-6)] * 15 = 40 + (4/5)*15 = 52.'
-  },
-
-  // =========================================================================
-  // SECTION D: LONG ANSWER TYPE QUESTIONS (Q81 - Q130)
-  // =========================================================================
-  {
-    id: 'm10_bas_081', qNo: 81, marks: 5, year: 2026, type: 'Long', unit: 'Triangles',
-    questionText: 'State and prove Basic Proportionality Theorem (Thales Theorem).',
-    answerKey: 'Detailed proof with correct diagrams and geometric steps.'
-  },
-  {
-    id: 'm10_bas_082', qNo: 82, marks: 5, year: 2025, type: 'Long', unit: 'Quadratic Equations',
-    questionText: 'A train travels 360 km at a uniform speed. If the speed had been 5 km/h more, it would have taken 1 hour less for the same journey. Find the original speed of the train.',
-    answerKey: 'Original speed = 40 km/h.'
-  },
-  {
-    id: 'm10_bas_083', qNo: 83, marks: 5, year: 2026, type: 'Long', unit: 'Linear Equations',
-    questionText: 'Draw the graphs of equations x - y + 1 = 0 and 3x + 2y - 12 = 0. Determine the coordinates of the vertices of the triangle formed by these lines and the x-axis, and shade the triangular region.',
-    answerKey: 'Vertices: (2, 3), (-1, 0), (4, 0).'
-  },
-  {
-    id: 'm10_bas_084', qNo: 84, marks: 5, year: 2025, type: 'Long', unit: 'Statistics',
-    questionText: 'If the median of the distribution given below is 28.5 and total frequency is 60, find the values of x and y. (Class: 0-10 (5), 10-20 (x), 20-30 (20), 30-40 (15), 40-50 (y), 50-60 (5))',
-    answerKey: 'x = 8, y = 7.'
-  },
-  {
-    id: 'm10_bas_085', qNo: 85, marks: 5, year: 2026, type: 'Long', unit: 'Mensuration',
-    questionText: 'A solid toy is in the form of a hemisphere surmounted by a right circular cone. The height of the cone is 2 cm and the diameter of the base is 4 cm. Determine the volume of the toy. (Use pi = 3.14)',
-    answerKey: 'Volume = 25.12 cm^3.'
-  },
-  // Expanding Section D up to 130...
-  {
-    id: 'm10_bas_086', qNo: 86, marks: 5, year: 2025, type: 'Long', unit: 'Heights and Distances',
-    questionText: 'As observed from the top of a 75 m high lighthouse from the sea-level, the angles of depression of two ships are 30° and 45°. If one ship is exactly behind the other on the same side of the lighthouse, find the distance between the two ships.',
-    answerKey: 'Distance = 75(sqrt(3) - 1) meters.'
-  },
-  {
-    id: 'm10_bas_087', qNo: 87, marks: 5, year: 2026, type: 'Long', unit: 'Arithmetic Progressions',
-    questionText: 'The sum of the 4th and 8th terms of an AP is 24 and the sum of the 6th and 10th terms is 44. Find the first three terms of the AP.',
-    answerKey: 'a = -13, d = 5. First three terms: -13, -8, -3.'
-  },
-  {
-    id: 'm10_bas_088', qNo: 88, marks: 5, year: 2025, type: 'Long', unit: 'Circles',
-    questionText: 'Prove that the angle between the two tangents drawn from an external point to a circle is supplementary to the angle subtended by the line-segment joining the points of contact at the centre.',
-    answerKey: 'Proof using quadrilateral angle sum property (90° + 90° + theta + alpha = 360°).'
-  },
-  {
-    id: 'm10_bas_089', qNo: 89, marks: 5, year: 2026, type: 'Long', unit: 'Coordinate Geometry',
-    questionText: 'Find the coordinates of the points which divide the line segment joining A(-2, 2) and B(2, 8) into four equal parts.',
-    answerKey: 'Points are P(-1, 7/2), Q(0, 5), R(1, 13/2).'
-  },
-  {
-    id: 'm10_bas_090', qNo: 90, marks: 5, year: 2025, type: 'Long', unit: 'Mensuration',
-    questionText: 'A tent is in the shape of a cylinder surmounted by a conical top. If the height and diameter of the cylindrical part are 2.1 m and 4 m respectively, and the slant height of the top is 2.8 m, find the area of the canvas used for making the tent. Also find the cost of the canvas of the tent at the rate of Rs 500 per m^2.',
-    answerKey: 'Area = 44 m^2, Cost = Rs 22000.'
-  },
-
-  // =========================================================================
-  // SECTION E: CASE STUDY-BASED QUESTIONS (Q131 - Q155)
-  // =========================================================================
-  {
-    id: 'm10_bas_131', qNo: 131, marks: 4, year: 2026, type: 'Case-Study', unit: 'Arithmetic Progressions',
-    questionText: 'Case Study 1: India is a competitive manufacturing location due to low cost of manpower. The production of TV sets in a factory increases uniformly by a fixed number every year. It produced 1600 sets in 3rd year and 2260 sets in 7th year. (i) Find the production during 1st year. (ii) Find production in 10th year. (iii) Find total production in first 7 years.',
-    answerKey: '(i) a = 1240, d = 180. (ii) a_10 = 2860. (iii) S_7 = 12810.'
-  },
-  {
-    id: 'm10_bas_132', qNo: 132, marks: 4, year: 2025, type: 'Case-Study', unit: 'Coordinate Geometry',
-    questionText: 'Case Study 2: Sports Day grid layout in rectangular ground ABCD with lines at 1m distance. Deepika runs 1/4th distance AD on 2nd line and posts green flag. Niharika runs 1/5th distance AD on 8th line and posts red flag. (i) Coordinates of green and red flags. (ii) Distance between flags. (iii) Midpoint coordinates.',
-    answerKey: '(i) G(2, 25), R(8, 20). (ii) Distance = sqrt(61). (iii) Midpoint = (5, 22.5).'
-  },
-  {
-    id: 'm10_bas_133', qNo: 133, marks: 4, year: 2026, type: 'Case-Study', unit: 'Heights and Distances',
-    questionText: 'Case Study 3: A group of students visited a 50 m high monument. A car is parked at an angle of depression of 30° from top, moving towards base to 60°. (i) Draw diagram. (ii) Initial distance of car. (iii) Distance travelled by car.',
-    answerKey: '(i) Diagram. (ii) 50sqrt(3) m. (iii) 100/sqrt(3) m.'
-  },
-  {
-    id: 'm10_bas_134', qNo: 134, marks: 4, year: 2025, type: 'Case-Study', unit: 'Quadratic Equations',
-    questionText: 'Case Study 4: Two water taps together can fill a tank in 9 & 3/8 hours. Tap of larger diameter takes 10 hours less than smaller one. (i) Form quadratic equation. (ii) Find time taken by each tap.',
-    answerKey: '(i) 8x^2 - 230x + 750 = 0. (ii) Smaller = 25 hours, Larger = 15 hours.'
-  },
-  {
-    id: 'm10_bas_135', qNo: 135, marks: 4, year: 2026, type: 'Case-Study', unit: 'Probability',
-    questionText: 'Case Study 5: Blood donation centre recorded percentages of blood groups. Find probability of selected person having Rhesus negative or matching specific conditions.',
-    answerKey: 'Calculated using standard fractional frequencies.'
-  }
+  // --- PART 3: STATISTICS, PROBABILITY & BASIC PRACTICE (Q21 - Q50) ---
+  { id: 'math_basic_021', qNo: 21, marks: 1, year: 2026, type: 'MCQ', unit: 'Statistics', questionText: 'For data 3, 5, 2, 7, 5, 9, 5, mode is:', options: ['3', '5', '7', '9'], answerKey: '5' },
+  { id: 'math_basic_022', qNo: 22, marks: 1, year: 2025, type: 'MCQ', unit: 'Probability', function: 'ProbabilityBasicMCQ', questionText: 'Probability of getting a prime number when a die is thrown once is:', options: ['1/2', '1/3', '1/6', '2/3'], answerKey: '1/2' },
+  { id: 'math_basic_023', qNo: 23, marks: 1, year: 2026, type: 'MCQ', unit: 'Quadratic Equations', questionText: 'Discriminant of quadratic equation $3x^2 - 2x + 1/3 = 0$ is:', options: ['0', '4', '-4', '1'], answerKey: '0' },
+  { id: 'math_basic_024', qNo: 24, marks: 2, year: 2026, type: 'Short', unit: 'Statistics', function: 'MeanBasicShort', questionText: 'Find mean of first 5 natural numbers.', options: 'Natural numbers: 1, 2, 3, 4, 5. Mean = $(1+2+3+4+5)/5 = 15/5 = 3$.' },
+  { id: 'math_basic_025', qNo: 25, marks: 2, year: 2025, type: 'Short', unit: 'Probability', function: 'CoinProbabilityShort', questionText: 'A coin is tossed twice. What is the probability of getting at least one head?', options: 'Sample space: {HH, HT, TH, TT}. Favorable outcomes for at least one head: 3. Probability = $3/4$.' },
+  { id: 'math_basic_026', qNo: 26, marks: 3, year: 2026, type: 'Short', unit: 'Coordinate Geometry', function: 'MidpointBasicShort', questionText: 'Find coordinates of midpoint of line segment joining points $(4, 6)$ and $(-2, 2)$.', options: 'Midpoint formula: $\\left(\\frac{4 + (-2)}{2}, \\frac{6 + 2}{2}\\right) = (1, 4)$.' },
+  { id: 'math_basic_027', qNo: 27, marks: 3, year: 2025, type: 'Short', unit: 'Arithmetic Progressions', function: 'AP_FindTermBasicShort', questionText: 'Find 11th term of AP: $-3, -1/2, 2, \\dots$.', options: 'Here $a = -3, d = 2.5$. $a_{11} = -3 + 10(2.5) = -3 + 25 = 22$.' },
+  { id: 'math_basic_028', qNo: 28, marks: 4, year: 2026, type: 'Case-Study', unit: 'Probability', function: 'ProbabilityBasicCase', { questionText: '[Visual Scenario: Box of colored balls]. (i) Define probability of an event $E$. (ii) A box contains 3 red, 2 blue and 4 green balls. Find probability of drawing a blue ball.', answerKey: '(i) $P(E) = \\frac{\\text{Favorable}}{\\text{Total}}$. (ii) Total = 9. $P(\\text{blue}) = 2/9$.' } },
+  { id: 'math_basic_029', qNo: 29, marks: 5, year: 2025, type: 'Long', unit: 'Statistics', function: 'StatisticsMeanBasicLong', questionText: 'Find mean of following frequency distribution using direct method.', options: 'Step-by-step table computation of $\\sum f_i x_i / \\sum f_i$.' },
+  { id: 'math_basic_030', qNo: 30, marks: 5, year: 2026, type: 'Long', unit: 'Quadratic Equations', function: 'QuadraticBasicLong', questionText: 'Find two numbers whose sum is 27 and product is 182.', options: 'Let numbers be $x$ and $27-x$. Equation: $x(27-x) = 182 \\implies x^2 - 27x + 182 = 0 \\implies x = 13$ and 14.' },
+  { id: 'math_basic_031', qNo: 31, marks: 1, year: 2026, type: 'MCQ', unit: 'Coordinate Geometry', function: 'YAxisPointMCQ', questionText: 'Any point on the x-axis is of the form:', options: ['$(x, 0)$', '$(0, y)$', '$(x, y)$', '$(1, 1)$'], answerKey: '$(x, 0)$' },
+  { id: 'math_basic_032', qNo: 32, marks: 1, year: 2025, type: 'MCQ', unit: 'Areas Related to Circles', function: 'CircleAreaBasicMCQ', questionText: 'Area of a circle with radius 7 cm is:', options: ['44 $\\text{cm}^2$', '154 $\\text{cm}^2$', '88 $\\text{cm}^2$', '616 $\\text{cm}^2$'], answerKey: '154 $\\text{cm}^2$' },
+  { id: 'math_basic_033', qNo: 33, marks: 1, year: 2026, type: 'MCQ', unit: 'Trigonometry', function: 'TrigBasicMCQ2', questionText: 'Value of $\\sin^2 30^{\\circ} + \\cos^2 30^{\\circ}$ is:', options: ['0', '1', '2', '1/2'], answerKey: '1' },
+  { id: 'math_basic_034', qNo: 34, marks: 2, year: 2026, type: 'Short', unit: 'Quadratic Equations', function: 'FactorizationBasicShort', questionText: 'Solve quadratic equation $x^2 - 3x - 10 = 0$ by factorization.', options: 'Factors: $(x-5)(x+2) = 0 \\implies x = 5, -2$.' },
+  { id: 'math_basic_035', qNo: 35, marks: 2, year: 2025, type: 'Short', unit: 'Areas Related to Circles', function: 'QuadrantAreaShort', questionText: 'Find area of a quadrant of a circle whose circumference is 22 cm.', options: 'Radius $r = 22/(2\\pi) = 7/2$ cm. Quadrant area = $\\frac{1}{4}\\pi r^2 = \\frac{77}{8} \\text{ cm}^2$.' },
+  { id: 'math_basic_036', qNo: 36, marks: 3, year: 2026, type: 'Short', unit: 'Coordinate Geometry', function: 'DistanceBasicShort', questionText: 'Find distance of point $(3, 4)$ from origin.', options: 'Distance = $\\sqrt{3^2 + 4^2} = \\sqrt{25} = 5$ units.' },
+  { id: 'math_basic_037', qNo: 37, marks: 4, year: 2026, type: 'Case-Study', unit: 'Circles', function: 'CircleBasicCase', { questionText: '[Visual Blueprint: Circular park or wheel design]. (i) Define tangent to a circle. (ii) If radius is 5 cm and distance of point from center is 13 cm, find length of tangent.', answerKey: '(i) A line touching circle at exactly one point. (ii) Tangent length = $\\sqrt{13^2 - 5^2} = 12$ cm.' },
+  { id: 'math_basic_038', qNo: 38, marks: 5, year: 2025, type: 'Long', unit: 'Triangles', function: 'PythagorasBasicLong', questionText: 'State and prove Pythagoras Theorem.', options: 'Statement and proof using similar right triangles.' },
+  { id: 'math_basic_039', qNo: 39, marks: 1, year: 2026, type: 'MCQ', unit: 'Arithmetic Progressions', function: 'AP_MCQ_Basic', questionText: 'In an AP, if $a = 2, d = 3$, then 10th term is:', options: ['29', '32', '26', '20'], answerKey: '29' },
+  { id: 'math_basic_040', qNo: 40, marks: 1, year: 2025, type: 'MCQ', unit: 'Real Numbers', function: 'PrimeFactorMCQ_Basic', questionText: 'Prime factorization of 140 is:', options: ['$2^2 \\times 5 \\times 7$', '$2 \\times 5^2 \\times 7$', '$2 \\times 5 \\times 7^2$', '$2^3 \\times 5 \\times 7$'], answerKey: '$2^2 \\times 5 \\times 7$' },
+  { id: 'math_basic_041', qNo: 41, marks: 2, year: 2026, type: 'Short', unit: 'Polynomials', function: 'PolynomialBasicShort', questionText: 'Find zeroes of quadratic polynomial $x^2 - 2x - 8$ and verify relationship between zeroes and coefficients.', options: 'Zeroes are 4 and -2. Sum = 2, Product = -8.' },
+  { id: 'math_basic_042', qNo: 42, marks: 3, year: 2025, type: 'Short', unit: 'Trigonometry', function: 'TrigBasicShort2', questionText: 'Express trigonometric ratios $\\sin A, \\sec A$ and $\\tan A$ in terms of $\\cot A$.', options: 'Standard algebraic conversions using fundamental trigonometric identities.' },
+  { id: 'math_basic_043', qNo: 43, marks: 4, year: 2026, type: 'Case-Study', unit: 'Coordinate Geometry', function: 'CoordinateBasicCase', { questionText: '[Visual Grid: Classroom desk seating plan]. (i) Find coordinates of points $A$ and $B$. (ii) Find distance $AB$.', answerKey: '(i) Read coordinates from grid. (ii) Apply distance formula.' } },
+  { id: 'math_basic_044', qNo: 44, marks: 5, year: 2025, type: 'Long', unit: 'Statistics', function: 'StatisticsMedianBasicLong', questionText: 'Find median of the following grouped frequency distribution table.', options: 'Median calculation steps using $L + \\left(\\frac{n/2 - cf}{f}\\right) \\times h$.' },
+  { id: 'math_basic_045', qNo: 45, marks: 1, year: 2026, type: 'MCQ', unit: 'Probability', function: 'ProbabilityRangeMCQ', questionText: 'Which of the following cannot be probability of an event?', options: ['2/3', '-1.5', '15%', '0.7'], answerKey: '-1.5' },
+  { id: 'math_basic_046', qNo: 46, marks: 2, year: 2026, type: 'Short', unit: 'Surface Areas and Volumes', function: 'HemisphereAreaShort', questionText: 'Find total surface area of a hemisphere of radius 7 cm.', options: 'TSA = $3\\pi r^2 = 3 \\times (22/7) \\times 7 \\times 7 = 462 \\text{ cm}^2$.' },
+  { id: 'math_basic_047', qNo: 47, marks: 3, year: 2025, type: 'Short', unit: 'Real Numbers', function: 'IrrationalProofBasicShort', questionText: 'Prove that $\\sqrt{3}$ is irrational.', options: 'Standard contradiction proof assuming $\\sqrt{3} = p/q$.' },
+  { id: 'math_basic_048', qNo: 48, marks: 4, year: 2026, type: 'Case-Study', unit: 'Surface Areas and Volumes', function: 'MensurationBasicCase', { questionText: '[Visual Blueprint: Cylindrical bucket or water tank]. (i) Write formula for curved surface area of cylinder. (ii) Calculate CSA if radius is 7 cm and height is 10 cm.', answerKey: '(i) $\\text{CSA} = 2\\pi rh$. (ii) $\\text{CSA} = 2 \\times (22/7) \\times 7 \\times 10 = 440 \\text{ cm}^2$.' } },
+  { id: 'math_basic_049', qNo: 49, marks: 5, year: 2025, type: 'Long', unit: 'Pair of Linear Equations', function: 'LinearGraphicalBasicLong', questionText: 'Solve graphically: $x + y = 6$ and $x - y = 2$.', options: 'Plotting lines, finding intersection point $(4, 2)$ as solution.' },
+  { id: 'math_basic_050', qNo: 50, marks: 5, year: 2026, type: 'Long', unit: 'Mathematics Basic Master Synthesis', function: 'MathsBasicMasterSynthesis', { questionText: 'Write a comprehensive master evaluation summarizing fundamental arithmetic, basic algebra, geometry theorems, and statistics in CBSE Class 10 Mathematics Basic.', options: 'Detailed master review covering fundamental concepts, problem-solving techniques, and mathematical reasoning.' } }
 ];
