@@ -4,11 +4,11 @@ import { bookKeepingAccountancyMasterBank } from './book-keeping-accountancy/que
 import { carnaticVocalMasterBank } from './carnatic-vocal/questionBank.js';
 import { computerApplicationsMasterBank } from './computer-applications/questionBank.js';
 import { englishCommunicativeMasterBank } from './english-communicative/questionBank.js';
-import { englishLangLitMasterBank } from './english-lang-lit/questionBank.js';
-import { hindiAMasterBank } from './hindi-a/questionBank.js';
-import { hindiBMasterBank } from './hindi-b/questionBank.js';
+import { englishlanglitMasterBank } from './english-lang-lit/questionBank.js';
+import { hindiaMasterBank } from './hindi-a/questionBank.js';
+import { hindibMasterBank } from './hindi-b/questionBank.js';
 import { informationTechnologyMasterBank } from './information-technology/questionBank.js';
-import { mathematicsBasicMasterBank } from './mathematics-basic/questionBank.js';
+import { mathematicsbasicMasterBank } from './mathematics-basic/questionBank.js';
 import { mathematicsStandardMasterBank } from './mathematics-standard/questionBank.js';
 import { nccMasterBank } from './ncc/questionBank.js';
 import { pewbMasterBank } from './pewb/questionBank.js';
@@ -23,15 +23,15 @@ export const class10QuestionBanks = {
   'carnatic-vocal': carnaticVocalMasterBank || [],
   'computer-applications': computerApplicationsMasterBank || [],
   'english-communicative': englishCommunicativeMasterBank || [],
-  'english-lang-lit': englishLangLitMasterBank || [],
-  'hindi-a': hindiAMasterBank || [],
-  'hindi-b': hindiBMasterBank || [],
+  'english-lang-lit': englishlanglitMasterBank || [],
+  'hindi-a': hindiaMasterBank || [],
+  'hindi-b': hindibMasterBank || [],
   'sanskrit': sanskritMasterBank || [],
   'punjabi': punjabiMasterBank || [],
   'pewb': pewbMasterBank || [],
   'ncc': nccMasterBank || [],
   'mathematics-standard': mathematicsStandardMasterBank || [],
-  'mathematics-basic': mathematicsBasicMasterBank || [],
+  'mathematics-basic': mathematicsbasicMasterBank || [],
   'information-technology': informationTechnologyMasterBank || [],
   'science': scienceMasterBank || [],
   'social-science': socialScienceMasterBank || [],
