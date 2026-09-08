@@ -29,3 +29,28 @@ export async function callGeminiApi(promptText) {
   const textResult = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
   return textResult;
 }
+
+export function parseAiJsonSafely(rawText) {
+  if (!rawText) return null;
+  try {
+    // Strip markdown code blocks if any
+    let cleaned = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
+    // Try direct parse first
+    return JSON.parse(cleaned);
+  } catch (e1) {
+    try {
+      // Fallback: fix single quotes or trailing commas if possible
+      let fixed = rawText
+        .replace(/```json/gi, '')
+        .replace(/```/g, '')
+        .trim();
+      // Basic cleanup for unquoted keys or single quotes
+      // eslint-disable-next-line no-new-func
+      const result = new Function(`return ${fixed}`)();
+      return result;
+    } catch (e2) {
+      console.error('Safe JSON parse failed:', e2, rawText);
+      return null;
+    }
+  }
+}
