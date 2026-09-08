@@ -22,7 +22,7 @@ export async function callGeminiApi(promptText) {
 
   if (!response.ok) {
     const errData = await response.text();
-    throw new Error(`Gemini API Error: ${errData}`);
+    throw new Error(`Gemini API Error [${response.status}]: ${errData}`);
   }
 
   const data = await response.json();
@@ -34,7 +34,6 @@ export function parseAiJsonSafely(rawText) {
   if (!rawText) return null;
   try {
     let cleaned = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
-    // Find first '{' and last '}'
     const firstBrace = cleaned.indexOf('{');
     const lastBrace = cleaned.lastIndexOf('}');
     if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
