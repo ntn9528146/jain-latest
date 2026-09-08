@@ -3,20 +3,20 @@ export const secondarySyllabus = {
   subjects: {
     'Mathematics Standard (Code 041)': {
       units: [
-        { id: 'm1', name: 'Number Systems', marks: 6, subtopics: ['Real Numbers', 'Fundamental Theorem of Arithmetic', 'Proofs of irrationality'] },
-        { id: 'm2', name: 'Algebra', marks: 20, subtopics: ['Polynomials', 'Pair of Linear Equations in Two Variables', 'Quadratic Equations', 'Arithmetic Progressions'] },
-        { id: 'm3', name: 'Coordinate Geometry', marks: 6, subtopics: ['Lines in two-dimensions', 'Distance Formula', 'Section Formula'] },
-        { id: 'm4', name: 'Geometry', marks: 15, subtopics: ['Triangles', 'Circles and Tangents'] },
+        { id: 'm1', name: 'Number Systems', marks: 6, subtopics: ['Real Numbers', 'Fundamental Theorem of Arithmetic'] },
+        { id: 'm2', name: 'Algebra', marks: 20, subtopics: ['Polynomials', 'Pair of Linear Equations', 'Quadratic Equations', 'Arithmetic Progressions'] },
+        { id: 'm3', name: 'Coordinate Geometry', marks: 6, subtopics: ['Distance Formula', 'Section Formula'] },
+        { id: 'm4', name: 'Geometry', marks: 15, subtopics: ['Triangles', 'Circles'] },
         { id: 'm5', name: 'Trigonometry', marks: 12, subtopics: ['Introduction to Trigonometry', 'Trigonometric Identities', 'Heights and Distances'] },
         { id: 'm6', name: 'Mensuration', marks: 10, subtopics: ['Areas Related to Circles', 'Surface Areas and Volumes'] },
-        { id: 'm7', name: 'Statistics and Probability', marks: 11, subtopics: ['Statistics (Mean, Median, Mode)', 'Probability'] }
+        { id: 'm7', name: 'Statistics and Probability', marks: 11, subtopics: ['Statistics', 'Probability'] }
       ]
     },
     'Mathematics Basic (Code 241)': {
       units: [
         { id: 'mb1', name: 'Number Systems', marks: 6, subtopics: ['Real Numbers', 'Fundamental Theorem of Arithmetic'] },
         { id: 'mb2', name: 'Algebra', marks: 20, subtopics: ['Polynomials', 'Pair of Linear Equations', 'Quadratic Equations', 'Arithmetic Progressions'] },
-        { id: 'mb3', name: 'Coordinate Geometry', marks: 6, subtopics: ['Coordinate geometry basics and distance/section formulas'] },
+        { id: 'mb3', name: 'Coordinate Geometry', marks: 6, subtopics: ['Distance Formula', 'Section Formula'] },
         { id: 'mb4', name: 'Geometry', marks: 15, subtopics: ['Triangles', 'Circles'] },
         { id: 'mb5', name: 'Trigonometry', marks: 12, subtopics: ['Introduction to Trigonometry', 'Trigonometric Identities', 'Heights and Distances'] },
         { id: 'mb6', name: 'Mensuration', marks: 10, subtopics: ['Areas Related to Circles', 'Surface Areas and Volumes'] },
@@ -25,7 +25,7 @@ export const secondarySyllabus = {
     },
     'Science (Code 086)': {
       units: [
-        { id: 's1', name: 'Chemical Substances - Nature and Behaviour', marks: 25, subtopics: ['Chemical Reactions', 'Acids, Bases and Salts', 'Metals and Non-metals', 'Carbon and its Compounds'] },
+        { id: 's1', name: 'Chemical Substances - Nature and Behaviour', marks: 25, subtopics: ['Chemical Reactions', 'Acids, Bases and Salts', 'Metals and Non-metals', 'Carbon compounds'] },
         { id: 's2', name: 'World of Living', marks: 25, subtopics: ['Life Processes', 'Control and Coordination', 'Reproduction', 'Heredity'] },
         { id: 's3', name: 'Natural Phenomena', marks: 12, subtopics: ['Light Reflection and Refraction', 'Human Eye'] },
         { id: 's4', name: 'Effects of Current', marks: 13, subtopics: ['Electricity', 'Magnetic Effects of Electric Current'] },
@@ -34,7 +34,7 @@ export const secondarySyllabus = {
     },
     'Social Science (Code 087)': {
       units: [
-        { id: 'ss1', name: 'History', marks: 20, subtopics: ['Rise of Nationalism in Europe', 'Nationalism in India', 'Global World', 'Print Culture'] },
+        { id: 'ss1', name: 'History', marks: 20, subtopics: ['Nationalism in Europe', 'Nationalism in India', 'Global World', 'Print Culture'] },
         { id: 'ss2', name: 'Geography', marks: 20, subtopics: ['Resources', 'Water', 'Agriculture', 'Minerals', 'Manufacturing', 'Economy'] },
         { id: 'ss3', name: 'Political Science', marks: 20, subtopics: ['Power-sharing', 'Federalism', 'Political Parties', 'Outcomes of Democracy'] },
         { id: 'ss4', name: 'Economics', marks: 20, subtopics: ['Development', 'Sectors', 'Money and Credit', 'Globalisation', 'Consumer Rights'] }
@@ -43,7 +43,7 @@ export const secondarySyllabus = {
     'English Language and Literature (Code 184)': {
       units: [
         { id: 'el1', name: 'Reading Comprehension', marks: 20, subtopics: ['Discursive and Case-based passages'] },
-        { id: 'el2', name: 'Writing Skills and Grammar', marks: 20, subtopics: ['Grammar, Formal Letters, Analytical Paragraph'] },
+        { id: 'el2', name: 'Writing Skills and Grammar', marks: 20, subtopics: ['Grammar, Letters, Analytical Paragraph'] },
         { id: 'el3', name: 'Language through Literature', marks: 40, subtopics: ['First Flight and Footprints Without Feet'] }
       ]
     },
@@ -57,9 +57,9 @@ export const secondarySyllabus = {
     },
     'Hindi Course A (Code 002)': {
       units: [
-        { id: 'ha1', name: 'Ghand Khand', marks: 25, subtopics: ['Reading and Prose'] },
+        { id: 'ha1', name: 'Ghand Khand', marks: 25, subtopics: ['Prose and Reading'] },
         { id: 'ha2', name: 'Kavya Khand', marks: 20, subtopics: ['Poetry'] },
-        { id: 'ha3', name: 'Kritika', marks: 10, subtopics: ['Supplementary'] },
+        { id: 'ha3', name: 'Kritika', marks: 10, subtopics: ['Supplementary Reader'] },
         { id: 'ha4', name: 'Vyakaran', marks: 16, subtopics: ['Grammar'] },
         { id: 'ha5', name: 'Lekhan', marks: 9, subtopics: ['Writing Skills'] }
       ]
@@ -69,7 +69,31 @@ export const secondarySyllabus = {
         { id: 'hb1', name: 'Apathit Bodh', marks: 14, subtopics: ['Reading Comprehension'] },
         { id: 'hb2', name: 'Vyakaran', marks: 16, subtopics: ['Grammar'] },
         { id: 'hb3', name: 'Sparsh & Sanchayan', marks: 28, subtopics: ['Literature'] },
-        { id: 'hb4', name: 'Rachnatmak Lekhan', marks: 22, subtopics: ['Writing'] }
+        { id: 'hb4', name: 'Rachnatmak Lekhan', marks: 22, subtopics: ['Writing Skills'] }
+      ]
+    },
+    'Sanskrit': {
+      units: [
+        { id: 'sk1', name: 'Apathit Avbodhanam', marks: 10, subtopics: ['Unseen passage comprehension'] },
+        { id: 'sk2', name: 'Rachnatmak Karyam', marks: 15, subtopics: ['Patra-lekhan', 'Chitra-varnan'] },
+        { id: 'sk3', name: 'Anuprayogik Vyakaran', marks: 25, subtopics: ['Sandhi, Samas, Pratyaya'] },
+        { id: 'sk4', name: 'Pathtit Avbodhanam', marks: 30, subtopics: ['Shemushi textbook extracts'] }
+      ]
+    },
+    'Urdu': {
+      units: [
+        { id: 'u1', name: 'Reading & Comprehension', marks: 20, subtopics: ['Prose and Poetry passages'] },
+        { id: 'u2', name: 'Writing Skills', marks: 25, subtopics: ['Mazmoon Nigari, Letters'] },
+        { id: 'u3', name: 'Functional Grammar', marks: 20, subtopics: ['Qawaid, Muhavare'] },
+        { id: 'u4', name: 'Literature', marks: 15, subtopics: ['Textual questions'] }
+      ]
+    },
+    'Punjabi': {
+      units: [
+        { id: 'p1', name: 'Reading Skill', marks: 10, subtopics: ['Anditta Paira'] },
+        { id: 'p2', name: 'Grammar', marks: 12, subtopics: ['Virodhi Shabad, Ling, Muhavare'] },
+        { id: 'p3', name: 'Writing Skill', marks: 18, subtopics: ['Lekh Rachna, Patr Rachna'] },
+        { id: 'p4', name: 'Textbooks & Literature', marks: 40, subtopics: ['Sahit Mala and Vangi'] }
       ]
     },
     'Information Technology (Code 402)': {
@@ -88,30 +112,6 @@ export const secondarySyllabus = {
       units: [
         { id: 'ca1', name: 'Networking and HTML', marks: 25, subtopics: ['Internet, HTML basics, Tables, Links, Images'] },
         { id: 'ca2', name: 'Cyber Ethics and Python', marks: 25, subtopics: ['Cyber safety, Python fundamentals, Control statements'] }
-      ]
-    },
-    'Sanskrit': {
-      units: [
-        { id: 'sk1', name: 'Apathit Avbodhanam', marks: 10, subtopics: ['Unseen passage comprehension'] },
-        { id: 'sk2', name: 'Rachnatmak Karyam', marks: 15, subtopics: ['Patra-lekhan', 'Chitra-varnan / Anuchhed-lekhan'] },
-        { id: 'sk3', name: 'Anuprayogik Vyakaran', marks: 25, subtopics: ['Sandhi, Samas, Pratyaya, Vachya'] },
-        { id: 'sk4', name: 'Pathtit Avbodhanam', marks: 30, subtopics: ['Shemushi textbook extracts'] }
-      ]
-    },
-    'Urdu': {
-      units: [
-        { id: 'u1', name: 'Reading & Comprehension', marks: 20, subtopics: ['Prose and Poetry passages'] },
-        { id: 'u2', name: 'Writing Skills', marks: 25, subtopics: ['Mazmoon Nigari, Letters'] },
-        { id: 'u3', name: 'Functional Grammar', marks: 20, subtopics: ['Qawaid, Muhavare'] },
-        { id: 'u4', name: 'Literature', marks: 15, subtopics: ['Textual questions'] }
-      ]
-    },
-    'Punjabi': {
-      units: [
-        { id: 'p1', name: 'Reading Skill', marks: 10, subtopics: ['Anditta Paira'] },
-        { id: 'p2', name: 'Grammar', marks: 12, subtopics: ['Virodhi Shabad, Ling, Muhavare'] },
-        { id: 'p3', name: 'Writing Skill', marks: 18, subtopics: ['Lekh Rachna, Patr Rachna'] },
-        { id: 'p4', name: 'Textbooks & Literature', marks: 40, subtopics: ['Sahit Mala and Vangi'] }
       ]
     },
     'NCC': {
@@ -134,20 +134,20 @@ export const secondarySyllabus = {
     },
     'Elements of Book Keeping & Accountancy': {
       units: [
-        { id: 'bk1', name: 'Capital and Revenue', marks: 8, subtopics: ['Capital and revenue receipts and expenditures'] },
-        { id: 'bk2', name: 'Depreciation', marks: 12, subtopics: ['Straight line and diminishing balance methods'] },
-        { id: 'bk3', name: 'Bank Reconciliation Statement', marks: 14, subtopics: ['Preparation of BRS with cash/pass book balances'] },
-        { id: 'bk4', name: 'Bills of Exchange', marks: 10, subtopics: ['Nature, use, terms and journalizing transactions'] },
-        { id: 'bk5', name: 'Final Accounts', marks: 14, subtopics: ['Trading, P&L Account and Balance Sheet with closing stock'] },
-        { id: 'bk6', name: 'Accounting from Incomplete Records', marks: 12, subtopics: ['Statement of profit and statement of affairs method'] },
-        { id: 'bk7', name: 'Project Work', marks: 30, subtopics: ['Capital/revenue classification and incomplete records project'] }
+        { id: 'bk1', name: 'Capital and Revenue', marks: 8, subtopics: ['Receipts and expenditures'] },
+        { id: 'bk2', name: 'Depreciation', marks: 12, subtopics: ['Methods of depreciation'] },
+        { id: 'bk3', name: 'Bank Reconciliation Statement', marks: 14, subtopics: ['BRS preparation'] },
+        { id: 'bk4', name: 'Bills of Exchange', marks: 10, subtopics: ['Nature and terms'] },
+        { id: 'bk5', name: 'Final Accounts', marks: 14, subtopics: ['Trading, P&L and Balance Sheet'] },
+        { id: 'bk6', name: 'Accounting from Incomplete Records', marks: 12, subtopics: ['Statement of profit and affairs'] },
+        { id: 'bk7', name: 'Project Work', marks: 30, subtopics: ['Project report and viva'] }
       ]
     },
     'Carnatic Vocal': {
       units: [
-        { id: 'cv1', name: 'Theory', marks: 30, subtopics: ['Raga classification, 72 Melakarta scheme, prescribed ragas and 20th century composers'] },
-        { id: 'cv2', name: 'Practical', marks: 50, subtopics: ['Alankaras, Varnams, Kriti rendition, Kalpana swaras, and tuning of tanpura'] },
-        { id: 'cv3', name: 'Internal Assessment', marks: 20, subtopics: ['Periodic assessment and portfolio'] }
+        { id: 'cv1', name: 'Theory', marks: 30, subtopics: ['Raga classification and 72 Melakarta scheme'] },
+        { id: 'cv2', name: 'Practical', marks: 50, subtopics: ['Alankaras, Varnams and Kriti rendition'] },
+        { id: 'cv3', name: 'Internal Assessment', marks: 20, subtopics: ['Periodic assessment'] }
       ]
     }
   }
