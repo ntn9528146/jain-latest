@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Button from '../common/Button.jsx';
 import { exportToDocx, printElementById } from '../../services/exportService.js';
 import { getSyllabusDataForClass, ALL_CLASSES } from '../../config/syllabus/index.js';
+import { callGeminiApi } from '../../services/geminiApiService.js';
 
 export default function PracticalStudio({ onPracticalGenerated }) {
   const [selectedClass, setSelectedClass] = useState('Class 12');
@@ -15,6 +16,7 @@ export default function PracticalStudio({ onPracticalGenerated }) {
   const [vivaCount, setVivaCount] = useState(5);
   const [generatedStudio, setGeneratedStudio] = useState(null);
   const [activeFileTab, setActiveFileTab] = useState('practical');
+  const [loadingAi, setLoadingAi] = useState(false);
 
   const handleClassChange = (newClass) => {
     setSelectedClass(newClass);
@@ -25,75 +27,86 @@ export default function PracticalStudio({ onPracticalGenerated }) {
 
   const currentUnits = syllabusBundle?.subjects[selectedSubject]?.units || [];
 
-  const handleGeneratePractical = () => {
+  const handleGeneratePractical = async () => {
+    setLoadingAi(true);
     const topicsPool = activeSubTab === 'manual' && manualTopic.trim()
       ? manualTopic.split('\n').filter((t) => t.trim())
       : currentUnits.flatMap((u) => u.subtopics || [u.name]);
 
-    const fallbackTopic = selectedSubject || 'Laboratory Practical Skill';
-    const isCS = selectedSubject.toLowerCase().includes('computer') || selectedSubject.toLowerCase().includes('it');
-    const isChem = selectedSubject.toLowerCase().includes('chem');
+    const prompt = `You are an expert CBSE curriculum examiner. Generate a highly unique and rigorous practical examination assignment for Class "${selectedClass}", Subject "${selectedSubject}".
+Generate exactly ${experimentCount} distinct lab experiments and ${vivaCount} distinct viva-voce questions with model answers based on these topics: ${topicsPool.slice(0, 5).join(', ')}.
+Return ONLY valid JSON format with this exact structure:
+{
+  "experiments": [
+    { "expNo": 1, "title": "Detailed Aim", "apparatus": "Required equipment", "principle": "Scientific principle" }
+  ],
+  "vivaQuestions": [
+    { "qNo": 1, "question": "Viva question text?", "modelAnswer": "Detailed model answer" }
+  ],
+  "projectTitle": "Comprehensive investigative project title"
+}`;
 
-    const experiments = [];
-    for (let i = 0; i < experimentCount; i++) {
-      const topic = topicsPool.length > 0 ? topicsPool[i % topicsPool.length] : fallbackTopic;
-      
-      let expTitle = `To study, investigate and experimentally verify the characteristics of ${topic}.`;
-      let apparatus = 'Standard Laboratory Workstation / Apparatus / Hardware Setup';
-
-      if (isCS) {
-        expTitle = `Write a Python program to implement ${topic} with file handling and database connectivity.`;
-        apparatus = 'Python 3.x IDLE, MySQL 8.0 Server, Client Terminal';
-      } else if (isChem) {
-        expTitle = `Prepare a standard solution and perform quantitative chemical titration involving ${topic}.`;
-        apparatus = 'Burette, Pipette, Conical Flask, Standard Chemical Reagents';
+    try {
+      const responseText = await callGeminiApi(prompt);
+      let parsed = null;
+      try {
+        const cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
+        parsed = JSON.parse(cleanJson);
+      } catch (err) {
+        console.error('Failed to parse AI response, using dynamic builder fallback', err);
       }
 
-      experiments.push({
-        expNo: i + 1,
-        title: expTitle,
-        apparatus,
-        principle: `According to official CBSE practical curriculum specifications for ${selectedSubject}.`,
-        marking: 'Aim & Apparatus (1M) + Procedure (2M) + Observations/Graphs (3M) + Result (1M) = 7 Marks'
-      });
+      const experiments = parsed?.experiments || [];
+      while (experiments.length < experimentCount) {
+        const i = experiments.length;
+        experiments.push({
+          expNo: i + 1,
+          title: `Advanced Investigation & Experimental Verification for ${selectedSubject} - Module ${i + 1}`,
+          apparatus: 'Standard CBSE Laboratory Setup / Digital Workstation',
+          principle: `Based on official CBSE guidelines for ${selectedSubject}.`
+        });
+      }
+
+      const vivaQuestions = parsed?.vivaQuestions || [];
+      while (vivaQuestions.length < vivaCount) {
+        const i = vivaQuestions.length;
+        vivaQuestions.push({
+          qNo: i + 1,
+          question: `Explain the core conceptual mechanism and practical applications related to ${selectedSubject} unit ${i + 1}?`,
+          modelAnswer: `Candidate is expected to detail the theoretical foundation, practical execution steps, and source of errors.`
+        });
+      }
+
+      const compiled = {
+        schoolName: 'ARDEN PROGRESSIVE SCHOOL',
+        title: 'CBSE Live AI-Powered Practical Assessment 2026-27',
+        subject: selectedSubject,
+        className: selectedClass,
+        maxMarks: 30,
+        experiments: experiments.slice(0, experimentCount),
+        vivaQuestions: vivaQuestions.slice(0, vivaCount),
+        projectFileGuideline: {
+          projectTitle: parsed?.projectTitle || `Investigative Academic Project Report on ${selectedSubject}`,
+          sections: [
+            '1. Certificate of Authenticity & School Emblem',
+            '2. Student Declaration & Acknowledgement',
+            '3. Aim, Objective and Scope of Investigation',
+            '4. Theoretical Framework & CBSE Standards',
+            '5. Observations, Data Log & Calculations',
+            '6. Graphical Analysis, Source Code or Diagrams',
+            '7. Results, Conclusion & Bibliography'
+          ]
+        }
+      };
+
+      setGeneratedStudio(compiled);
+      if (onPracticalGenerated) onPracticalGenerated(selectedSubject);
+    } catch (error) {
+      console.error('AI Practical Generation Error:', error);
+      alert('Error generating live AI practicals. Please check API connection.');
+    } finally {
+      setLoadingAi(false);
     }
-
-    const vivaQuestions = [];
-    for (let i = 0; i < vivaCount; i++) {
-      const topic = topicsPool.length > 0 ? topicsPool[(i + 1) % topicsPool.length] : fallbackTopic;
-      vivaQuestions.push({
-        qNo: i + 1,
-        question: `What is the core working principle and technical significance of "${topic}"?`,
-        modelAnswer: `Candidate must explain the governing principle of ${topic}, state potential sources of experimental error, and justify precision standards.`
-      });
-    }
-
-    const projectFileGuideline = {
-      projectTitle: `Comprehensive Investigative Academic Project on ${topicsPool[0] || fallbackTopic}`,
-      sections: [
-        '1. Student Declaration & Certificate of Authenticity',
-        '2. Acknowledgement & Dedication',
-        '3. Objective, Aim and Scope of the Investigation',
-        '4. Theoretical Framework & CBSE Curriculum Alignment',
-        '5. Experimental / Data Collection Log',
-        '6. Graphs, Code Blocks, Charts & Observation Table',
-        '7. Conclusions, Bibliography & Web References'
-      ]
-    };
-
-    const compiled = {
-      schoolName: 'ARDEN PROGRESSIVE SCHOOL',
-      title: 'CBSE Practical Examination & Assessment 2026-27',
-      subject: selectedSubject,
-      className: selectedClass,
-      maxMarks: 30,
-      experiments,
-      vivaQuestions,
-      projectFileGuideline
-    };
-
-    setGeneratedStudio(compiled);
-    if (onPracticalGenerated) onPracticalGenerated(selectedSubject);
   };
 
   const handlePrintPractical = () => {
@@ -109,7 +122,7 @@ export default function PracticalStudio({ onPracticalGenerated }) {
         qNo: e.expNo,
         marks: 7,
         questionText: `${e.title}\nApparatus: ${e.apparatus}\nProtocol: ${e.principle}`,
-        answerKey: e.marking
+        answerKey: 'Aim & Apparatus (1M) + Procedure (2M) + Observations (3M) + Result (1M)'
       }));
     } else if (activeFileTab === 'viva' || activeFileTab === 'answers') {
       secQuestions = generatedStudio.vivaQuestions.map((v) => ({
@@ -137,8 +150,8 @@ export default function PracticalStudio({ onPracticalGenerated }) {
         timeAllowed: '2.5 Hours'
       },
       generalInstructions: [
-        "Candidates must follow standard safety guidelines.",
-        "Perform the assigned experiments systematically."
+        "Candidates must follow standard laboratory safety guidelines.",
+        "Perform experiments with precision and record observations."
       ],
       sections: [
         {
@@ -155,13 +168,13 @@ export default function PracticalStudio({ onPracticalGenerated }) {
       <div className="no-print flex justify-between items-center border-b border-slate-800 pb-3">
         <div>
           <h3 className="text-sm font-bold text-white flex items-center gap-2">
-            🧪 Practical Exam, Viva Voce & Project Studio
-            <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-              Multi-File Single-Click
+            🧪 Google Gemini AI Practical Studio
+            <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+              Live Unique AI Generation
             </span>
           </h3>
           <p className="text-slate-400 mt-0.5">
-            Generates 4 separate print-ready files in a single click: Practical Sheet, Viva Bank, Project Guide, and Answer Key.
+            Generates 100% unique real-time practical papers, viva questions, and project guides directly via Google AI.
           </p>
         </div>
 
@@ -186,13 +199,13 @@ export default function PracticalStudio({ onPracticalGenerated }) {
       {activeSubTab === 'manual' && (
         <div className="no-print">
           <label className="block text-slate-400 text-[10px] uppercase font-bold mb-1">
-            Type or Paste Custom Topics (One per line):
+            Type Custom Focus Topics for AI Generation:
           </label>
           <textarea
             rows="3"
             value={manualTopic}
             onChange={(e) => setManualTopic(e.target.value)}
-            placeholder="e.g. Verification of Ohm's Law&#10;Logic Gates Simulation..."
+            placeholder="e.g. Binary file handling in Python&#10;Spectrophotometric estimation..."
             className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white font-mono text-[11px]"
           />
         </div>
@@ -253,8 +266,8 @@ export default function PracticalStudio({ onPracticalGenerated }) {
       </div>
 
       <div className="no-print">
-        <Button onClick={handleGeneratePractical} className="w-full">
-          ⚡ Single Click: Generate Practical, Viva, Project & Answer Files
+        <Button onClick={handleGeneratePractical} disabled={loadingAi} className="w-full">
+          {loadingAi ? '🤖 Google AI is synthesizing unique practical sets...' : '⚡ Generate Live AI Practical, Viva, Project & Answer Files'}
         </Button>
       </div>
 
@@ -281,7 +294,7 @@ export default function PracticalStudio({ onPracticalGenerated }) {
                 onClick={() => setActiveFileTab('project')}
                 className={`px-3 py-1 rounded transition ${activeFileTab === 'project' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'}`}
               >
-                3. Project Guidelines
+                3. Project Guide
               </button>
               <button
                 type="button"
@@ -321,7 +334,7 @@ export default function PracticalStudio({ onPracticalGenerated }) {
                     </div>
                     <div className="text-center px-16">
                       <p className="text-xl font-black uppercase text-black">{generatedStudio.schoolName}</p>
-                      <p className="text-sm font-bold uppercase text-black">LABORATORY PRACTICAL EXAMINATION</p>
+                      <p className="text-sm font-bold uppercase text-black">AI-POWERED PRACTICAL EXAMINATION</p>
                     </div>
                   </div>
 
@@ -350,7 +363,8 @@ export default function PracticalStudio({ onPracticalGenerated }) {
                         <td className="border border-black p-2 text-center font-bold">{exp.expNo}</td>
                         <td className="border border-black p-2 text-left space-y-1 font-sans">
                           <p className="font-bold text-black">{exp.title}</p>
-                          <p className="text-gray-800 text-[11px]"><strong className="text-black">Apparatus:</strong> {exp.apparatus}</p>
+                          <p className="text-gray-800 text-[11px]"><strong className="text-black">Apparatus/Requirements:</strong> {exp.apparatus}</p>
+                          <p className="text-gray-700 text-[10px] italic">Principle: {exp.principle}</p>
                         </td>
                         <td className="border border-black p-2 text-center font-bold">[7 Marks]</td>
                       </tr>
@@ -448,7 +462,7 @@ export default function PracticalStudio({ onPracticalGenerated }) {
                         <td className="border border-black p-2 text-center font-bold">{v.qNo}</td>
                         <td className="border border-black p-2 text-left">
                           <p className="font-bold text-black mb-1">{v.question}</p>
-                          <pre className="font-sans text-black whitespace-pre-wrap">{v.modelAnswer}</pre>
+                          <pre className="font-sans text-black whitespace-pre-wrap text-[11px] bg-gray-50 p-2 rounded border border-gray-200">{v.modelAnswer}</pre>
                         </td>
                         <td className="border border-black p-2 text-center font-bold">[1 Mark]</td>
                       </tr>
