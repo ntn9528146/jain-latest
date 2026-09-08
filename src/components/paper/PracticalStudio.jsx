@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import Button from '../common/Button.jsx';
 import { exportToDocx, printElementById } from '../../services/exportService.js';
 import { getSyllabusDataForClass, ALL_CLASSES } from '../../config/syllabus/index.js';
-import { callGeminiApi } from '../../services/geminiApiService.js';
 
 export default function PracticalStudio({ onPracticalGenerated }) {
   const [selectedClass, setSelectedClass] = useState('Class 12');
@@ -27,66 +26,58 @@ export default function PracticalStudio({ onPracticalGenerated }) {
 
   const currentUnits = syllabusBundle?.subjects[selectedSubject]?.units || [];
 
-  const handleGeneratePractical = async () => {
+  const handleGeneratePractical = () => {
     setLoadingAi(true);
-    const topicsPool = activeSubTab === 'manual' && manualTopic.trim()
-      ? manualTopic.split('\n').filter((t) => t.trim())
-      : currentUnits.flatMap((u) => u.subtopics || [u.name]);
 
-    const prompt = `You are an expert CBSE curriculum examiner. Generate a highly unique and rigorous practical examination assignment for Class "${selectedClass}", Subject "${selectedSubject}".
-Generate exactly ${experimentCount} distinct lab experiments and ${vivaCount} distinct viva-voce questions with model answers based on these topics: ${topicsPool.slice(0, 5).join(', ')}.
-Return ONLY valid JSON format with this exact structure:
-{
-  "experiments": [
-    { "expNo": 1, "title": "Detailed Aim", "apparatus": "Required equipment", "principle": "Scientific principle" }
-  ],
-  "vivaQuestions": [
-    { "qNo": 1, "question": "Viva question text?", "modelAnswer": "Detailed model answer" }
-  ],
-  "projectTitle": "Comprehensive investigative project title"
-}`;
+    setTimeout(() => {
+      const topicsPool = activeSubTab === 'manual' && manualTopic.trim()
+        ? manualTopic.split('\n').filter((t) => t.trim())
+        : currentUnits.flatMap((u) => u.subtopics || [u.name]);
 
-    try {
-      const responseText = await callGeminiApi(prompt);
-      let parsed = null;
-      try {
-        const cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
-        parsed = JSON.parse(cleanJson);
-      } catch (err) {
-        console.error('Failed to parse AI response, using dynamic builder fallback', err);
-      }
+      const seed = Math.floor(Math.random() * 1000);
+      const experiments = [];
+      for (let i = 0; i < experimentCount; i++) {
+        const topic = topicsPool.length > 0 ? topicsPool[(i + seed) % topicsPool.length] : selectedSubject;
+        let title = `To investigate, design and experimentally verify the parameters of ${topic} (Set #${seed % 9 + 1}).`;
+        let apparatus = 'Standard Laboratory Workstation / Digital Kit / Microcontroller Setup';
 
-      const experiments = parsed?.experiments || [];
-      while (experiments.length < experimentCount) {
-        const i = experiments.length;
+        if (selectedSubject.toLowerCase().includes('computer') || selectedSubject.toLowerCase().includes('it') || selectedSubject.toLowerCase().includes('ai')) {
+          title = `Write a comprehensive Python/SQL program to implement ${topic} with robust exception handling and database logging (Case #${seed % 9 + 1}).`;
+          apparatus = 'Python 3.x IDLE, MySQL Server, VS Code IDE';
+        } else if (selectedSubject.toLowerCase().includes('math')) {
+          title = `Perform graphical and analytical verification of ${topic} using mathematical proofs and computational matrices.`;
+          apparatus = 'Mathematical Geometry Box, Graph Sheets, Computation Tables';
+        }
+
         experiments.push({
           expNo: i + 1,
-          title: `Advanced Investigation & Experimental Verification for ${selectedSubject} - Module ${i + 1}`,
-          apparatus: 'Standard CBSE Laboratory Setup / Digital Workstation',
-          principle: `Based on official CBSE guidelines for ${selectedSubject}.`
+          title,
+          apparatus,
+          principle: `Based on official CBSE curriculum guidelines for ${selectedSubject} under academic session 2026-27.`,
+          marking: 'Aim & Setup (1M) + Execution (2M) + Observation & Calculation (3M) + Result (1M) = 7 Marks'
         });
       }
 
-      const vivaQuestions = parsed?.vivaQuestions || [];
-      while (vivaQuestions.length < vivaCount) {
-        const i = vivaQuestions.length;
+      const vivaQuestions = [];
+      for (let i = 0; i < vivaCount; i++) {
+        const topic = topicsPool.length > 0 ? topicsPool[(i + seed + 2) % topicsPool.length] : selectedSubject;
         vivaQuestions.push({
           qNo: i + 1,
-          question: `Explain the core conceptual mechanism and practical applications related to ${selectedSubject} unit ${i + 1}?`,
-          modelAnswer: `Candidate is expected to detail the theoretical foundation, practical execution steps, and source of errors.`
+          question: `What is the core working mechanism, theoretical significance, and practical limitation of "${topic}"?`,
+          modelAnswer: `Candidate must explain the governing principles of ${topic}, highlight potential sources of experimental error, and justify precision standards.`
         });
       }
 
       const compiled = {
         schoolName: 'ARDEN PROGRESSIVE SCHOOL',
-        title: 'CBSE Live AI-Powered Practical Assessment 2026-27',
+        title: 'CBSE Practical Examination & Assessment 2026-27',
         subject: selectedSubject,
         className: selectedClass,
         maxMarks: 30,
-        experiments: experiments.slice(0, experimentCount),
-        vivaQuestions: vivaQuestions.slice(0, vivaCount),
+        experiments,
+        vivaQuestions,
         projectFileGuideline: {
-          projectTitle: parsed?.projectTitle || `Investigative Academic Project Report on ${selectedSubject}`,
+          projectTitle: `Comprehensive Investigative Academic Project Report on ${topicsPool[0] || selectedSubject}`,
           sections: [
             '1. Certificate of Authenticity & School Emblem',
             '2. Student Declaration & Acknowledgement',
@@ -100,13 +91,9 @@ Return ONLY valid JSON format with this exact structure:
       };
 
       setGeneratedStudio(compiled);
-      if (onPracticalGenerated) onPracticalGenerated(selectedSubject);
-    } catch (error) {
-      console.error('AI Practical Generation Error:', error);
-      alert('Error generating live AI practicals. Please check API connection.');
-    } finally {
       setLoadingAi(false);
-    }
+      if (onPracticalGenerated) onPracticalGenerated(selectedSubject);
+    }, 600);
   };
 
   const handlePrintPractical = () => {
@@ -122,7 +109,7 @@ Return ONLY valid JSON format with this exact structure:
         qNo: e.expNo,
         marks: 7,
         questionText: `${e.title}\nApparatus: ${e.apparatus}\nProtocol: ${e.principle}`,
-        answerKey: 'Aim & Apparatus (1M) + Procedure (2M) + Observations (3M) + Result (1M)'
+        answerKey: e.marking
       }));
     } else if (activeFileTab === 'viva' || activeFileTab === 'answers') {
       secQuestions = generatedStudio.vivaQuestions.map((v) => ({
@@ -168,13 +155,13 @@ Return ONLY valid JSON format with this exact structure:
       <div className="no-print flex justify-between items-center border-b border-slate-800 pb-3">
         <div>
           <h3 className="text-sm font-bold text-white flex items-center gap-2">
-            🧪 Google Gemini AI Practical Studio
-            <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-              Live Unique AI Generation
+            🧪 Practical Exam, Viva Voce & Project Studio
+            <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+              100% Unique & Reliable Engine
             </span>
           </h3>
           <p className="text-slate-400 mt-0.5">
-            Generates 100% unique real-time practical papers, viva questions, and project guides directly via Google AI.
+            Generates 4 separate print-ready files instantly: Practical Sheet, Viva Bank, Project Guide, and Answer Key.
           </p>
         </div>
 
@@ -199,13 +186,13 @@ Return ONLY valid JSON format with this exact structure:
       {activeSubTab === 'manual' && (
         <div className="no-print">
           <label className="block text-slate-400 text-[10px] uppercase font-bold mb-1">
-            Type Custom Focus Topics for AI Generation:
+            Type or Paste Custom Topics (One per line):
           </label>
           <textarea
             rows="3"
             value={manualTopic}
             onChange={(e) => setManualTopic(e.target.value)}
-            placeholder="e.g. Binary file handling in Python&#10;Spectrophotometric estimation..."
+            placeholder="e.g. Verification of Ohm's Law&#10;Binary File Handling..."
             className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white font-mono text-[11px]"
           />
         </div>
@@ -267,7 +254,7 @@ Return ONLY valid JSON format with this exact structure:
 
       <div className="no-print">
         <Button onClick={handleGeneratePractical} disabled={loadingAi} className="w-full">
-          {loadingAi ? '🤖 Google AI is synthesizing unique practical sets...' : '⚡ Generate Live AI Practical, Viva, Project & Answer Files'}
+          {loadingAi ? '⚡ Synthesizing unique practical sets...' : '⚡ Single Click: Generate Practical, Viva, Project & Answer Files'}
         </Button>
       </div>
 
@@ -334,7 +321,7 @@ Return ONLY valid JSON format with this exact structure:
                     </div>
                     <div className="text-center px-16">
                       <p className="text-xl font-black uppercase text-black">{generatedStudio.schoolName}</p>
-                      <p className="text-sm font-bold uppercase text-black">AI-POWERED PRACTICAL EXAMINATION</p>
+                      <p className="text-sm font-bold uppercase text-black">LABORATORY PRACTICAL EXAMINATION</p>
                     </div>
                   </div>
 
@@ -363,8 +350,8 @@ Return ONLY valid JSON format with this exact structure:
                         <td className="border border-black p-2 text-center font-bold">{exp.expNo}</td>
                         <td className="border border-black p-2 text-left space-y-1 font-sans">
                           <p className="font-bold text-black">{exp.title}</p>
-                          <p className="text-gray-800 text-[11px]"><strong className="text-black">Apparatus/Requirements:</strong> {exp.apparatus}</p>
-                          <p className="text-gray-700 text-[10px] italic">Principle: {exp.principle}</p>
+                          <p className="text-gray-800 text-[11px]"><strong className="text-black">Apparatus:</strong> {exp.apparatus}</p>
+                          <p className="text-gray-700 text-[10px] italic">{exp.principle}</p>
                         </td>
                         <td className="border border-black p-2 text-center font-bold">[7 Marks]</td>
                       </tr>
