@@ -14,7 +14,6 @@ const getApiKeys = () => {
     if (process.env.VITE_GEMINI_API_KEY_3) keys.push(process.env.VITE_GEMINI_API_KEY_3);
   }
 
-  // Fallback default if none found
   if (keys.length === 0) {
     keys.push("");
   }
@@ -30,7 +29,8 @@ async function callGeminiAPIWithRotation(promptText, temperature = 0.7) {
     const apiKey = keys[i];
     if (!apiKey) continue;
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+    // Updated to gemini-1.5-flash which is fully stable and available
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
     
     try {
       const response = await fetch(url, {
@@ -130,7 +130,6 @@ Return ONLY a JSON object with two fields:
   }
 }
 
-// Universal exports covering all imported function names across the app
 export async function executePaperPipeline(config) {
   return await generateAndAuditPaper(config);
 }
