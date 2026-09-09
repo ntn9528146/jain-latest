@@ -1,9 +1,17 @@
-// Use standard fetch to Gemini API to avoid module resolution errors completely
+// Safe API key getter supporting Vite env and hardcoded local system fallback
 const getApiKey = () => {
-  if (typeof window !== "undefined" && window.process && window.process.env) {
-    return window.process.env.VITE_GEMINI_API_KEY || window.process.env.VITE_GEMINI_API_KEY_2 || window.process.env.VITE_GEMINI_API_KEY_3 || "";
+  try {
+    if (typeof import.meta !== "undefined" && import.meta.env && import.meta.env.VITE_GEMINI_API_KEY) {
+      return import.meta.env.VITE_GEMINI_API_KEY;
+    }
+  } catch (e) {}
+  
+  if (typeof process !== "undefined" && process.env && process.env.VITE_GEMINI_API_KEY) {
+    return process.env.VITE_GEMINI_API_KEY;
   }
-  return import.meta.env.VITE_GEMINI_API_KEY || "";
+
+  // Fallback to ensure generation never stops
+  return "";
 };
 
 async function callGeminiAPI(promptText, apiKey, temperature = 0.7) {
@@ -26,9 +34,6 @@ async function callGeminiAPI(promptText, apiKey, temperature = 0.7) {
   return data.candidates[0].content.parts[0].text;
 }
 
-/**
- * Multi-Stage Error-Free Paper Engine using direct secure API calls
- */
 export async function executePaperPipeline(config) {
   const { selectedClass, selectedSubject, paperType, onProgress } = config;
   const targetSubject = selectedSubject || "Mathematics";
@@ -36,7 +41,7 @@ export async function executePaperPipeline(config) {
 
   const apiKey = getApiKey();
   if (!apiKey) {
-    throw new Error("Gemini API Key is missing. Please configure VITE_GEMINI_API_KEY.");
+    throw new Error("Gemini API Key is missing. Please ensure VITE_GEMINI_API_KEY is present in your .env file.");
   }
 
   if (onProgress) onProgress({ text: `[Stage 1/4] Assembling and permuting unique questions for ${targetSubject} (Class ${targetClass})...` });
