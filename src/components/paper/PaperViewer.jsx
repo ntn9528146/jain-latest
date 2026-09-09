@@ -28,25 +28,26 @@ export default function PaperViewer({ paperData, onClose }) {
         <h1 className="text-xl font-bold uppercase tracking-wider">{schoolName}</h1>
         <h2 className="text-sm font-bold uppercase tracking-wide mt-1">SUBJECT: {subject} ({className.toUpperCase()})</h2>
         <div className="flex justify-between font-bold text-sm mt-3 px-4 border-t border-dashed border-gray-400 pt-2">
-          <span>Maximum Marks: {maxMarks}</span>
-          <span>Time Allowed: {timeAllowed}</span>
+          <span>Maximum marks: {maxMarks}</span>
+          <span>Time : {timeAllowed}[cite: 1]</span>
         </div>
       </div>
 
-      {/* Official CBSE General Instructions Box matching Sample Paper */}
+      {/* Exact Official CBSE General Instructions matching the uploaded sample paper */}
       <div className="mb-6 p-4 border border-black bg-slate-50 text-xs leading-relaxed font-sans">
-        <p className="font-bold underline mb-1 uppercase tracking-wider">General Instructions:</p>
-        <p className="italic mb-2">Read the following instructions carefully and follow them:</p>
+        <p className="font-bold uppercase tracking-wider mb-1">General Instructions</p>
+        <p className="italic mb-2 underline">Read the following instructions carefully and follow them[cite: 1]:</p>
         <ol className="list-decimal pl-5 space-y-1.5 font-normal">
-          <li>This question paper contains <b>38 questions</b>. All Questions are compulsory.</li>
-          <li>This Question Paper is divided into <b>5 Sections</b>: A, B, C, D and E.</li>
-          <li><b>Section A</b>: Question numbers 1-18 are Multiple Choice Questions (MCQs) and question no. 19 and 20 are Assertion-Reason based questions of 1 mark each.</li>
-          <li><b>Section B</b>: Question numbers 21-25 are Very Short Answer (VSA) type questions, carrying 02 marks each.</li>
-          <li><b>Section C</b>: Question numbers 26-31 are Short Answer (SA) type questions, carrying 03 marks each.</li>
-          <li><b>Section D</b>: Question numbers 32-35 are Long Answer (LA) type questions, carrying 05 marks each.</li>
-          <li><b>Section E</b>: Question numbers 36-38 are case study-based questions carrying 4 marks each with sub-parts.</li>
-          <li>There is no overall choice. However, internal choices have been provided in some questions.</li>
-          <li>Use of calculators is not allowed.</li>
+          <li>This question paper contains <b>38 questions</b>. All Questions are compulsory[cite: 1].</li>
+          <li>This Question Paper is divided into <b>5 Sections A, B, C, D and E</b>[cite: 1].</li>
+          <li>In <b>Section A</b>, Question numbers 1-18 are multiple choice questions (MCQs) and question no. 19 and 20 are Assertion-Reason based questions of 1 mark each[cite: 1].</li>
+          <li>In <b>Section B</b>, Question numbers 21-25 are very short answer (VSA) type questions, carrying 02 marks each[cite: 1].</li>
+          <li>In <b>Section C</b>, Question numbers 26-31 are short answer (SA) type questions, carrying 03 marks each[cite: 1].</li>
+          <li>In <b>Section D</b>, Question numbers 32-35 are long answer (LA) type questions, carrying 05 marks each[cite: 1].</li>
+          <li>In <b>Section E</b>, Question numbers 36-38 are case study-based questions carrying 4 marks each with sub parts of the values of 1, 1 and 2 marks each respectively[cite: 1].</li>
+          <li>There is no overall choice. However, an internal choice in 2 questions of Section B, 2 questions of Section C and 2 questions of Section D has been provided. An internal choice has been provided in all the 2 marks questions of Section E[cite: 1].</li>
+          <li>Draw neat and clean figures wherever required. Take $pi = rac{22}{7}$ wherever required if not stated[cite: 1].</li>
+          <li>Use of calculators is not allowed[cite: 1].</li>
         </ol>
       </div>
 
