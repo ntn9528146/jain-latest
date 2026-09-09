@@ -1,8 +1,7 @@
 import React from 'react';
 import { formatMathText } from '../../utils/mathParser';
 
-export default function PaperViewer({ paperData }) {
-  // Fallback if paperData structure varies
+export default function PaperViewer({ paperData, onClose }) {
   const data = paperData || {};
   const schoolName = data.schoolName || "EXAMINATION DEPARTMENT";
   const className = data.className || data.class || "10th";
@@ -12,7 +11,18 @@ export default function PaperViewer({ paperData }) {
   const sections = data.sections || [];
 
   return (
-    <div className="max-w-4xl mx-auto bg-white p-8 shadow-md text-black print:shadow-none">
+    <div className="max-w-4xl mx-auto bg-white text-black p-8 shadow-md rounded-2xl relative">
+      {onClose && (
+        <div className="flex justify-end mb-4 print:hidden">
+          <button
+            onClick={onClose}
+            className="bg-slate-200 hover:bg-slate-300 text-slate-800 px-4 py-1.5 rounded-xl text-xs font-bold transition"
+          >
+            ← Back to Generator
+          </button>
+        </div>
+      )}
+
       <div className="text-center border-b-2 border-black pb-4 mb-6">
         <h1 className="text-2xl font-bold uppercase tracking-wide">{schoolName}</h1>
         <div className="flex justify-between font-bold text-sm mt-2 px-4">
