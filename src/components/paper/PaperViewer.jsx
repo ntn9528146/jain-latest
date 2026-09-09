@@ -10,26 +10,6 @@ export default function PaperViewer({ paperData, onClose }) {
   const maxMarks = data.maxMarks || 80;
   const sections = data.sections || [];
 
-  const isValidOption = (opt) => {
-    const str = String(opt).trim();
-    if (str.length > 60) return false;
-    const lower = str.toLowerCase();
-    if (
-      lower.startsWith("using") ||
-      lower.startsWith("proof") ||
-      lower.startsWith("roots are") ||
-      lower.startsWith("mean is") ||
-      lower.startsWith("median is") ||
-      lower.startsWith("solving") ||
-      lower.startsWith("let ") ||
-      lower.startsWith("tangents are") ||
-      lower.startsWith("formula:")
-    ) {
-      return false;
-    }
-    return true;
-  };
-
   return (
     <div className="max-w-4xl mx-auto bg-white text-black p-8 shadow-md rounded-2xl relative">
       {onClose && (
@@ -65,7 +45,11 @@ export default function PaperViewer({ paperData, onClose }) {
               {section.sectionName || section.title || `Section ${sIndex + 1}`}
             </h2>
             {(section.questions || []).map((q, qIndex) => {
-              const validOptions = (q.options || []).filter(isValidOption);
+              const qMarks = Number(q.marks || 1);
+              // STRICT RULE: Options (A, B, C, D) are ONLY valid for 1-mark MCQs. 
+              // Subjective questions (marks > 1) never have choice options; any text there is AI solution leakage.
+              const showOptions = qMarks === 1 && q.options && q.options.length > 0;
+
               return (
                 <div key={qIndex} className="mb-4 flex justify-between items-start text-sm text-black">
                   <div className="flex-1 pr-4">
@@ -76,9 +60,9 @@ export default function PaperViewer({ paperData, onClose }) {
                         dangerouslySetInnerHTML={{ __html: formatMathText(q.questionText || q.question || "") }}
                       />
                     </div>
-                    {validOptions.length > 0 && (
+                    {showOptions && (
                       <div className="grid grid-cols-1 gap-1 mt-2 pl-8">
-                        {validOptions.map((opt, oIndex) => {
+                        {q.options.map((opt, oIndex) => {
                           const optLabel = String.fromCharCode(65 + oIndex);
                           return (
                             <div key={oIndex} className="flex items-start text-black">
@@ -91,7 +75,7 @@ export default function PaperViewer({ paperData, onClose }) {
                     )}
                   </div>
                   <div className="text-right shrink-0 font-bold pl-2 text-black">
-                    [{q.marks || 1}]
+                    [{qMarks}]
                   </div>
                 </div>
               );
