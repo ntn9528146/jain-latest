@@ -22,8 +22,8 @@ async function callGeminiDirectAPI(promptText, temperature = 0.7) {
   const keys = getApiKeys();
   let lastError = null;
   
-  // Using gemini-pro and gemini-1.5-flash via standard v1 endpoint
-  const models = ["gemini-pro", "gemini-1.5-flash"];
+  // Using gemini-pro which is universally accepted by all standard API keys on v1 endpoint
+  const models = ["gemini-pro"];
 
   for (let i = 0; i < keys.length; i++) {
     const apiKey = keys[i];
