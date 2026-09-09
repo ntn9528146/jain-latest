@@ -1,68 +1,69 @@
-const getApiKeys = () => {
-  let keys = [];
-  try {
-    if (typeof import.meta !== "undefined" && import.meta.env) {
-      if (import.meta.env.VITE_GEMINI_API_KEY) keys.push(import.meta.env.VITE_GEMINI_API_KEY);
-      if (import.meta.env.VITE_GEMINI_API_KEY_2) keys.push(import.meta.env.VITE_GEMINI_API_KEY_2);
-      if (import.meta.env.VITE_GEMINI_API_KEY_3) keys.push(import.meta.env.VITE_GEMINI_API_KEY_3);
-    }
-  } catch (e) {}
-
-  if (keys.length === 0 && typeof process !== "undefined" && process.env) {
-    if (process.env.VITE_GEMINI_API_KEY) keys.push(process.env.VITE_GEMINI_API_KEY);
-    if (process.env.VITE_GEMINI_API_KEY_2) keys.push(process.env.VITE_GEMINI_API_KEY_2);
-    if (process.env.VITE_GEMINI_API_KEY_3) keys.push(process.env.VITE_GEMINI_API_KEY_3);
-  }
-
-  if (keys.length === 0) {
-    keys.push("");
-  }
-
-  return keys;
-};
-
-async function callGeminiAPIWithRotation(promptText, temperature = 0.7) {
-  const keys = getApiKeys();
-  let lastError = null;
-
-  for (let i = 0; i < keys.length; i++) {
-    const apiKey = keys[i];
-    if (!apiKey) continue;
-
-    // Using gemini-pro which is universally supported across v1beta generateContent endpoints
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
-    
-    try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: promptText }] }],
-          generationConfig: { temperature, responseMimeType: "application/json" }
-        })
-      });
-
-      if (!response.ok) {
-        const errText = await response.text();
-        lastError = new Error(`API Error (${response.status}): ${errText}`);
-        continue;
-      }
-
-      const data = await response.json();
-      return data.candidates[0].content.parts[0].text;
-    } catch (err) {
-      lastError = err;
-      continue;
-    }
-  }
-
-  throw lastError || new Error("Gemini API Key is missing or invalid. Please check your .env configuration.");
+// Universal Export definition first to satisfy Vite module analysis immediately
+export async function executePaperPipeline(config) {
+  return await generateAndAuditPaper(config);
 }
 
 export async function generateAndAuditPaper(config) {
   const { selectedClass, selectedSubject, paperType, onProgress } = config;
   const targetSubject = selectedSubject || "Mathematics";
   const targetClass = selectedClass || "10th";
+
+  const getApiKeys = () => {
+    let keys = [];
+    try {
+      if (typeof import.meta !== "undefined" && import.meta.env) {
+        if (import.meta.env.VITE_GEMINI_API_KEY) keys.push(import.meta.env.VITE_GEMINI_API_KEY);
+        if (import.meta.env.VITE_GEMINI_API_KEY_2) keys.push(import.meta.env.VITE_GEMINI_API_KEY_2);
+        if (import.meta.env.VITE_GEMINI_API_KEY_3) keys.push(import.meta.env.VITE_GEMINI_API_KEY_3);
+      }
+    } catch (e) {}
+
+    if (keys.length === 0 && typeof process !== "undefined" && process.env) {
+      if (process.env.VITE_GEMINI_API_KEY) keys.push(process.env.VITE_GEMINI_API_KEY);
+      if (process.env.VITE_GEMINI_API_KEY_2) keys.push(process.env.VITE_GEMINI_API_KEY_2);
+      if (process.env.VITE_GEMINI_API_KEY_3) keys.push(process.env.VITE_GEMINI_API_KEY_3);
+    }
+
+    if (keys.length === 0) keys.push("");
+    return keys;
+  };
+
+  const callGeminiAPIWithRotation = async (promptText, temperature = 0.7) => {
+    const keys = getApiKeys();
+    let lastError = null;
+
+    for (let i = 0; i < keys.length; i++) {
+      const apiKey = keys[i];
+      if (!apiKey) continue;
+
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
+      
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: promptText }] }],
+            generationConfig: { temperature, responseMimeType: "application/json" }
+          })
+        });
+
+        if (!response.ok) {
+          const errText = await response.text();
+          lastError = new Error(`API Error (${response.status}): ${errText}`);
+          continue;
+        }
+
+        const data = await response.json();
+        return data.candidates[0].content.parts[0].text;
+      } catch (err) {
+        lastError = err;
+        continue;
+      }
+    }
+
+    throw lastError || new Error("Gemini API Key is missing or invalid. Please check your .env configuration.");
+  };
 
   if (onProgress) onProgress({ text: `[Stage 1/4] Assembling and permuting unique questions for ${targetSubject} (Class ${targetClass})...` });
 
@@ -128,8 +129,4 @@ Return ONLY a JSON object with two fields:
     console.error("Multi-stage auditor error:", err);
     throw new Error("Failed during multi-stage paper auditing: " + err.message);
   }
-}
-
-export async function executePaperPipeline(config) {
-  return await generateAndAuditPaper(config);
 }
