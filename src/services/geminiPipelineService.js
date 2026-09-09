@@ -28,14 +28,22 @@ async function callGeminiStrictAI(promptText, temperature = 0.7) {
   }
 
   let lastError = null;
-  // Using gemini-pro which is universally accepted across all standard v1 REST keys
-  const modelsToTry = ["gemini-pro"];
+  
+  // Comprehensive mega-list of all possible Gemini models (old & new) across all endpoints
+  const allModels = [
+    "gemini-1.5-flash",
+    "gemini-1.5-flash-latest",
+    "gemini-1.5-pro",
+    "gemini-1.5-pro-latest",
+    "gemini-pro",
+    "gemini-1.0-pro"
+  ];
 
   for (let k = 0; k < keys.length; k++) {
     const apiKey = keys[k];
     
-    for (let m = 0; m < modelsToTry.length; m++) {
-      const modelName = modelsToTry[m];
+    for (let m = 0; m < allModels.length; m++) {
+      const modelName = allModels[m];
       const url = `https://generativelanguage.googleapis.com/v1/models/${modelName}:generateContent?key=${apiKey}`;
 
       try {
@@ -52,8 +60,7 @@ async function callGeminiStrictAI(promptText, temperature = 0.7) {
         });
 
         if (!response.ok) {
-          const errorBody = await response.text();
-          lastError = new Error(`API Error (${response.status}) on model [${modelName}] with Key #${k + 1}: ${errorBody}`);
+          // Silent catch for this model/key combination, move to next immediately
           continue;
         }
 
@@ -61,16 +68,15 @@ async function callGeminiStrictAI(promptText, temperature = 0.7) {
         const textResponse = data?.candidates?.[0]?.content?.parts?.[0]?.text;
         
         if (textResponse) {
-          return textResponse;
+          return textResponse; // Success! Found a working key and model combination
         }
       } catch (err) {
-        lastError = err;
         continue;
       }
     }
   }
 
-  throw lastError || new Error("All API keys exhausted during strict AI pipeline execution.");
+  throw new Error("All API keys and all model variants (Flash, Pro, Latest) failed to respond. Please check your network or API key permissions.");
 }
 
 function cleanAndParseJSON(text) {
@@ -89,8 +95,8 @@ export async function generateAndAuditPaper(config) {
   const targetSubject = selectedSubject || "Mathematics";
   const targetClass = selectedClass || "10th";
 
-  // STAGE 1: Initial Assembly via Strict AI
-  if (onProgress) onProgress({ text: `[Stage 1/4] Assembling original question matrix for ${targetSubject} (Class ${targetClass}) via Gemini AI...` });
+  // STAGE 1: Initial Assembly via Mega-Fallback AI Rotation
+  if (onProgress) onProgress({ text: `[Stage 1/4] Assembling question matrix for ${targetSubject} (Class ${targetClass}) using multi-model AI rotation...` });
 
   const uniqueSalt = Math.random().toString(36).substring(2, 10) + Date.now();
   const basePrompt = `
