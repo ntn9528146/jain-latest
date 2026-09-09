@@ -28,8 +28,8 @@ async function callGeminiStrictAI(promptText, temperature = 0.7) {
   }
 
   let lastError = null;
-  // Universally supported production models on Google Generative Language v1 API
-  const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-pro"];
+  // Using gemini-pro which is universally accepted across all standard v1 REST keys
+  const modelsToTry = ["gemini-pro"];
 
   for (let k = 0; k < keys.length; k++) {
     const apiKey = keys[k];
@@ -54,14 +54,14 @@ async function callGeminiStrictAI(promptText, temperature = 0.7) {
         if (!response.ok) {
           const errorBody = await response.text();
           lastError = new Error(`API Error (${response.status}) on model [${modelName}] with Key #${k + 1}: ${errorBody}`);
-          continue; // Try next model or next key
+          continue;
         }
 
         const data = await response.json();
         const textResponse = data?.candidates?.[0]?.content?.parts?.[0]?.text;
         
         if (textResponse) {
-          return textResponse; // Success! Return AI output
+          return textResponse;
         }
       } catch (err) {
         lastError = err;
@@ -70,7 +70,7 @@ async function callGeminiStrictAI(promptText, temperature = 0.7) {
     }
   }
 
-  throw lastError || new Error("All API keys and fallback models exhausted during AI pipeline execution.");
+  throw lastError || new Error("All API keys exhausted during strict AI pipeline execution.");
 }
 
 function cleanAndParseJSON(text) {
@@ -89,7 +89,7 @@ export async function generateAndAuditPaper(config) {
   const targetSubject = selectedSubject || "Mathematics";
   const targetClass = selectedClass || "10th";
 
-  // STAGE 1: Initial Assembly & Permutation via AI
+  // STAGE 1: Initial Assembly via Strict AI
   if (onProgress) onProgress({ text: `[Stage 1/4] Assembling original question matrix for ${targetSubject} (Class ${targetClass}) via Gemini AI...` });
 
   const uniqueSalt = Math.random().toString(36).substring(2, 10) + Date.now();
@@ -120,7 +120,7 @@ Return ONLY valid JSON with this exact structure:
   const rawText1 = await callGeminiStrictAI(basePrompt, 0.85);
   let currentPaper = cleanAndParseJSON(rawText1);
 
-  // STAGE 2 & 3: Rigorous Multi-Stage AI Compliance & Error Purging Audit Cycles
+  // STAGE 2 & 3: Strict Multi-Stage AI Compliance & Error Purging Audit Cycles
   const maxAuditCycles = 2;
   for (let cycle = 1; cycle <= maxAuditCycles; cycle++) {
     if (onProgress) onProgress({ text: `[Stage ${cycle + 1}/4] Running strict CBSE compliance & mathematical error purging audit (Cycle ${cycle})...` });
