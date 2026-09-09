@@ -1,8 +1,4 @@
-export async function executePaperPipeline(config) {
-  return await generateAndAuditPaper(config);
-}
-
-export async function generateAndAuditPaper(config) {
+async function generateAndAuditPaper(config) {
   const { selectedClass, selectedSubject, paperType, onProgress } = config;
   const targetSubject = selectedSubject || "Mathematics";
   const targetClass = selectedClass || "10th";
@@ -30,8 +26,6 @@ export async function generateAndAuditPaper(config) {
   const callGeminiAPIWithRotation = async (promptText, temperature = 0.7) => {
     const keys = getApiKeys();
     let lastError = null;
-
-    // Trying models that are universally compatible with standard API keys
     const modelsToTry = ["gemini-pro", "gemini-1.5-flash"];
 
     for (let i = 0; i < keys.length; i++) {
@@ -54,7 +48,7 @@ export async function generateAndAuditPaper(config) {
           if (!response.ok) {
             const errText = await response.text();
             lastError = new Error(`API Error (${response.status}) on model ${modelName}: ${errText}`);
-            continue; // Try next model or next key
+            continue;
           }
 
           const data = await response.json();
@@ -136,3 +130,11 @@ Return ONLY a JSON object with two fields:
     throw new Error("Failed during multi-stage paper auditing: " + err.message);
   }
 }
+
+async function executePaperPipeline(config) {
+  return await generateAndAuditPaper(config);
+}
+
+// Export everything as Named and Default to prevent any module resolution mismatch
+export { generateAndAuditPaper, executePaperPipeline };
+export default executePaperPipeline;
