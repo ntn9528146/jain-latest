@@ -7,11 +7,6 @@ const getApiKey = () => {
   return import.meta.env.VITE_GEMINI_API_KEY || "";
 };
 
-/**
- * Multi-Stage Error-Free Paper Engine
- * Step 1: Base generation / permutation from stored pool.
- * Step 2, 3, 4: Multi-cycle API auditing, format checking, and error purging until 100% CBSE compliant.
- */
 export async function generateAndAuditPaper(config) {
   const { selectedClass, selectedSubject, paperType, onProgress } = config;
   const targetSubject = selectedSubject || "Mathematics";
