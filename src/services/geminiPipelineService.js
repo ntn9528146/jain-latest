@@ -21,8 +21,6 @@ const getApiKeys = () => {
 async function callGeminiDirectAPI(promptText, temperature = 0.7) {
   const keys = getApiKeys();
   let lastError = null;
-  
-  // Using gemini-pro which is universally accepted by all standard API keys on v1 endpoint
   const models = ["gemini-pro"];
 
   for (let i = 0; i < keys.length; i++) {
@@ -62,7 +60,7 @@ async function callGeminiDirectAPI(promptText, temperature = 0.7) {
   throw lastError || new Error("All API keys and models failed. Please check your VITE_GEMINI_API_KEY in .env.");
 }
 
-export async function generateAndAuditPaper(config) {
+async function generateAndAuditPaper(config) {
   const { selectedClass, selectedSubject, paperType, onProgress } = config;
   const targetSubject = selectedSubject || "Mathematics";
   const targetClass = selectedClass || "10th";
@@ -133,8 +131,10 @@ Return ONLY a JSON object with two fields:
   }
 }
 
-export async function executePaperPipeline(config) {
+async function executePaperPipeline(config) {
   return await generateAndAuditPaper(config);
 }
 
+// Ensure all export variations are explicitly declared
+export { generateAndAuditPaper, executePaperPipeline };
 export default executePaperPipeline;
