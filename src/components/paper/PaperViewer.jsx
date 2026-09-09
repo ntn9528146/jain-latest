@@ -9,34 +9,52 @@ export default function PaperViewer({ paperData, onClose }) {
   const timeAllowed = rawData.timeAllowed || "3 Hours";
   const maxMarks = rawData.maxMarks || 80;
 
-  // ENSURE STRICT 5-SECTION CBSE STRUCTURE (38 Questions Total)
-  let sections = rawData.sections || [];
-  
-  // If sections are not properly split by AI, enforce standard CBSE blueprint distribution
-  if (sections.length < 5) {
-    let allQuestions = [];
-    sections.forEach(s => { if (s.questions) allQuestions = allQuestions.concat(s.questions); });
+  let incomingSections = rawData.sections || [];
+  let allQs = [];
+  incomingSections.forEach(s => { if (s.questions) allQs = allQs.concat(s.questions); });
 
-    // Fallback if questions are empty
-    if (allQuestions.length === 0) {
-      for (let i = 1; i <= 38; i++) {
-        allQuestions.push({
-          qNo: i,
-          questionText: `Sample Question number ${i} for ${subject} - Class ${className}.`,
-          options: i <= 20 ? ["Option A", "Option B", "Option C", "Option D"] : [],
-          marks: i <= 20 ? 1 : (i >= 21 && i <= 25 ? 2 : (i >= 26 && i <= 31 ? 3 : (i >= 32 && i <= 35 ? 5 : 4)))
-        });
+  // Guarantee exact CBSE distribution matching the General Instructions
+  const sectionRules = [
+    { name: "SECTION A", start: 1, end: 20, marks: 1, isMcq: true },   // Q1-20 (18 MCQs + 2 Assertion-Reason)
+    { name: "SECTION B", start: 21, end: 25, marks: 2, isMcq: false }, // Q21-25 (2 marks)[cite: 1]
+    { name: "SECTION C", start: 26, end: 31, marks: 3, isMcq: false }, // Q26-31 (3 marks)[cite: 1]
+    { name: "SECTION D", start: 32, end: 35, marks: 5, isMcq: false }, // Q32-35 (5 marks)[cite: 1]
+    { name: "SECTION E", start: 36, end: 38, marks: 4, isMcq: false }  // Q36-38 (4 marks Case Study)[cite: 1]
+  ];
+
+  const enforcedSections = sectionRules.map((rule, sIdx) => {
+    let sectionQuestions = [];
+    for (let qNo = rule.start; qNo <= rule.end; qNo++) {
+      // Find if AI generated a question for this qNo
+      let found = allQs.find(q => Number(q.qNo) === qNo);
+      if (!found && allQs.length > 0) {
+        // Fallback: pick next available question from pool
+        found = allQs.shift();
       }
+      if (!found) {
+        // Fallback generator if pool runs out
+        found = {
+          qNo: qNo,
+          questionText: `Question number ${qNo} for ${subject} - Class ${className}.`,
+          options: rule.isMcq ? ["Option A", "Option B", "Option C", "Option D"] : [],
+          marks: rule.marks
+        };
+      } else {
+        found.qNo = qNo;
+        found.marks = rule.marks;
+        if (rule.isMcq && (!found.options || found.options.length === 0)) {
+          found.options = ["Option A", "Option B", "Option C", "Option D"];
+        } else if (!rule.isMcq) {
+          found.options = [];
+        }
+      }
+      sectionQuestions.push(found);
     }
-
-    sections = [
-      { sectionName: "SECTION A", questions: allQuestions.slice(0, 20) }, // Q1-20 (18 MCQs + 2 Assertion-Reason)
-      { sectionName: "SECTION B", questions: allQuestions.slice(20, 25) }, // Q21-25 (2 marks)[cite: 1]
-      { sectionName: "SECTION C", questions: allQuestions.slice(25, 31) }, // Q26-31 (3 marks)[cite: 1]
-      { sectionName: "SECTION D", questions: allQuestions.slice(31, 35) }, // Q32-35 (5 marks)[cite: 1]
-      { sectionName: "SECTION E", questions: allQuestions.slice(35, 38) }  // Q36-38 (4 marks Case Study)[cite: 1]
-    ];
-  }
+    return {
+      sectionName: rule.name,
+      questions: sectionQuestions
+    };
+  });
 
   return (
     <div className="max-w-4xl mx-auto bg-white text-black p-8 shadow-md rounded-2xl relative font-serif">
@@ -56,8 +74,8 @@ export default function PaperViewer({ paperData, onClose }) {
         <h1 className="text-xl font-bold uppercase tracking-wider">{schoolName}</h1>
         <h2 className="text-sm font-bold uppercase tracking-wide mt-1">SUBJECT: {subject} ({className.toUpperCase()})</h2>
         <div className="flex justify-between font-bold text-sm mt-3 px-4 border-t border-dashed border-gray-400 pt-2">
-          <span>Maximum Marks: {maxMarks}[cite: 1]</span>
-          <span>Time Allowed: {timeAllowed}[cite: 1]</span>
+          <span>Maximum marks: {maxMarks}[cite: 1]</span>
+          <span>Time : {timeAllowed}[cite: 1]</span>
         </div>
       </div>
 
@@ -79,53 +97,49 @@ export default function PaperViewer({ paperData, onClose }) {
         </ol>
       </div>
 
-      {sections.map((section, sIndex) => {
-        const sName = section.sectionName || section.title || `SECTION ${String.fromCharCode(65 + sIndex)}`;
-
-        return (
-          <div key={sIndex} className="mb-8">
-            <div className="bg-slate-200 border-y-2 border-black py-1.5 px-4 mb-4 text-center">
-              <h3 className="font-bold uppercase text-sm tracking-wide">{sName}</h3>
-            </div>
-
-            {(section.questions || []).map((q, qIndex) => {
-              const qMarks = Number(q.marks || 1);
-              const showOptions = qMarks === 1 && q.options && q.options.length > 0;
-
-              return (
-                <div key={qIndex} className="mb-5 flex justify-between items-start text-sm leading-relaxed">
-                  <div className="flex-1 pr-4">
-                    <div className="flex items-start">
-                      <span className="w-8 shrink-0 font-bold">{q.qNo || (sIndex * 10 + qIndex + 1)}.</span>
-                      <div 
-                        className="flex-1"
-                        dangerouslySetInnerHTML={{ __html: formatMathText(q.questionText || q.question || "") }}
-                      />
-                    </div>
-
-                    {showOptions && (
-                      <div className="grid grid-cols-2 gap-x-6 gap-y-1 mt-2 pl-8">
-                        {q.options.map((opt, oIndex) => {
-                          const optLabel = String.fromCharCode(65 + oIndex);
-                          return (
-                            <div key={oIndex} className="flex items-start">
-                              <span className="mr-2 font-semibold">({optLabel})</span>
-                              <span dangerouslySetInnerHTML={{ __html: formatMathText(String(opt)) }} />
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                  <div className="text-right shrink-0 font-bold pl-2">
-                    [{qMarks}]
-                  </div>
-                </div>
-              );
-            })}
+      {enforcedSections.map((section, sIndex) => (
+        <div key={sIndex} className="mb-8">
+          <div className="bg-slate-200 border-y-2 border-black py-1.5 px-4 mb-4 text-center">
+            <h3 className="font-bold uppercase text-sm tracking-wide">{section.sectionName}</h3>
           </div>
-        );
-      })}
+
+          {(section.questions || []).map((q, qIndex) => {
+            const qMarks = Number(q.marks || 1);
+            const showOptions = qMarks === 1 && q.options && q.options.length > 0;
+
+            return (
+              <div key={qIndex} className="mb-5 flex justify-between items-start text-sm leading-relaxed">
+                <div className="flex-1 pr-4">
+                  <div className="flex items-start">
+                    <span className="w-8 shrink-0 font-bold">{q.qNo}.</span>
+                    <div 
+                      className="flex-1"
+                      dangerouslySetInnerHTML={{ __html: formatMathText(q.questionText || q.question || "") }}
+                    />
+                  </div>
+
+                  {showOptions && (
+                    <div className="grid grid-cols-2 gap-x-6 gap-y-1 mt-2 pl-8">
+                      {q.options.map((opt, oIndex) => {
+                        const optLabel = String.fromCharCode(65 + oIndex);
+                        return (
+                          <div key={oIndex} className="flex items-start">
+                            <span className="mr-2 font-semibold">({optLabel})</span>
+                            <span dangerouslySetInnerHTML={{ __html: formatMathText(String(opt)) }} />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+                <div className="text-right shrink-0 font-bold pl-2">
+                  [{qMarks}]
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ))}
     </div>
   );
 }
