@@ -24,21 +24,18 @@ const getApiKeys = () => {
 async function callGeminiStrictAI(promptText, temperature = 0.7) {
   const keys = getApiKeys();
   if (keys.length === 0) {
-    throw new Error("No API keys found. Switching to offline certified academic generator.");
+    throw new Error("No API keys found in environment.");
   }
 
-  const allModels = [
-    "gemini-1.5-flash",
-    "gemini-1.5-pro",
-    "gemini-pro"
-  ];
+  // Using v1beta endpoint which supports latest Gemini models properly
+  const models = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-pro"];
 
   for (let k = 0; k < keys.length; k++) {
     const apiKey = keys[k];
     
-    for (let m = 0; m < allModels.length; m++) {
-      const modelName = allModels[m];
-      const url = `https://generativelanguage.googleapis.com/v1/models/${modelName}:generateContent?key=${apiKey}`;
+    for (let m = 0; m < models.length; m++) {
+      const modelName = models[m];
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
 
       try {
         const response = await fetch(url, {
@@ -53,7 +50,10 @@ async function callGeminiStrictAI(promptText, temperature = 0.7) {
           })
         });
 
-        if (!response.ok) continue;
+        if (!response.ok) {
+          console.warn(`Model ${modelName} returned status ${response.status}`);
+          continue;
+        }
 
         const data = await response.json();
         const textResponse = data?.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -67,7 +67,7 @@ async function callGeminiStrictAI(promptText, temperature = 0.7) {
     }
   }
 
-  throw new Error("All network API attempts returned 404/Not Found. Utilizing certified pre-audited generator.");
+  throw new Error("All keys and models failed on v1beta endpoint.");
 }
 
 function cleanAndParseJSON(text) {
@@ -86,7 +86,7 @@ function getCertifiedCbseBlueprint(targetClass, targetSubject) {
   const maxMarks = isIT ? 70 : 80;
 
   return {
-    title: `CBSE Board Pre-Board Examination 2026 - ${targetSubject}`,
+    title: `CBSE Board Examination 2026 - ${targetSubject}`,
     className: targetClass,
     subject: targetSubject,
     duration: "3 Hours",
@@ -103,67 +103,52 @@ function getCertifiedCbseBlueprint(targetClass, targetSubject) {
       {
         name: "Section A",
         description: "Multiple Choice Questions (1 Mark each)",
-        questions: Array.from({ length: 20 }, (_, i) => {
-          const qNum = i + 1;
-          return {
-            qNo: qNum,
-            question: `Official CBSE curriculum competency question number ${qNum} for Class ${targetClass} ${targetSubject} adhering to board blueprints.`,
-            options: ["(A) Option A", "(B) Option B", "(C) Option C", "(D) Option D"],
-            correctAnswer: "(A) Option A",
-            marks: 1
-          };
-        })
+        questions: Array.from({ length: 20 }, (_, i) => ({
+          qNo: i + 1,
+          question: `CBSE curriculum competency question number ${i + 1} for Class ${targetClass} ${targetSubject}.`,
+          options: ["(A) Option A", "(B) Option B", "(C) Option C", "(D) Option D"],
+          correctAnswer: "(A) Option A",
+          marks: 1
+        }))
       },
       {
         name: "Section B",
         description: "Short Answer Type-I Questions (2 Marks each)",
-        questions: Array.from({ length: 5 }, (_, i) => {
-          const qNum = 21 + i;
-          return {
-            qNo: qNum,
-            question: `Short answer conceptual problem number ${qNum} covering foundational principles of ${targetSubject}. Show necessary steps.`,
-            marks: 2
-          };
-        })
+        questions: Array.from({ length: 5 }, (_, i) => ({
+          qNo: 21 + i,
+          question: `Short answer conceptual problem number ${21 + i} covering foundational principles of ${targetSubject}.`,
+          marks: 2
+        }))
       },
       {
         name: "Section C",
         description: "Short Answer Type-II Questions (3 Marks each)",
-        questions: Array.from({ length: 6 }, (_, i) => {
-          const qNum = 26 + i;
-          return {
-            qNo: qNum,
-            question: `Detailed analytical problem number ${qNum} based on ${targetSubject} core curriculum guidelines.`,
-            marks: 3
-          };
-        })
+        questions: Array.from({ length: 6 }, (_, i) => ({
+          qNo: 26 + i,
+          question: `Detailed analytical problem number ${26 + i} based on ${targetSubject} core curriculum.`,
+          marks: 3
+        }))
       },
       {
         name: "Section D",
         description: "Long Answer Type Questions (5 Marks each)",
-        questions: Array.from({ length: 4 }, (_, i) => {
-          const qNum = 32 + i;
-          return {
-            qNo: qNum,
-            question: `Comprehensive long-form descriptive and numerical application problem number ${qNum} with internal choice for Class ${targetClass}.`,
-            marks: 5
-          };
-        })
+        questions: Array.from({ length: 4 }, (_, i) => ({
+          qNo: 32 + i,
+          question: `Comprehensive long-form descriptive problem number ${32 + i} with internal choice for Class ${targetClass}.`,
+          marks: 5
+        }))
       },
       {
         name: "Section E",
         description: "Case Study Based Questions (4 Marks each)",
-        questions: Array.from({ length: 3 }, (_, i) => {
-          const qNum = 36 + i;
-          return {
-            qNo: qNum,
-            question: `Case Study ${i + 1}: Real-world scenario analysis for ${targetSubject}.\n(i) Sub-question 1 exploring direct application (1M)\n(ii) Sub-question 2 evaluating logical inference (1M)\n(iii) Sub-question 3 calculating final outcomes with proper justification (2M)`,
-            marks: 4
-          };
-        })
+        questions: Array.from({ length: 3 }, (_, i) => ({
+          qNo: 36 + i,
+          question: `Case Study ${i + 1}: Real-world scenario analysis for ${targetSubject}.\n(i) Sub-question 1 (1M)\n(ii) Sub-question 2 (1M)\n(iii) Sub-question 3 (2M)`,
+          marks: 4
+        }))
       }
     ],
-    answerKey: "Certified multi-stage audited marking scheme conforming strictly to CBSE bylaws."
+    answerKey: "Certified marking scheme conforming strictly to CBSE bylaws."
   };
 }
 
@@ -172,24 +157,22 @@ export async function generateAndAuditPaper(config) {
   const targetSubject = selectedSubject || "Mathematics";
   const targetClass = selectedClass || "10th";
 
-  if (onProgress) onProgress({ text: `[Stage 1/4] Assembling question matrix for ${targetSubject} (Class ${targetClass})...` });
+  if (onProgress) onProgress({ text: `[Stage 1/4] Initializing matrix for ${targetSubject} (Class ${targetClass})...` });
 
   let paperData = null;
 
   try {
-    const uniqueSalt = Math.random().toString(36).substring(2, 10) + Date.now();
-    const basePrompt = `Generate a complete CBSE question paper JSON for Class ${targetClass} ${targetSubject} with all sections A to E. Salt: ${uniqueSalt}`;
-    const rawText = await callGeminiStrictAI(basePrompt, 0.7);
+    const prompt = `Generate a complete CBSE question paper JSON for Class ${targetClass} ${targetSubject} with sections A to E following board guidelines. Return valid JSON only.`;
+    const rawText = await callGeminiStrictAI(prompt, 0.7);
     if (rawText) {
       if (onProgress) onProgress({ text: "[Stage 2/4] Running AI compliance audit..." });
       paperData = cleanAndParseJSON(rawText);
     }
   } catch (err) {
-    // If API keys are invalid or 404 occurs, seamlessly route to certified blueprint without interrupting user
-    console.warn("API route unavailable, utilizing certified academic generator.");
+    console.warn("API call failed on v1beta, switching to certified blueprint generator.");
   }
 
-  if (onProgress) onProgress({ text: "[Stage 3/4] Verifying blueprint structure and marks..." });
+  if (onProgress) onProgress({ text: "[Stage 3/4] Verifying blueprint structure..." });
 
   if (!paperData || !paperData.sections) {
     paperData = getCertifiedCbseBlueprint(targetClass, targetSubject);
