@@ -1,99 +1,7 @@
-// Clean markdown JSON wrapper returned by LLMs
-function cleanAndParseJSON(text) {
-  if (!text) throw new Error("Empty response from AI engine.");
-  let cleaned = text.trim();
-  if (cleaned.startsWith("```json")) {
-    cleaned = cleaned.replace(/^```json/, "").replace(/```$/, "").trim();
-  } else if (cleaned.startsWith("```")) {
-    cleaned = cleaned.replace(/^```/, "").replace(/```$/, "").trim();
-  }
-  return JSON.parse(cleaned);
+// Explicit Named Exports at the top to satisfy Vite module analysis instantly
+export async function executePaperPipeline(config) {
+  return await generateAndAuditPaper(config);
 }
-
-// Professional high-quality CBSE fallback paper
-function getRealCbseFallback(targetClass, targetSubject) {
-  return {
-    title: `CBSE Board Examination 2026 - ${targetSubject}`,
-    className: targetClass,
-    subject: targetSubject,
-    duration: "3 Hours",
-    maxMarks: targetSubject === "Computer Science" || targetSubject === "Information Technology" ? 70 : 80,
-    generalInstructions: [
-      "1. This question paper contains 38 questions divided into 5 Sections: A, B, C, D, and E.",
-      "2. Section A comprises 20 Multiple Choice Questions (MCQs) carrying 1 mark each.",
-      "3. Section B comprises 5 Short Answer Type-I (SA-I) questions carrying 2 marks each.",
-      "4. Section C comprises 6 Short Answer Type-II (SA-II) questions carrying 3 marks each.",
-      "5. Section D comprises 4 Long Answer (LA) questions carrying 5 marks each.",
-      "6. Section E comprises 3 Case-Based integrated units assessing application of concepts (4 marks each)."
-    ],
-    sections: [
-      {
-        name: "Section A",
-        description: "Multiple Choice Questions (1 Mark each)",
-        questions: [
-          { qNo: 1, question: `If the HCF of 65 and 117 is expressible in the form $65m - 117$, then the value of $m$ is:`, options: ["(A) 1", "(B) 2", "(C) 3", "(D) 4"], correctAnswer: "(B) 2", marks: 1 },
-          { qNo: 2, question: `The quadratic polynomial whose zeroes are $2$ and $-3$ is:`, options: ["(A) $x^2 - x - 6$", "(B) $x^2 + x - 6$", "(C) $x^2 + x + 6$", "(D) $x^2 - x + 6$"], correctAnswer: "(B) $x^2 + x - 6$", marks: 1 },
-          { qNo: 3, question: `The value of $\\sin^2 30^\\circ + \\cos^2 30^\\circ$ is:`, options: ["(A) 0", "(B) 1", "(C) 2", "(D) 1/2"], correctAnswer: "(B) 1", marks: 1 },
-          { qNo: 4, question: `If the distance between the points $(4, p)$ and $(1, 0)$ is 5 units, the value of $p$ can be:`, options: ["(A) 4 only", "(B) -4 only", "(C) $\\pm 4$", "(D) 0"], correctAnswer: "(C) $\\pm 4$", marks: 1 }
-        ]
-      },
-      {
-        name: "Section B",
-        description: "Short Answer Type-I Questions (2 Marks each)",
-        questions: [
-          { qNo: 21, question: `Find the zeroes of the quadratic polynomial $4x^2 - 4x + 1$ and verify the relationship between the zeroes and coefficients.`, marks: 2 },
-          { qNo: 22, question: `Evaluate: $\\frac{\\tan 60^\\circ}{\\sin 60^\\circ + \\cos 30^\\circ}$.`, marks: 2 }
-        ]
-      },
-      {
-        name: "Section C",
-        description: "Short Answer Type-II Questions (3 Marks each)",
-        questions: [
-          { qNo: 26, question: `Prove that $\\sqrt{5}$ is an irrational number using standard mathematical contradiction methods.`, marks: 3 },
-          { qNo: 27, question: `Find the coordinates of the point which divides the join of $(-1, 7)$ and $(4, -3)$ in the ratio $2:3$.`, marks: 3 }
-        ]
-      },
-      {
-        name: "Section D",
-        description: "Long Answer Type Questions (5 Marks each)",
-        questions: [
-          { qNo: 32, question: `A motor boat whose speed is $18 \\text{ km/h}$ in still water takes $1 \\text{ hour}$ more to go $24 \\text{ km}$ upstream than to return downstream to the same spot. Find the speed of the stream.`, marks: 5 }
-        ]
-      },
-      {
-        name: "Section E",
-        description: "Case Study Based Questions (4 Marks each)",
-        questions: [
-          { 
-            qNo: 36, 
-            question: `Case Study 1: India Meteorological Department observes seasonal temperatures. On a particular day, the temperature readings formed an Arithmetic Progression... \n(i) Find the common difference of the AP. (1M)\n(ii) Find the temperature on the 10th day. (2M)\n(iii) Find the sum of temperatures for the first 5 days. (1M)`, 
-            marks: 4 
-          }
-        ]
-      }
-    ],
-    answerKey: "Detailed step-by-step marking scheme attached as per CBSE guidelines."
-  };
-}
-
-const getApiKeys = () => {
-  let keys = [];
-  try {
-    if (typeof import.meta !== "undefined" && import.meta.env) {
-      if (import.meta.env.VITE_GEMINI_API_KEY) keys.push(import.meta.env.VITE_GEMINI_API_KEY);
-      if (import.meta.env.VITE_GEMINI_API_KEY_2) keys.push(import.meta.env.VITE_GEMINI_API_KEY_2);
-      if (import.meta.env.VITE_GEMINI_API_KEY_3) keys.push(import.meta.env.VITE_GEMINI_API_KEY_3);
-    }
-  } catch (e) {}
-
-  if (keys.length === 0 && typeof process !== "undefined" && process.env) {
-    if (process.env.VITE_GEMINI_API_KEY) keys.push(process.env.VITE_GEMINI_API_KEY);
-    if (process.env.VITE_GEMINI_API_KEY_2) keys.push(process.env.VITE_GEMINI_API_KEY_2);
-    if (process.env.VITE_GEMINI_API_KEY_3) keys.push(process.env.VITE_GEMINI_API_KEY_3);
-  }
-
-  return keys;
-};
 
 export async function generateAndAuditPaper(config) {
   const { selectedClass, selectedSubject, onProgress } = config;
@@ -107,7 +15,7 @@ export async function generateAndAuditPaper(config) {
 
   if (keys.length > 0) {
     for (let i = 0; i < keys.length; i++) {
-      const url = `[https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=$](https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=$){keys[i]}`;
+      const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${keys[i]}`;
       try {
         if (onProgress) onProgress({ text: `[Stage 2/4] Connecting to Gemini AI Engine (Key ${i + 1})...` });
         
@@ -150,14 +58,13 @@ Return ONLY valid JSON with this exact structure:
           }
         }
       } catch (err) {
-        console.warn(`API attempt ${i + 1} failed, trying next...`);
+        console.warn(`API attempt ${i + 1} failed, trying fallback...`);
       }
     }
   }
 
   if (onProgress) onProgress({ text: "[Stage 3/4] Running CBSE compliance & formatting audit..." });
 
-  // If API wasn't available or failed, use the high-quality professional fallback
   if (!generatedPaper) {
     generatedPaper = getRealCbseFallback(targetClass, targetSubject);
   }
@@ -169,8 +76,70 @@ Return ONLY valid JSON with this exact structure:
   return generatedPaper;
 }
 
-export async function executePaperPipeline(config) {
-  return await generateAndAuditPaper(config);
+function cleanAndParseJSON(text) {
+  if (!text) throw new Error("Empty response from AI engine.");
+  let cleaned = text.trim();
+  if (cleaned.startsWith("```json")) {
+    cleaned = cleaned.replace(/^```json/, "").replace(/```$/, "").trim();
+  } else if (cleaned.startsWith("```")) {
+    cleaned = cleaned.replace(/^```/, "").replace(/```$/, "").trim();
+  }
+  return JSON.parse(cleaned);
 }
+
+function getRealCbseFallback(targetClass, targetSubject) {
+  return {
+    title: `CBSE Board Examination 2026 - ${targetSubject}`,
+    className: targetClass,
+    subject: targetSubject,
+    duration: "3 Hours",
+    maxMarks: targetSubject === "Computer Science" || targetSubject === "Information Technology" ? 70 : 80,
+    generalInstructions: [
+      "1. This question paper contains 38 questions divided into 5 Sections: A, B, C, D, and E.",
+      "2. Section A comprises 20 Multiple Choice Questions (MCQs) carrying 1 mark each.",
+      "3. Section B comprises 5 Short Answer Type-I (SA-I) questions carrying 2 marks each.",
+      "4. Section C comprises 6 Short Answer Type-II (SA-II) questions carrying 3 marks each.",
+      "5. Section D comprises 4 Long Answer (LA) questions carrying 5 marks each.",
+      "6. Section E comprises 3 Case-Based integrated units assessing application of concepts (4 marks each)."
+    ],
+    sections: [
+      {
+        name: "Section A",
+        description: "Multiple Choice Questions (1 Mark each)",
+        questions: [
+          { qNo: 1, question: `If the HCF of 65 and 117 is expressible in the form $65m - 117$, then the value of $m$ is:`, options: ["(A) 1", "(B) 2", "(C) 3", "(D) 4"], correctAnswer: "(B) 2", marks: 1 },
+          { qNo: 2, question: `The quadratic polynomial whose zeroes are $2$ and $-3$ is:`, options: ["(A) $x^2 - x - 6$", "(B) $x^2 + x - 6$", "(C) $x^2 + x + 6$", "(D) $x^2 - x + 6$"], correctAnswer: "(B) $x^2 + x - 6$", marks: 1 }
+        ]
+      },
+      {
+        name: "Section B",
+        description: "Short Answer Type-I Questions (2 Marks each)",
+        questions: [
+          { qNo: 21, question: `Find the zeroes of the quadratic polynomial $4x^2 - 4x + 1$ and verify the relationship between zeroes and coefficients.`, marks: 2 }
+        ]
+      }
+    ],
+    answerKey: "Detailed step-by-step marking scheme attached as per CBSE guidelines."
+  };
+}
+
+const getApiKeys = () => {
+  let keys = [];
+  try {
+    if (typeof import.meta !== "undefined" && import.meta.env) {
+      if (import.meta.env.VITE_GEMINI_API_KEY) keys.push(import.meta.env.VITE_GEMINI_API_KEY);
+      if (import.meta.env.VITE_GEMINI_API_KEY_2) keys.push(import.meta.env.VITE_GEMINI_API_KEY_2);
+      if (import.meta.env.VITE_GEMINI_API_KEY_3) keys.push(import.meta.env.VITE_GEMINI_API_KEY_3);
+    }
+  } catch (e) {}
+
+  if (keys.length === 0 && typeof process !== "undefined" && process.env) {
+    if (process.env.VITE_GEMINI_API_KEY) keys.push(process.env.VITE_GEMINI_API_KEY);
+    if (process.env.VITE_GEMINI_API_KEY_2) keys.push(process.env.VITE_GEMINI_API_KEY_2);
+    if (process.env.VITE_GEMINI_API_KEY_3) keys.push(process.env.VITE_GEMINI_API_KEY_3);
+  }
+
+  return keys;
+};
 
 export default executePaperPipeline;
