@@ -1,5 +1,4 @@
-import { GoogleGenAI } from "@google/genai";
-
+// Use standard fetch to Gemini API to avoid module resolution errors completely
 const getApiKey = () => {
   if (typeof window !== "undefined" && window.process && window.process.env) {
     return window.process.env.VITE_GEMINI_API_KEY || window.process.env.VITE_GEMINI_API_KEY_2 || window.process.env.VITE_GEMINI_API_KEY_3 || "";
@@ -7,8 +6,28 @@ const getApiKey = () => {
   return import.meta.env.VITE_GEMINI_API_KEY || "";
 };
 
+async function callGeminiAPI(promptText, apiKey, temperature = 0.7) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: promptText }] }],
+      generationConfig: { temperature, responseMimeType: "application/json" }
+    })
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`Gemini API Error: ${response.status} - ${errText}`);
+  }
+
+  const data = await response.json();
+  return data.candidates[0].content.parts[0].text;
+}
+
 /**
- * Robust Multi-Stage Error-Free Paper Engine with executePaperPipeline export
+ * Multi-Stage Error-Free Paper Engine using direct secure API calls
  */
 export async function executePaperPipeline(config) {
   const { selectedClass, selectedSubject, paperType, onProgress } = config;
@@ -16,7 +35,9 @@ export async function executePaperPipeline(config) {
   const targetClass = selectedClass || "10th";
 
   const apiKey = getApiKey();
-  const ai = new GoogleGenAI({ apiKey });
+  if (!apiKey) {
+    throw new Error("Gemini API Key is missing. Please configure VITE_GEMINI_API_KEY.");
+  }
 
   if (onProgress) onProgress({ text: `[Stage 1/4] Assembling and permuting unique questions for ${targetSubject} (Class ${targetClass})...` });
 
@@ -30,13 +51,8 @@ Return ONLY valid JSON format matching standard schema.
 `;
 
   try {
-    const response1 = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: basePrompt,
-      config: { temperature: 0.9, responseMimeType: "application/json" }
-    });
-
-    let currentPaper = JSON.parse(response1.text());
+    const rawText1 = await callGeminiAPI(basePrompt, apiKey, 0.9);
+    let currentPaper = JSON.parse(rawText1);
 
     const maxCycles = 3;
     let isSatisfied = false;
@@ -65,13 +81,9 @@ Return ONLY a JSON object with two fields:
 }
 `;
 
-      const auditResponse = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: auditPrompt,
-        config: { temperature: 0.1, responseMimeType: "application/json" }
-      });
-
-      const auditResult = JSON.parse(auditResponse.text());
+      const auditText = await callGeminiAPI(auditPrompt, apiKey, 0.1);
+      const auditResult = JSON.parse(auditText);
+      
       if (auditResult && auditResult.paper) {
         currentPaper = auditResult.paper;
       }
