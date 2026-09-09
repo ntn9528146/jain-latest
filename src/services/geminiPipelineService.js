@@ -1,35 +1,71 @@
-import { GoogleGenAI } from "@google/genai";
-
-const getApiKey = () => {
+const getApiKeys = () => {
+  let keys = [];
   try {
     if (typeof import.meta !== "undefined" && import.meta.env) {
-      if (import.meta.env.VITE_GEMINI_API_KEY) return import.meta.env.VITE_GEMINI_API_KEY;
-      if (import.meta.env.VITE_GEMINI_API_KEY_2) return import.meta.env.VITE_GEMINI_API_KEY_2;
-      if (import.meta.env.VITE_GEMINI_API_KEY_3) return import.meta.env.VITE_GEMINI_API_KEY_3;
+      if (import.meta.env.VITE_GEMINI_API_KEY) keys.push(import.meta.env.VITE_GEMINI_API_KEY);
+      if (import.meta.env.VITE_GEMINI_API_KEY_2) keys.push(import.meta.env.VITE_GEMINI_API_KEY_2);
+      if (import.meta.env.VITE_GEMINI_API_KEY_3) keys.push(import.meta.env.VITE_GEMINI_API_KEY_3);
     }
   } catch (e) {}
 
-  if (typeof process !== "undefined" && process.env) {
-    if (process.env.VITE_GEMINI_API_KEY) return process.env.VITE_GEMINI_API_KEY;
-    if (process.env.VITE_GEMINI_API_KEY_2) return process.env.VITE_GEMINI_API_KEY_2;
-    if (process.env.VITE_GEMINI_API_KEY_3) return process.env.VITE_GEMINI_API_KEY_3;
+  if (keys.length === 0 && typeof process !== "undefined" && process.env) {
+    if (process.env.VITE_GEMINI_API_KEY) keys.push(process.env.VITE_GEMINI_API_KEY);
+    if (process.env.VITE_GEMINI_API_KEY_2) keys.push(process.env.VITE_GEMINI_API_KEY_2);
+    if (process.env.VITE_GEMINI_API_KEY_3) keys.push(process.env.VITE_GEMINI_API_KEY_3);
   }
 
-  return "";
+  if (keys.length === 0) keys.push("");
+  return keys;
 };
+
+async function callGeminiDirectAPI(promptText, temperature = 0.7) {
+  const keys = getApiKeys();
+  let lastError = null;
+  
+  // Using gemini-pro and gemini-1.5-flash via standard v1 endpoint
+  const models = ["gemini-pro", "gemini-1.5-flash"];
+
+  for (let i = 0; i < keys.length; i++) {
+    const apiKey = keys[i];
+    if (!apiKey) continue;
+
+    for (const model of models) {
+      const url = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${apiKey}`;
+      
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: promptText }] }],
+            generationConfig: { temperature, responseMimeType: "application/json" }
+          })
+        });
+
+        if (!response.ok) {
+          const errText = await response.text();
+          lastError = new Error(`API Error (${response.status}) on ${model}: ${errText}`);
+          continue;
+        }
+
+        const data = await response.json();
+        if (data && data.candidates && data.candidates[0] && data.candidates[0].content) {
+          return data.candidates[0].content.parts[0].text;
+        }
+      } catch (err) {
+        lastError = err;
+        continue;
+      }
+    }
+  }
+
+  throw lastError || new Error("All API keys and models failed. Please check your VITE_GEMINI_API_KEY in .env.");
+}
 
 export async function generateAndAuditPaper(config) {
   const { selectedClass, selectedSubject, paperType, onProgress } = config;
   const targetSubject = selectedSubject || "Mathematics";
   const targetClass = selectedClass || "10th";
-
-  const apiKey = getApiKey();
-  if (!apiKey) {
-    throw new Error("Gemini API Key is missing. Please check your .env configuration.");
-  }
-
-  // Initialize official GoogleGenAI client which handles model routing automatically
-  const ai = new GoogleGenAI({ apiKey });
 
   if (onProgress) onProgress({ text: `[Stage 1/4] Assembling and permuting unique questions for ${targetSubject} (Class ${targetClass})...` });
 
@@ -43,13 +79,8 @@ Return ONLY valid JSON format matching standard schema.
 `;
 
   try {
-    const response1 = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: basePrompt,
-      config: { temperature: 0.9, responseMimeType: "application/json" }
-    });
-
-    let currentPaper = JSON.parse(response1.text());
+    const rawText1 = await callGeminiDirectAPI(basePrompt, 0.9);
+    let currentPaper = JSON.parse(rawText1);
 
     const maxCycles = 3;
     let isSatisfied = false;
@@ -57,7 +88,7 @@ Return ONLY valid JSON format matching standard schema.
 
     while (!isSatisfied && cycleCount < maxCycles) {
       cycleCount++;
-      if (onProgress) onProgress({ text: `[Stage ${cycleCount + 1}/4] Running CBSE compliance & error-free auditing cycle ${cycleCount}...` });
+      if (onProgress) onProgress({ text: `[Stage ${cycleCount + 1}/4] Running CBSE compliance & error-free auditing cycle ${cycleCount} using multi-key rotation...` });
 
       const auditPrompt = `
 You are a Rigorous CBSE Board Chief Auditor and Master Validator. 
@@ -78,13 +109,8 @@ Return ONLY a JSON object with two fields:
 }
 `;
 
-      const auditResponse = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: auditPrompt,
-        config: { temperature: 0.1, responseMimeType: "application/json" }
-      });
-
-      const auditResult = JSON.parse(auditResponse.text());
+      const auditText = await callGeminiDirectAPI(auditPrompt, 0.1);
+      const auditResult = JSON.parse(auditText);
       
       if (auditResult && auditResult.paper) {
         currentPaper = auditResult.paper;
