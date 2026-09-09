@@ -22,8 +22,8 @@ async function callGeminiDirectAPI(promptText, temperature = 0.7) {
   const keys = getApiKeys();
   let lastError = null;
   
-  // Permanent stable models supported on v1 endpoint
-  const models = ["gemini-1.5-flash", "gemini-1.5-pro"];
+  // Using strictly gemin-1.5-flash which is universally active and supported on v1 endpoint
+  const models = ["gemini-1.5-flash"];
 
   for (let i = 0; i < keys.length; i++) {
     const apiKey = keys[i];
@@ -45,7 +45,7 @@ async function callGeminiDirectAPI(promptText, temperature = 0.7) {
         if (!response.ok) {
           const errText = await response.text();
           lastError = new Error(`API Error (${response.status}) on ${model}: ${errText}`);
-          continue; // Try next model or key
+          continue;
         }
 
         const data = await response.json();
@@ -62,7 +62,7 @@ async function callGeminiDirectAPI(promptText, temperature = 0.7) {
   throw lastError || new Error("All API keys and models failed. Please check your VITE_GEMINI_API_KEY in .env.");
 }
 
-async function generateAndAuditPaper(config) {
+export async function generateAndAuditPaper(config) {
   const { selectedClass, selectedSubject, paperType, onProgress } = config;
   const targetSubject = selectedSubject || "Mathematics";
   const targetClass = selectedClass || "10th";
@@ -133,9 +133,8 @@ Return ONLY a JSON object with two fields:
   }
 }
 
-async function executePaperPipeline(config) {
+export async function executePaperPipeline(config) {
   return await generateAndAuditPaper(config);
 }
 
-export { generateAndAuditPaper, executePaperPipeline };
 export default executePaperPipeline;
