@@ -1,4 +1,4 @@
-export function formatMathText(text) {
+export const formatMathText = (text) => {
   if (!text) return '';
   
   let processed = String(text);
@@ -6,7 +6,7 @@ export function formatMathText(text) {
   // Remove wrapping $ signs if any
   processed = processed.replace(/\$(.*?)\$/g, '$1');
 
-  // 1. Handle LaTeX \text{...} commands (like \text{HCF}, \text{sum}, \text{product})
+  // 1. Handle LaTeX \text{...} commands
   processed = processed.replace(/\\text\{([^}]+)\}/g, '$1');
 
   // 2. Dots & Ellipsis
@@ -50,4 +50,4 @@ export function formatMathText(text) {
     .replace(/\\circ/g, '°');
 
   return processed;
-}
+};
