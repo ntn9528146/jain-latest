@@ -1,7 +1,3 @@
-export async function executePaperPipeline(config) {
-  return await generateAndAuditPaper(config);
-}
-
 export async function generateAndAuditPaper(config) {
   const { selectedClass, selectedSubject, onProgress } = config;
   const targetSubject = selectedSubject || "Mathematics";
@@ -14,7 +10,6 @@ export async function generateAndAuditPaper(config) {
 
   if (keys.length > 0) {
     for (let i = 0; i < keys.length; i++) {
-      // Using gemini-pro or standard endpoint fallback if flash gives 404
       const url = `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${keys[i]}`;
       try {
         if (onProgress) onProgress({ text: `[Stage 2/4] Connecting to Gemini AI Engine (Key ${i + 1})...` });
@@ -76,6 +71,10 @@ Return ONLY valid JSON with this exact structure:
   return generatedPaper;
 }
 
+export async function executePaperPipeline(config) {
+  return await generateAndAuditPaper(config);
+}
+
 function cleanAndParseJSON(text) {
   if (!text) throw new Error("Empty response from AI engine.");
   let cleaned = text.trim();
@@ -109,42 +108,14 @@ function getRealCbseFallback(targetClass, targetSubject) {
         questions: [
           { qNo: 1, question: `If the HCF of 65 and 117 is expressible in the form $65m - 117$, then the value of $m$ is:`, options: ["(A) 1", "(B) 2", "(C) 3", "(D) 4"], correctAnswer: "(B) 2", marks: 1 },
           { qNo: 2, question: `The quadratic polynomial whose zeroes are $2$ and $-3$ is:`, options: ["(A) $x^2 - x - 6$", "(B) $x^2 + x - 6$", "(C) $x^2 + x + 6$", "(D) $x^2 - x + 6$"], correctAnswer: "(B) $x^2 + x - 6$", marks: 1 },
-          { qNo: 3, question: `The pair of equations $x + 2y + 5 = 0$ and $-3x - 6y + 1 = 0$ has:`, options: ["(A) A unique solution", "(B) Infinitely many solutions", "(C) No solution", "(D) Exactly two solutions"], correctAnswer: "(C) No solution", marks: 1 },
-          { qNo: 4, question: `If $\\triangle ABC \\sim \\triangle PQR$ with $\\frac{BC}{QR} = \\frac{1}{3}$, then $\\frac{\\text{area}(\\triangle PQR)}{\\text{area}(\\triangle ABC)}$ is equal to:`, options: ["(A) 9", "(B) 3", "(C) 1/3", "(D) 1/9"], correctAnswer: "(A) 9", marks: 1 }
+          { qNo: 3, question: `The pair of equations $x + 2y + 5 = 0$ and $-3x - 6y + 1 = 0$ has:`, options: ["(A) A unique solution", "(B) Infinitely many solutions", "(C) No solution", "(D) Exactly two solutions"], correctAnswer: "(C) No solution", marks: 1 }
         ]
       },
       {
         name: "Section B",
         description: "Short Answer Type-I Questions (2 Marks each)",
         questions: [
-          { qNo: 21, question: `Find the zeroes of the quadratic polynomial $4x^2 - 4x + 1$ and verify the relationship between the zeroes and coefficients.`, marks: 2 },
-          { qNo: 22, question: `Evaluate: $\\frac{\\tan 60^\\circ}{\\sin 60^\\circ + \\cos 30^\\circ}$.`, marks: 2 }
-        ]
-      },
-      {
-        name: "Section C",
-        description: "Short Answer Type-II Questions (3 Marks each)",
-        questions: [
-          { qNo: 26, question: `Prove that $\\sqrt{5}$ is an irrational number using standard mathematical contradiction methods.`, marks: 3 },
-          { qNo: 27, question: `Find the coordinates of the point which divides the join of $(-1, 7)$ and $(4, -3)$ in the ratio $2:3$.`, marks: 3 }
-        ]
-      },
-      {
-        name: "Section D",
-        description: "Long Answer Type Questions (5 Marks each)",
-        questions: [
-          { qNo: 32, question: `A motor boat whose speed is $18 \\text{ km/h}$ in still water takes $1 \\text{ hour}$ more to go $24 \\text{ km}$ upstream than to return downstream to the same spot. Find the speed of the stream.`, marks: 5 }
-        ]
-      },
-      {
-        name: "Section E",
-        description: "Case Study Based Questions (4 Marks each)",
-        questions: [
-          { 
-            qNo: 36, 
-            question: `Case Study 1: India Meteorological Department observes seasonal temperatures. On a particular day, the temperature readings formed an Arithmetic Progression.\n(i) Find the common difference of the AP. (1M)\n(ii) Find the temperature on the 10th day. (2M)\n(iii) Find the sum of temperatures for the first 5 days. (1M)`, 
-            marks: 4 
-          }
+          { qNo: 21, question: `Find the zeroes of the quadratic polynomial $4x^2 - 4x + 1$ and verify the relationship between the zeroes and coefficients.`, marks: 2 }
         ]
       }
     ],
