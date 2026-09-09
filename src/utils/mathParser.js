@@ -9,17 +9,22 @@ export const formatMathText = (text) => {
 
   processed = processed.replace(/\$(.*?)\$/g, (m, p1) => p1);
 
-  // 1. Handle Sqrt containing fractions FIRST: \sqrt{\frac{num}{den}}
+  // 1. Handle Fraction containing Sqrt on top: \frac{\sqrt{num}}{den}
+  processed = processed.replace(/\\frac\{\\sqrt\{([^}]+)\}\}\{([^}]+)\}/g, 
+    "<span style=\"display:inline-flex; flex-direction:column; vertical-align:middle; text-align:center; margin:0 4px; font-size:0.95em;\"><span style=\"border-bottom:1.5px solid currentColor; padding:0 3px;\">√(<i>$1</i>)</span><span style=\"padding:0 3px;\">$2</span></span>"
+  );
+
+  // 2. Handle Sqrt containing fractions: \sqrt{\frac{num}{den}}
   processed = processed.replace(/\\sqrt\{\\frac\{([^}]+)\}\{([^}]+)\}\}/g, 
     "√(<i><span style=\"display:inline-flex; flex-direction:column; vertical-align:middle; text-align:center; margin:0 2px; font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor; padding:0 2px;\">$1</span><span style=\"padding:0 2px;\">$2</span></span></i>)"
   );
 
-  // 2. Standard Fractions: \frac{num}{den}
+  // 3. Standard Fractions: \frac{num}{den}
   processed = processed.replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, 
     "<span style=\"display:inline-flex; flex-direction:column; vertical-align:middle; text-align:center; margin:0 4px; font-size:0.95em;\"><span style=\"border-bottom:1.5px solid currentColor; padding:0 3px;\">$1</span><span style=\"padding:0 3px;\">$2</span></span>"
   );
 
-  // 3. Standard Square roots: \sqrt{x}
+  // 4. Standard Square roots: \sqrt{x}
   processed = processed.replace(/\\sqrt\{([^}]+)\}/g, "√(<i>$1</i>)");
 
   processed = processed
