@@ -29,7 +29,8 @@ async function callGeminiAPIWithRotation(promptText, temperature = 0.7) {
     const apiKey = keys[i];
     if (!apiKey) continue;
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    // Using gemini-pro which is universally supported across v1beta generateContent endpoints
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
     
     try {
       const response = await fetch(url, {
@@ -129,7 +130,6 @@ Return ONLY a JSON object with two fields:
   }
 }
 
-// Explicit export matching executePaperPipeline required by CreatePaper.jsx
 export async function executePaperPipeline(config) {
   return await generateAndAuditPaper(config);
 }
