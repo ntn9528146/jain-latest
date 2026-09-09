@@ -1,4 +1,3 @@
-// Safe API key getter supporting Vite env and hardcoded local system fallback
 const getApiKey = () => {
   try {
     if (typeof import.meta !== "undefined" && import.meta.env && import.meta.env.VITE_GEMINI_API_KEY) {
@@ -9,8 +8,6 @@ const getApiKey = () => {
   if (typeof process !== "undefined" && process.env && process.env.VITE_GEMINI_API_KEY) {
     return process.env.VITE_GEMINI_API_KEY;
   }
-
-  // Fallback to ensure generation never stops
   return "";
 };
 
@@ -34,14 +31,14 @@ async function callGeminiAPI(promptText, apiKey, temperature = 0.7) {
   return data.candidates[0].content.parts[0].text;
 }
 
-export async function executePaperPipeline(config) {
+export async function generateAndAuditPaper(config) {
   const { selectedClass, selectedSubject, paperType, onProgress } = config;
   const targetSubject = selectedSubject || "Mathematics";
   const targetClass = selectedClass || "10th";
 
   const apiKey = getApiKey();
   if (!apiKey) {
-    throw new Error("Gemini API Key is missing. Please ensure VITE_GEMINI_API_KEY is present in your .env file.");
+    throw new Error("Gemini API Key is missing. Please ensure VITE_GEMINI_API_KEY is present in your environment.");
   }
 
   if (onProgress) onProgress({ text: `[Stage 1/4] Assembling and permuting unique questions for ${targetSubject} (Class ${targetClass})...` });
@@ -108,4 +105,9 @@ Return ONLY a JSON object with two fields:
     console.error("Multi-stage auditor error:", err);
     throw new Error("Failed during multi-stage paper auditing: " + err.message);
   }
+}
+
+// Export both names to prevent any module import mismatch
+export async function executePaperPipeline(config) {
+  return await generateAndAuditPaper(config);
 }
