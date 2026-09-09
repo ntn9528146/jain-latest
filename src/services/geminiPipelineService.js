@@ -1,3 +1,6 @@
+export async function executePaperPipeline(config) {
+  return await generateAndAuditPaper(config);
+}
 
 export async function generateAndAuditPaper(config) {
   const { selectedClass, selectedSubject, paperType, onProgress } = config;
@@ -28,37 +31,44 @@ export async function generateAndAuditPaper(config) {
     const keys = getApiKeys();
     let lastError = null;
 
+    // Trying models that are universally compatible with standard API keys
+    const modelsToTry = ["gemini-pro", "gemini-1.5-flash"];
+
     for (let i = 0; i < keys.length; i++) {
       const apiKey = keys[i];
       if (!apiKey) continue;
 
-      const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-      
-      try {
-        const response = await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: promptText }] }],
-            generationConfig: { temperature, responseMimeType: "application/json" }
-          })
-        });
+      for (const modelName of modelsToTry) {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+        
+        try {
+          const response = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: promptText }] }],
+              generationConfig: { temperature, responseMimeType: "application/json" }
+            })
+          });
 
-        if (!response.ok) {
-          const errText = await response.text();
-          lastError = new Error(`API Error (${response.status}): ${errText}`);
+          if (!response.ok) {
+            const errText = await response.text();
+            lastError = new Error(`API Error (${response.status}) on model ${modelName}: ${errText}`);
+            continue; // Try next model or next key
+          }
+
+          const data = await response.json();
+          if (data && data.candidates && data.candidates[0] && data.candidates[0].content) {
+            return data.candidates[0].content.parts[0].text;
+          }
+        } catch (err) {
+          lastError = err;
           continue;
         }
-
-        const data = await response.json();
-        return data.candidates[0].content.parts[0].text;
-      } catch (err) {
-        lastError = err;
-        continue;
       }
     }
 
-    throw lastError || new Error("Gemini API Key is missing or invalid. Please check your .env configuration.");
+    throw lastError || new Error("All Gemini API keys and fallback models failed. Please verify your VITE_GEMINI_API_KEY in .env.");
   };
 
   if (onProgress) onProgress({ text: `[Stage 1/4] Assembling and permuting unique questions for ${targetSubject} (Class ${targetClass})...` });
@@ -125,8 +135,4 @@ Return ONLY a JSON object with two fields:
     console.error("Multi-stage auditor error:", err);
     throw new Error("Failed during multi-stage paper auditing: " + err.message);
   }
-}
-
-export async function executePaperPipeline(config) {
-  return await generateAndAuditPaper(config);
 }
