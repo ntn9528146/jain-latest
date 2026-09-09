@@ -1,4 +1,3 @@
-// Function to fetch and rotate through all 3 available API keys stored in .env / system storage
 const getApiKeys = () => {
   let keys = [];
   try {
@@ -15,21 +14,22 @@ const getApiKeys = () => {
     if (process.env.VITE_GEMINI_API_KEY_3) keys.push(process.env.VITE_GEMINI_API_KEY_3);
   }
 
+  // Fallback default if none found
+  if (keys.length === 0) {
+    keys.push("");
+  }
+
   return keys;
 };
 
-// Robust caller with automatic multi-key failover rotation
 async function callGeminiAPIWithRotation(promptText, temperature = 0.7) {
   const keys = getApiKeys();
-  if (keys.length === 0) {
-    throw new Error("Gemini API Keys are missing. Please configure VITE_GEMINI_API_KEY, VITE_GEMINI_API_KEY_2, and VITE_GEMINI_API_KEY_3 in your .env file.");
-  }
-
   let lastError = null;
 
-  // Try each available key in rotation
   for (let i = 0; i < keys.length; i++) {
     const apiKey = keys[i];
+    if (!apiKey) continue;
+
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
     
     try {
@@ -44,21 +44,19 @@ async function callGeminiAPIWithRotation(promptText, temperature = 0.7) {
 
       if (!response.ok) {
         const errText = await response.text();
-        console.warn(`API Key index ${i+1} failed with status ${response.status}. Trying next key if available...`);
         lastError = new Error(`API Error (${response.status}): ${errText}`);
-        continue; // Try next key
+        continue;
       }
 
       const data = await response.json();
       return data.candidates[0].content.parts[0].text;
     } catch (err) {
-      console.warn(`Network or fetch error with API Key index ${i+1}:`, err);
       lastError = err;
-      continue; // Try next key
+      continue;
     }
   }
 
-  throw lastError || new Error("All configured Gemini API keys failed to respond.");
+  throw lastError || new Error("Gemini API Key is missing or invalid. Please check your .env configuration.");
 }
 
 export async function generateAndAuditPaper(config) {
@@ -132,6 +130,7 @@ Return ONLY a JSON object with two fields:
   }
 }
 
+// Universal exports covering all imported function names across the app
 export async function executePaperPipeline(config) {
   return await generateAndAuditPaper(config);
 }
