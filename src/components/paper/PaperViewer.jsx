@@ -5,21 +5,11 @@ export default function PaperViewer({ paperData, onClose }) {
   const data = paperData || {};
   const schoolName = data.schoolName || "EXAMINATION DEPARTMENT";
   const className = data.className || data.class || "10th";
-  const subject = data.subject || "MATHEMATICS";
+  // Dynamically resolve subject from generated paper data or fallback cleanly
+  const subject = data.subject || "ACADEMIC EXAMINATION";
   const timeAllowed = data.timeAllowed || "3 Hours";
   const maxMarks = data.maxMarks || 80;
   const sections = data.sections || [];
-
-  // Helper to strip accidental AI solution leaks from subjective question text
-  const cleanQuestionText = (text, marks) => {
-    if (!text) return "";
-    let clean = String(text);
-    // If marks > 1, strip any trailing "(A) Solution..." or similar AI artifacts
-    if (Number(marks) > 1) {
-      clean = clean.replace(/\(A\)\s*(Result is|Factors|Using|Proof|Tangents are|Detailed|Speeds|301 is not).*$/i, "");
-    }
-    return clean.trim();
-  };
 
   return (
     <div className="max-w-4xl mx-auto bg-white text-black p-8 shadow-md rounded-2xl relative font-serif">
@@ -34,18 +24,25 @@ export default function PaperViewer({ paperData, onClose }) {
         </div>
       )}
 
-      {/* CBSE Header Format */}
+      {/* Authentic CBSE Board Top Header */}
       <div className="text-center border-b-2 border-black pb-4 mb-6">
         <h1 className="text-xl font-bold uppercase tracking-wider">{schoolName}</h1>
-        <div className="flex justify-between font-bold text-sm mt-3 px-4">
-          <span>CLASS: {className}</span>
-          <span>SUBJECT: {subject}</span>
+        <h2 className="text-sm font-bold uppercase tracking-wide mt-1">SUBJECT: {subject} ({className.toUpperCase()})</h2>
+        <div className="flex justify-between font-bold text-sm mt-3 px-4 border-t border-dashed border-gray-400 pt-2">
+          <span>Maximum Marks: {maxMarks}</span>
+          <span>Time Allowed: {timeAllowed}</span>
         </div>
-        <div className="flex justify-center space-x-6 text-sm font-semibold mt-1">
-          <span>TIME ALLOWED: {timeAllowed}</span>
-          <span>|</span>
-          <span>MAX. MARKS: {maxMarks}</span>
-        </div>
+      </div>
+
+      {/* CBSE General Instructions Block */}
+      <div className="mb-6 p-4 border border-black bg-slate-50 text-xs leading-relaxed">
+        <p className="font-bold underline mb-1">General Instructions:</p>
+        <p className="italic mb-2">Read the following instructions carefully and follow them:</p>
+        <ul className="list-decimal pl-5 space-y-1 font-sans">
+          <li>This question paper contains multiple sections. All questions are compulsory.</li>
+          <li>Proper internal choices have been provided where applicable.</li>
+          <li>Draw neat and clean diagrams wherever required. Use of calculators is not allowed.</li>
+        </ul>
       </div>
 
       {sections.length === 0 ? (
@@ -57,16 +54,15 @@ export default function PaperViewer({ paperData, onClose }) {
 
           return (
             <div key={sIndex} className="mb-8">
-              <div className="bg-slate-100 border-y-2 border-black py-1.5 px-4 mb-4 text-center">
-                <h2 className="font-bold uppercase text-sm tracking-wide">{sName}</h2>
-                <p className="text-[11px] italic text-gray-700">
-                  {isMCQSection ? "Multiple Choice Questions (Each question carries 1 mark)" : "Short/Long Answer Type Questions"}
+              <div className="bg-slate-200 border-y-2 border-black py-1.5 px-4 mb-4 text-center">
+                <h3 className="font-bold uppercase text-sm tracking-wide">{sName}</h3>
+                <p className="text-[11px] italic text-gray-800">
+                  {isMCQSection ? "Multiple Choice Questions (Each question carries 1 mark)" : "Standard Descriptive Answer Type Questions"}
                 </p>
               </div>
 
               {(section.questions || []).map((q, qIndex) => {
                 const qMarks = Number(q.marks || 1);
-                const cleanedText = cleanQuestionText(q.questionText || q.question || "", qMarks);
                 const showOptions = qMarks === 1 && q.options && q.options.length > 0;
 
                 return (
@@ -76,11 +72,10 @@ export default function PaperViewer({ paperData, onClose }) {
                         <span className="w-8 shrink-0 font-bold">{q.qNo || qIndex + 1}.</span>
                         <div 
                           className="flex-1"
-                          dangerouslySetInnerHTML={{ __html: formatMathText(cleanedText) }}
+                          dangerouslySetInnerHTML={{ __html: formatMathText(q.questionText || q.question || "") }}
                         />
                       </div>
 
-                      {/* Options rendered vertically like CBSE sample paper */}
                       {showOptions && (
                         <div className="grid grid-cols-2 gap-x-6 gap-y-1 mt-2 pl-8">
                           {q.options.map((opt, oIndex) => {
