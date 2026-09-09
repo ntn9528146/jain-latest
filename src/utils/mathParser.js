@@ -6,26 +6,33 @@ export function formatMathText(text) {
   // Remove wrapping $ signs if any
   processed = processed.replace(/\$(.*?)\$/g, '$1');
 
-  // 1. Degrees: ^{\circ} or ^\circ -> °
+  // 1. Dots & Ellipsis
+  processed = processed.replace(/\\dots/g, '…');
+  processed = processed.replace(/\\ldots/g, '…');
+
+  // 2. Degrees: ^{\circ} or ^\circ -> °
   processed = processed.replace(/\^\{\\circ\}/g, '°');
   processed = processed.replace(/\^\\circ/g, '°');
 
-  // 2. Fractions: \frac{num}{den} -> stacked fraction format
+  // 3. Fractions: \frac{num}{den} -> stacked fraction format
   processed = processed.replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '<span style="display:inline-flex; flex-direction:column; vertical-align:middle; text-align:center; margin:0 3px; font-size:0.95em;"><span style="border-bottom:1px solid currentColor; padding:0 2px;">$1</span><span style="padding:0 2px;">$2</span></span>');
 
-  // 3. Superscripts (Powers like x^2, x^{2})
+  // 4. Superscripts (Powers like x^2, x^{2}, \sin^2)
   processed = processed.replace(/\^\{([^}]+)\}/g, '<sup>$1</sup>');
   processed = processed.replace(/\^([0-9a-zA-Z+\-]+)/g, '<sup>$1</sup>');
 
-  // 4. Subscripts (Like CH_3, CH_{3}, f_1, f_{1})
+  // 5. Subscripts (Like S_n, x_1, a_{10})
   processed = processed.replace(/_\{([^}]+)\}/g, '<sub>$1</sub>');
   processed = processed.replace(/_([0-9a-zA-Z])/g, '<sub>$1</sub>');
 
-  // 5. Square roots (\sqrt{x})
+  // 6. Square roots (\sqrt{x})
   processed = processed.replace(/\\sqrt\{([^}]+)\}/g, '√(<i>$1</i>)');
 
-  // 6. Common mathematical/chemical symbols
+  // 7. Common mathematical/chemical symbols & functions
   processed = processed
+    .replace(/\\sin/g, 'sin')
+    .replace(/\\cos/g, 'cos')
+    .replace(/\\tan/g, 'tan')
     .replace(/\\pi/g, 'π')
     .replace(/\\theta/g, 'θ')
     .replace(/\\alpha/g, 'α')
