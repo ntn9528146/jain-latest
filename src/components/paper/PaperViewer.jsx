@@ -46,8 +46,9 @@ export default function PaperViewer({ paperData, onClose }) {
             </h2>
             {(section.questions || []).map((q, qIndex) => {
               const qMarks = Number(q.marks || 1);
-              // STRICT RULE: Options (A, B, C, D) are ONLY valid for 1-mark MCQs. 
-              // Subjective questions (marks > 1) never have choice options; any text there is AI solution leakage.
+              
+              // CBSE Standard Rule: Options (A, B, C, D) are strictly for 1-mark MCQs. 
+              // Subjective questions (marks > 1) must never display options/hints/solutions.
               const showOptions = qMarks === 1 && q.options && q.options.length > 0;
 
               return (
