@@ -21,7 +21,9 @@ const getApiKeys = () => {
 async function callGeminiDirectAPI(promptText, temperature = 0.7) {
   const keys = getApiKeys();
   let lastError = null;
-  const models = ["gemini-pro"];
+  
+  // Permanent stable models supported on v1 endpoint
+  const models = ["gemini-1.5-flash", "gemini-1.5-pro"];
 
   for (let i = 0; i < keys.length; i++) {
     const apiKey = keys[i];
@@ -43,7 +45,7 @@ async function callGeminiDirectAPI(promptText, temperature = 0.7) {
         if (!response.ok) {
           const errText = await response.text();
           lastError = new Error(`API Error (${response.status}) on ${model}: ${errText}`);
-          continue;
+          continue; // Try next model or key
         }
 
         const data = await response.json();
@@ -135,6 +137,5 @@ async function executePaperPipeline(config) {
   return await generateAndAuditPaper(config);
 }
 
-// Ensure all export variations are explicitly declared
 export { generateAndAuditPaper, executePaperPipeline };
 export default executePaperPipeline;
