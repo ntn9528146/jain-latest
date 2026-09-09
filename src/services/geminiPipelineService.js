@@ -6,68 +6,77 @@ const getApiKeys = () => {
   let keys = [];
   try {
     if (typeof import.meta !== "undefined" && import.meta.env) {
+      // Vite strictly requires VITE_ prefix
       if (import.meta.env.VITE_GEMINI_API_KEY) keys.push(import.meta.env.VITE_GEMINI_API_KEY);
       if (import.meta.env.VITE_GEMINI_API_KEY_2) keys.push(import.meta.env.VITE_GEMINI_API_KEY_2);
       if (import.meta.env.VITE_GEMINI_API_KEY_3) keys.push(import.meta.env.VITE_GEMINI_API_KEY_3);
+      
+      // Fallback check if user wrote without VITE_ prefix in Vite
+      if (keys.length === 0 && import.meta.env.GEMINI_API_KEY) keys.push(import.meta.env.GEMINI_API_KEY);
     }
-  } catch (e) {}
-
-  if (keys.length === 0 && typeof process !== "undefined" && process.env) {
-    if (process.env.VITE_GEMINI_API_KEY) keys.push(process.env.VITE_GEMINI_API_KEY);
-    if (process.env.VITE_GEMINI_API_KEY_2) keys.push(process.env.VITE_GEMINI_API_KEY_2);
-    if (process.env.VITE_GEMINI_API_KEY_3) keys.push(process.env.VITE_GEMINI_API_KEY_3);
+  } catch (e) {
+    console.error("[GeminiService] Error reading import.meta.env:", e);
   }
 
-  return keys.filter(k => k && k.trim() !== "");
+  const validKeys = keys.filter(k => k && typeof k === 'string' && k.trim() !== "" && k !== "undefined");
+  console.log(`[GeminiService Diagnostics] Total valid API Keys loaded: ${validKeys.length}`);
+  if (validKeys.length === 0) {
+    console.warn("[GeminiService WARNING] No API keys found! Make sure your .env file has 'VITE_GEMINI_API_KEY=your_key' and restart 'npm run dev'.");
+  }
+  return validKeys;
 };
 
 async function callGeminiStrictAI(promptText, temperature = 0.7) {
   const keys = getApiKeys();
   if (keys.length === 0) {
-    throw new Error("No API keys found in environment.");
+    throw new Error("API Key missing. Please check your .env file for VITE_GEMINI_API_KEY.");
   }
 
-  // Using v1beta endpoint which supports latest Gemini models properly
-  const models = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-pro"];
+  const modelName = "gemini-1.5-flash";
+  let lastError = null;
 
   for (let k = 0; k < keys.length; k++) {
     const apiKey = keys[k];
-    
-    for (let m = 0; m < models.length; m++) {
-      const modelName = models[m];
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+    const maskedKey = apiKey.substring(0, 6) + "..." + apiKey.substring(apiKey.length - 4);
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
 
-      try {
-        const response = await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: promptText }] }],
-            generationConfig: {
-              temperature: temperature,
-              responseMimeType: "application/json"
-            }
-          })
-        });
+    console.log(`[GeminiService] Attempting API call using Key #${k + 1} (${maskedKey}) with model [${modelName}]...`);
 
-        if (!response.ok) {
-          console.warn(`Model ${modelName} returned status ${response.status}`);
-          continue;
-        }
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: promptText }] }],
+          generationConfig: {
+            temperature: temperature,
+            responseMimeType: "application/json"
+          }
+        })
+      });
 
-        const data = await response.json();
-        const textResponse = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-        
-        if (textResponse) {
-          return textResponse;
-        }
-      } catch (err) {
+      if (!response.ok) {
+        const errBody = await response.text();
+        console.error(`[GeminiService] API HTTP Error ${response.status} on Key #${k + 1}:`, errBody);
+        lastError = new Error(`API Error (${response.status}): ${errBody}`);
         continue;
       }
+
+      const data = await response.json();
+      const textResponse = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      
+      if (textResponse) {
+        console.log(`[GeminiService] Successfully received AI response using Key #${k + 1}!`);
+        return textResponse;
+      }
+    } catch (err) {
+      console.error(`[GeminiService] Network/Fetch exception on Key #${k + 1}:`, err.message);
+      lastError = err;
+      continue;
     }
   }
 
-  throw new Error("All keys and models failed on v1beta endpoint.");
+  throw lastError || new Error("All API keys failed to connect.");
 }
 
 function cleanAndParseJSON(text) {
@@ -169,12 +178,13 @@ export async function generateAndAuditPaper(config) {
       paperData = cleanAndParseJSON(rawText);
     }
   } catch (err) {
-    console.warn("API call failed on v1beta, switching to certified blueprint generator.");
+    console.warn("[GeminiService] Caught error during AI call:", err.message);
   }
 
   if (onProgress) onProgress({ text: "[Stage 3/4] Verifying blueprint structure..." });
 
   if (!paperData || !paperData.sections) {
+    console.log("[GeminiService] Falling back to certified academic blueprint engine.");
     paperData = getCertifiedCbseBlueprint(targetClass, targetSubject);
   }
 
