@@ -1,251 +1,55 @@
-import React, { useState } from 'react';
-import { exportToThreeSeparateDocs, exportToSlides, printIsolatedElement, formatClassWithSuperscript } from '../../services/exportService.js';
+import React from 'react';
+import { formatMathText } from '../../utils/mathParser';
 
-export default function PaperViewer({ paperData, onClose }) {
-  const [activeTab, setActiveTab] = useState('paper');
-  const [copies, setCopies] = useState(1);
-
-  if (!paperData) return null;
-
-  const handlePrint = () => {
-    printIsolatedElement('printable-paper-core', copies);
-  };
-
-  const cleanExamTitle = (paperData.paperHeader?.examName || 'PRE-BOARD EXAMINATION')
-    .replace(/\(\s*\d+%\s*SYLLABUS\s*\)/gi, '')
-    .trim()
-    .toUpperCase();
-
-  const classFormatted = formatClassWithSuperscript(paperData.paperHeader?.className || '12');
-
-  const renderFormattedQuestion = (text) => {
-    if (!text) return null;
-    const lines = text.split('\n');
-    return (
-      <div className="space-y-1">
-        {lines.map((line, idx) => {
-          const isOption = line.trim().startsWith('(A)') || line.trim().startsWith('(B)') || 
-                           line.trim().startsWith('(C)') || line.trim().startsWith('(D)') ||
-                           line.trim().startsWith('(क)') || line.trim().startsWith('(ख)') || 
-                           line.trim().startsWith('(ग)') || line.trim().startsWith('(घ)');
-          return (
-            <div key={idx} className={isOption ? 'pl-4 font-sans text-[11pt]' : 'text-[12pt]'}>
-              {line}
-            </div>
-          );
-        })}
-      </div>
-    );
-  };
+export default function PaperViewer({ paperData }) {
+  if (!paperData || !paperData.sections) {
+    return <div className="p-6 text-center text-gray-500">No paper data available. Please generate a paper first.</div>;
+  }
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl space-y-4 font-serif">
-      <div className="no-print bg-slate-950 px-6 py-3 border-b border-slate-800 flex flex-wrap justify-between items-center gap-3">
-        <div className="flex bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs font-sans font-semibold">
-          <button
-            type="button"
-            onClick={() => setActiveTab('paper')}
-            className={`px-3 py-1.5 rounded-lg transition ${activeTab === 'paper' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'}`}
-          >
-            📄 Board Question Paper
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('answerKey')}
-            className={`px-3 py-1.5 rounded-lg transition ${activeTab === 'answerKey' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'}`}
-          >
-            🔑 Detailed Marking Scheme
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('blueprint')}
-            className={`px-3 py-1.5 rounded-lg transition ${activeTab === 'blueprint' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'}`}
-          >
-            📊 Topic Blueprint
-          </button>
-        </div>
-
-        <div className="flex items-center gap-2 text-xs font-sans">
-          <div className="flex items-center gap-1.5 bg-slate-900 px-2 py-1 rounded-xl border border-slate-800 text-slate-300">
-            <span className="text-[11px] font-bold">Copies:</span>
-            <input
-              type="number"
-              min="1"
-              max="50"
-              value={copies}
-              onChange={(e) => setCopies(Math.max(1, parseInt(e.target.value, 10) || 1))}
-              className="w-12 bg-slate-950 text-center text-white font-bold rounded border border-slate-700 py-0.5 text-xs"
-            />
-          </div>
-
-          <button
-            type="button"
-            onClick={handlePrint}
-            className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 transition shadow-lg shadow-indigo-600/30"
-          >
-            🖨️ Print Active Tab (A4)
-          </button>
-
-          <button
-            type="button"
-            onClick={() => exportToThreeSeparateDocs(paperData)}
-            className="bg-emerald-600 hover:bg-emerald-500 text-white border border-emerald-500 px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1"
-          >
-            📁 Download 3 Separate DOCX
-          </button>
-
-          <button
-            type="button"
-            onClick={() => exportToSlides(paperData)}
-            className="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-xl font-semibold transition"
-          >
-            📽️ Slides
-          </button>
-
-          {onClose && (
-            <button type="button" onClick={onClose} className="text-slate-400 hover:text-white px-2 py-1 text-sm font-bold">
-              ✕
-            </button>
-          )}
-        </div>
+    <div className="max-w-4xl mx-auto bg-white p-8 shadow-md print:shadow-none">
+      <div className="text-center border-b pb-4 mb-6">
+        <h1 className="text-2xl font-bold uppercase">{paperData.schoolName || "School Name"}</h1>
+        <p className="text-sm text-gray-600">CLASS: {paperData.className} | SUBJECT: {paperData.subject}</p>
+        <p className="text-sm font-semibold mt-1">TIME: {paperData.timeAllowed || "3 Hours"} | MAX. MARKS: {paperData.maxMarks || 80}</p>
       </div>
 
-      <div className="p-4 sm:p-6 max-w-4xl mx-auto">
-        <div id="printable-paper-core" className="bg-white text-black p-8 sm:p-12 rounded-xl shadow-xl space-y-4">
-          {activeTab === 'paper' && (
-            <div className="space-y-4">
-              <div className="border-b-2 border-black pb-2 text-center relative">
-                <div className="absolute left-0 top-0 h-14 w-14 rounded-full border-2 border-black flex flex-col items-center justify-center bg-slate-100 font-bold text-xs leading-none">
-                  <span className="text-[16px]">🏫</span>
-                  <span className="text-[8px] font-black mt-0.5">APS</span>
+      {paperData.sections.map((section, sIndex) => (
+        <div key={sIndex} className="mb-6">
+          <h2 className="bg-gray-100 font-bold p-2 border-y border-black text-center uppercase text-sm mb-4">
+            {section.sectionName}
+          </h2>
+          {section.questions.map((q, qIndex) => (
+            <div key={qIndex} className="mb-4 flex justify-between items-start text-sm">
+              <div className="flex-1 pr-4">
+                <div className="font-medium flex items-start">
+                  <span className="w-8 shrink-0">{q.qNo || qIndex + 1}.</span>
+                  <div 
+                    className="flex-1"
+                    dangerouslySetInnerHTML={{ __html: formatMathText(q.questionText || q.question) }}
+                  />
                 </div>
-
-                <p className="text-[14pt] font-bold tracking-wider uppercase text-black">CENTRAL BOARD OF SECONDARY EDUCATION</p>
-                <h1 className="text-[16pt] font-bold uppercase tracking-tight text-black mt-1">
-                  {paperData.paperHeader?.schoolName || 'ARDEN PROGRESSIVE SCHOOL'}
-                </h1>
-                <h2 className="text-[14pt] font-bold uppercase text-black mt-0.5">{cleanExamTitle}</h2>
-
-                <table className="w-full border-t-2 border-b-2 border-black text-[14pt] font-bold uppercase mt-3">
-                  <tbody>
-                    <tr>
-                      <td className="text-left py-1 w-1/4" dangerouslySetInnerHTML={{ __html: `CLASS: ${classFormatted}` }} />
-                      <td className="text-center py-1 w-2/4">SUBJECT: {paperData.paperHeader?.subjectName}</td>
-                      <td className="text-right py-1 w-1/4 whitespace-nowrap">
-                        TIME: {paperData.paperHeader?.timeAllowed} &nbsp;|&nbsp; MAX. MARKS: {paperData.paperHeader?.maxMarks}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-              <div className="p-3 border border-black rounded space-y-1">
-                <p className="text-[14pt] font-bold uppercase text-black">GENERAL INSTRUCTIONS:</p>
-                <ol className="list-decimal pl-5 text-[12pt] font-normal text-black space-y-0.5">
-                  {paperData.generalInstructions?.map((ins, idx) => (
-                    <li key={idx}>{ins}</li>
-                  ))}
-                </ol>
-              </div>
-
-              <div className="space-y-5 pt-2">
-                {paperData.sections?.map((sec, sIdx) => (
-                  <div key={sIdx} className="space-y-2 avoid-split">
-                    <div className="text-center text-[14pt] font-bold uppercase py-1 border border-black bg-gray-100 text-black">
-                      {sec.sectionTitle}
-                    </div>
-
-                    <table className="cbse-grid w-full border-collapse border border-black text-[12pt]">
-                      <thead>
-                        <tr className="bg-gray-100 border-b border-black text-black">
-                          <th className="border border-black p-2 w-12 text-center font-bold">Q.No</th>
-                          <th className="border border-black p-2 text-left font-bold">Question Details</th>
-                          <th className="border border-black p-2 w-16 text-center font-bold">Marks</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {sec.questions?.map((q) => (
-                          <tr key={q.qNo} className="border-b border-black avoid-split">
-                            <td className="border border-black p-2 align-top text-center font-normal">{q.qNo}</td>
-                            <td className="border border-black p-2 align-top text-left font-normal leading-relaxed">
-                              {renderFormattedQuestion(q.questionText)}
-                            </td>
-                            <td className="border border-black p-2 align-top text-center font-normal">[{q.marks}]</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                {q.options && q.options.length > 0 && (
+                  <div className="grid grid-cols-1 gap-1 mt-2 pl-8">
+                    {q.options.map((opt, oIndex) => {
+                      const optLabel = String.fromCharCode(65 + oIndex);
+                      return (
+                        <div key={oIndex} className="flex items-start">
+                          <span className="mr-2 font-semibold">({optLabel})</span>
+                          <span dangerouslySetInnerHTML={{ __html: formatMathText(opt) }} />
+                        </div>
+                      );
+                    })}
                   </div>
-                ))}
+                )}
               </div>
-
-              <div className="flex justify-between items-center pt-6 border-t border-black text-xs font-bold text-black font-sans">
-                <span>*** End of Question Paper ***</span>
-                <span>Page 1 of Evaluation Set</span>
+              <div className="text-right shrink-0 font-semibold pl-2">
+                [{q.marks || 1}]
               </div>
             </div>
-          )}
-
-          {activeTab === 'answerKey' && (
-            <div className="space-y-4">
-              <div className="border-b-2 border-black pb-2 text-center">
-                <p className="text-[14pt] font-bold uppercase text-black">CENTRAL BOARD OF SECONDARY EDUCATION</p>
-                <h1 className="text-[16pt] font-bold uppercase text-black">{paperData.paperHeader?.schoolName}</h1>
-                <h2 className="text-[14pt] font-bold uppercase text-black mt-1">CONFIDENTIAL: OFFICIAL MARKING SCHEME & STEP BREAKDOWN</h2>
-              </div>
-
-              <table className="cbse-grid w-full border-collapse border border-black text-[12pt]">
-                <thead>
-                  <tr className="bg-gray-100 border-b border-black text-black">
-                    <th className="border border-black p-2 w-12 text-center font-bold">Q.No</th>
-                    <th className="border border-black p-2 text-left font-bold">Step-Wise Value Points, Formulas & Model Solution</th>
-                    <th className="border border-black p-2 w-16 text-center font-bold">Marks</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paperData.sections?.flatMap((s) => s.questions)?.map((q) => (
-                    <tr key={q.qNo} className="border-b border-black avoid-split">
-                      <td className="border border-black p-2 align-top text-center font-normal">{q.qNo}</td>
-                      <td className="border border-black p-2 align-top text-left font-normal">
-                        <pre className="whitespace-pre-wrap leading-relaxed text-black font-serif text-[12pt] font-normal">{q.answerKey}</pre>
-                      </td>
-                      <td className="border border-black p-2 align-top text-center font-normal">[{q.marks}]</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {activeTab === 'blueprint' && (
-            <div className="space-y-4">
-              <div className="border-b-2 border-black pb-2 text-center">
-                <h2 className="text-[14pt] font-bold uppercase text-black">CBSE QUESTION PAPER BLUEPRINT MATRIX</h2>
-                <p className="text-xs text-black font-sans">Total Evaluation Marks: {paperData.paperHeader?.maxMarks}</p>
-              </div>
-
-              <table className="cbse-grid w-full border-collapse border border-black text-[12pt]">
-                <thead>
-                  <tr className="bg-gray-100 border-b border-black text-black">
-                    <th className="border border-black p-2 text-left font-bold">Syllabus Unit Focus</th>
-                    <th className="border border-black p-2 text-center w-36 font-bold">Questions Count</th>
-                    <th className="border border-black p-2 text-right w-36 font-bold">Marks Weightage</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paperData.blueprintSummary?.map((item, idx) => (
-                    <tr key={idx} className="border-b border-black avoid-split">
-                      <td className="border border-black p-2 font-normal text-black">{item.unitName}</td>
-                      <td className="border border-black p-2 text-center font-normal text-black">{item.questionsCount} Qs</td>
-                      <td className="border border-black p-2 text-right font-normal text-black">{item.marksAssigned} Marks</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+          ))}
         </div>
-      </div>
+      ))}
     </div>
   );
 }
