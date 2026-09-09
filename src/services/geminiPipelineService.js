@@ -1,45 +1,70 @@
-const getApiKey = () => {
+// Function to fetch and rotate through all 3 available API keys stored in .env / system storage
+const getApiKeys = () => {
+  let keys = [];
   try {
-    if (typeof import.meta !== "undefined" && import.meta.env && import.meta.env.VITE_GEMINI_API_KEY) {
-      return import.meta.env.VITE_GEMINI_API_KEY;
+    if (typeof import.meta !== "undefined" && import.meta.env) {
+      if (import.meta.env.VITE_GEMINI_API_KEY) keys.push(import.meta.env.VITE_GEMINI_API_KEY);
+      if (import.meta.env.VITE_GEMINI_API_KEY_2) keys.push(import.meta.env.VITE_GEMINI_API_KEY_2);
+      if (import.meta.env.VITE_GEMINI_API_KEY_3) keys.push(import.meta.env.VITE_GEMINI_API_KEY_3);
     }
   } catch (e) {}
-  
-  if (typeof process !== "undefined" && process.env && process.env.VITE_GEMINI_API_KEY) {
-    return process.env.VITE_GEMINI_API_KEY;
+
+  if (keys.length === 0 && typeof process !== "undefined" && process.env) {
+    if (process.env.VITE_GEMINI_API_KEY) keys.push(process.env.VITE_GEMINI_API_KEY);
+    if (process.env.VITE_GEMINI_API_KEY_2) keys.push(process.env.VITE_GEMINI_API_KEY_2);
+    if (process.env.VITE_GEMINI_API_KEY_3) keys.push(process.env.VITE_GEMINI_API_KEY_3);
   }
-  return "";
+
+  return keys;
 };
 
-async function callGeminiAPI(promptText, apiKey, temperature = 0.7) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-  const response = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: promptText }] }],
-      generationConfig: { temperature, responseMimeType: "application/json" }
-    })
-  });
-
-  if (!response.ok) {
-    const errText = await response.text();
-    throw new Error(`Gemini API Error: ${response.status} - ${errText}`);
+// Robust caller with automatic multi-key failover rotation
+async function callGeminiAPIWithRotation(promptText, temperature = 0.7) {
+  const keys = getApiKeys();
+  if (keys.length === 0) {
+    throw new Error("Gemini API Keys are missing. Please configure VITE_GEMINI_API_KEY, VITE_GEMINI_API_KEY_2, and VITE_GEMINI_API_KEY_3 in your .env file.");
   }
 
-  const data = await response.json();
-  return data.candidates[0].content.parts[0].text;
+  let lastError = null;
+
+  // Try each available key in rotation
+  for (let i = 0; i < keys.length; i++) {
+    const apiKey = keys[i];
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+    
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: promptText }] }],
+          generationConfig: { temperature, responseMimeType: "application/json" }
+        })
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        console.warn(`API Key index ${i+1} failed with status ${response.status}. Trying next key if available...`);
+        lastError = new Error(`API Error (${response.status}): ${errText}`);
+        continue; // Try next key
+      }
+
+      const data = await response.json();
+      return data.candidates[0].content.parts[0].text;
+    } catch (err) {
+      console.warn(`Network or fetch error with API Key index ${i+1}:`, err);
+      lastError = err;
+      continue; // Try next key
+    }
+  }
+
+  throw lastError || new Error("All configured Gemini API keys failed to respond.");
 }
 
 export async function generateAndAuditPaper(config) {
   const { selectedClass, selectedSubject, paperType, onProgress } = config;
   const targetSubject = selectedSubject || "Mathematics";
   const targetClass = selectedClass || "10th";
-
-  const apiKey = getApiKey();
-  if (!apiKey) {
-    throw new Error("Gemini API Key is missing. Please ensure VITE_GEMINI_API_KEY is present in your environment.");
-  }
 
   if (onProgress) onProgress({ text: `[Stage 1/4] Assembling and permuting unique questions for ${targetSubject} (Class ${targetClass})...` });
 
@@ -53,7 +78,7 @@ Return ONLY valid JSON format matching standard schema.
 `;
 
   try {
-    const rawText1 = await callGeminiAPI(basePrompt, apiKey, 0.9);
+    const rawText1 = await callGeminiAPIWithRotation(basePrompt, 0.9);
     let currentPaper = JSON.parse(rawText1);
 
     const maxCycles = 3;
@@ -62,7 +87,7 @@ Return ONLY valid JSON format matching standard schema.
 
     while (!isSatisfied && cycleCount < maxCycles) {
       cycleCount++;
-      if (onProgress) onProgress({ text: `[Stage ${cycleCount + 1}/4] Running CBSE compliance & error-free auditing cycle ${cycleCount}...` });
+      if (onProgress) onProgress({ text: `[Stage ${cycleCount + 1}/4] Running CBSE compliance & error-free auditing cycle ${cycleCount} using multi-key rotation...` });
 
       const auditPrompt = `
 You are a Rigorous CBSE Board Chief Auditor and Master Validator. 
@@ -83,7 +108,7 @@ Return ONLY a JSON object with two fields:
 }
 `;
 
-      const auditText = await callGeminiAPI(auditPrompt, apiKey, 0.1);
+      const auditText = await callGeminiAPIWithRotation(auditPrompt, 0.1);
       const auditResult = JSON.parse(auditText);
       
       if (auditResult && auditResult.paper) {
@@ -107,7 +132,6 @@ Return ONLY a JSON object with two fields:
   }
 }
 
-// Export both names to prevent any module import mismatch
 export async function executePaperPipeline(config) {
   return await generateAndAuditPaper(config);
 }
