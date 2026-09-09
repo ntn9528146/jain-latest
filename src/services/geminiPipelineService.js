@@ -1,4 +1,3 @@
-// Universal Export definition first to satisfy Vite module analysis immediately
 export async function executePaperPipeline(config) {
   return await generateAndAuditPaper(config);
 }
@@ -36,7 +35,8 @@ export async function generateAndAuditPaper(config) {
       const apiKey = keys[i];
       if (!apiKey) continue;
 
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
+      // Using gemini-1.5-flash with the standard generative language REST API structure
+      const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
       
       try {
         const response = await fetch(url, {
