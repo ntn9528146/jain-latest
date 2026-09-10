@@ -22,50 +22,46 @@ async function callGeminiStrictAI(promptText, temperature = 0.7) {
     throw new Error("No VITE_GEMINI_API_KEY found in environment variables. Please check your .env configuration.");
   }
 
-  // Official v1beta endpoint with state-of-the-art models
-  const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-pro"];
+  // Using the universally supported and stable v1beta model for Gemini keys
+  const modelName = "gemini-1.5-flash";
   let lastError = null;
 
   for (let k = 0; k < keys.length; k++) {
     const apiKey = keys[k];
-    
-    for (let m = 0; m < modelsToTry.length; m++) {
-      const modelName = modelsToTry[m];
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
 
-      try {
-        const response = await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: promptText }] }],
-            generationConfig: {
-              temperature: temperature,
-              responseMimeType: "application/json"
-            }
-          })
-        });
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: promptText }] }],
+          generationConfig: {
+            temperature: temperature,
+            responseMimeType: "application/json"
+          }
+        })
+      });
 
-        if (!response.ok) {
-          const errBody = await response.text();
-          lastError = new Error(`API Error (${response.status}) on model [${modelName}]: ${errBody}`);
-          continue;
-        }
-
-        const data = await response.json();
-        const textResponse = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-        
-        if (textResponse) {
-          return textResponse;
-        }
-      } catch (err) {
-        lastError = err;
+      if (!response.ok) {
+        const errBody = await response.text();
+        lastError = new Error(`API Error (${response.status}) on Key #${k + 1}: ${errBody}`);
         continue;
       }
+
+      const data = await response.json();
+      const textResponse = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      
+      if (textResponse) {
+        return textResponse;
+      }
+    } catch (err) {
+      lastError = err;
+      continue;
     }
   }
 
-  throw lastError || new Error("All API keys and models exhausted during strict AI generation.");
+  throw lastError || new Error("All API keys failed to connect to Gemini AI engine.");
 }
 
 function cleanAndParseJSON(text) {
