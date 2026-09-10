@@ -7,10 +7,10 @@ import PracticalStudio from '../components/paper/PracticalStudio.jsx';
 import PaperViewer from '../components/paper/PaperViewer.jsx';
 import ProfileModal from '../components/profile/ProfileModal.jsx';
 import { getFacultyPaperStats, incrementPaperCount } from '../services/paperStatsService.js';
-import * as pipelineModule from '../services/geminiPipelineService.js';
+import pipelineService, { executePaperPipeline, generateAndAuditPaper } from '../services/geminiPipelineService.js';
 
 const executePaperPipelineSafe = async (config) => {
-  const fn = pipelineModule.executePaperPipeline || pipelineModule.generateAndAuditPaper || pipelineModule.default;
+  const fn = executePaperPipeline || generateAndAuditPaper || pipelineService?.executePaperPipeline || pipelineService?.generateAndAuditPaper || pipelineService;
   if (typeof fn === 'function') {
     return await fn(config);
   }

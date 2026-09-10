@@ -76,5 +76,9 @@ export async function executePaperPipeline(config) {
   return await generateAndAuditPaper(config);
 }
 
-// Universal default export matching all possible caller expectations
-export default executePaperPipeline;
+const pipelineService = {
+  executePaperPipeline,
+  generateAndAuditPaper
+};
+
+export default pipelineService;
