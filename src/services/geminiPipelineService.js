@@ -1,4 +1,4 @@
-// --- UNIVERSAL EXPORTS TO PREVENT ANY MODULE MISMATCH ---
+// --- STRICT PERMANENT EXPORTS ---
 export async function executePaperPipeline(config) {
   return await generateAndAuditPaper(config);
 }
@@ -124,9 +124,5 @@ function cleanAndParseJSON(text) {
   return JSON.parse(cleaned);
 }
 
-const pipelineBundle = {
-  executePaperPipeline,
-  generateAndAuditPaper
-};
-
-export default pipelineBundle;
+// Ensure default export is directly the executePaperPipeline function
+export default executePaperPipeline;
