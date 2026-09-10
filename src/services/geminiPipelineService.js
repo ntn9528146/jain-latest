@@ -1,9 +1,5 @@
 import { callGeminiApi } from './geminiApiService.js';
 
-export async function executePaperPipeline(config) {
-  return await generateAndAuditPaper(config);
-}
-
 function cleanAndParseJSON(text) {
   if (!text) throw new Error("Empty response received from AI.");
   let cleaned = text.trim();
@@ -76,4 +72,9 @@ export async function generateAndAuditPaper(config) {
   return currentPaper;
 }
 
+export async function executePaperPipeline(config) {
+  return await generateAndAuditPaper(config);
+}
+
+// Universal default export matching all possible caller expectations
 export default executePaperPipeline;
