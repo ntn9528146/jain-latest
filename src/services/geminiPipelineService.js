@@ -1,4 +1,4 @@
-// --- PERMANENT MODULE EXPORT ANCHORS ---
+// --- UNIVERSAL EXPORTS TO PREVENT ANY MODULE MISMATCH ---
 export async function executePaperPipeline(config) {
   return await generateAndAuditPaper(config);
 }
@@ -13,7 +13,6 @@ export async function generateAndAuditPaper(config) {
   const keys = getApiKeys();
   let rawText1 = null;
 
-  // STAGE 1: Live AI Generation
   const prompt1 = `You are an expert CBSE Chief Examiner. Generate a complete, rigorous, and professional examination paper JSON for Class ${targetClass} ${targetSubject} following official CBSE board blueprint guidelines.
 Return ONLY valid JSON with this exact structure:
 {
@@ -38,7 +37,6 @@ Return ONLY valid JSON with this exact structure:
   rawText1 = await callGeminiAIWithRetry(prompt1, keys, 0.7);
   let currentPaper = cleanAndParseJSON(rawText1);
 
-  // STAGE 2 & 3: Compliance & Error Purging Audits
   for (let cycle = 1; cycle <= 2; cycle++) {
     if (onProgress) onProgress({ text: `[Stage ${cycle + 1}/4] Running strict CBSE compliance & error auditing (Cycle ${cycle})...` });
 
@@ -55,9 +53,7 @@ Return ONLY valid JSON with the exact same schema structure containing corrected
           currentPaper = parsedAudit;
         }
       }
-    } catch (e) {
-      // Continue with current paper if audit network blips
-    }
+    } catch (e) {}
   }
 
   if (onProgress) onProgress({ text: "[Stage 4/4] Paper fully audited, verified, and error-free!" });
@@ -128,5 +124,9 @@ function cleanAndParseJSON(text) {
   return JSON.parse(cleaned);
 }
 
-// Default export fallback matching named exports
-export default executePaperPipeline;
+const pipelineBundle = {
+  executePaperPipeline,
+  generateAndAuditPaper
+};
+
+export default pipelineBundle;
