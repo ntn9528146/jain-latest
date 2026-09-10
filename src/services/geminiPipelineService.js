@@ -20,7 +20,7 @@ export async function generateAndAuditPaper(config) {
   const targetSubject = selectedSubject || "Mathematics";
   const targetClass = selectedClass || "10th";
 
-  if (onProgress) onProgress({ text: `[Stage 1/4] Assembling question matrix for ${targetSubject} (Class ${targetClass})...` });
+  if (onProgress) onProgress({ text: `[Stage 1/4] Assembling question matrix for ${targetSubject} (Class ${targetClass}) via Gemini AI...` });
 
   const prompt1 = `You are an expert CBSE Chief Examiner. Generate a complete, rigorous, and professional examination paper JSON for Class ${targetClass} ${targetSubject} following official CBSE board blueprint guidelines (Sections A, B, C, D, E). Return ONLY valid JSON matching this schema:
 {
