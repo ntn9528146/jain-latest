@@ -16,6 +16,14 @@ export async function generateAndAuditPaper(config) {
   const targetSubject = selectedSubject || "Mathematics";
   const targetClass = selectedClass || "10th";
 
+  // Ensure VITE_GEMINI_API_KEY is present in localStorage or env fallback if missing
+  if (typeof window !== 'undefined') {
+    const storedKey = localStorage.getItem('user_gemini_key');
+    if (storedKey && !import.meta.env.VITE_GEMINI_API_KEY) {
+      import.meta.env.VITE_GEMINI_API_KEY = storedKey;
+    }
+  }
+
   // STAGE 1: Initial Assembly
   if (onProgress) onProgress({ text: `[Stage 1/4] Assembling question matrix for ${targetSubject} (Class ${targetClass}) via Gemini AI...` });
 
