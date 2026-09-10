@@ -1,50 +1,11 @@
+import { callGeminiAPI } from './geminiApiService.js';
+
 export async function executePaperPipeline(config) {
   return await generateAndAuditPaper(config);
 }
 
-const getApiKeys = () => {
-  let keys = [];
-  try {
-    if (typeof import.meta !== "undefined" && import.meta.env) {
-      if (import.meta.env.VITE_GEMINI_API_KEY) keys.push(import.meta.env.VITE_GEMINI_API_KEY);
-      if (import.meta.env.VITE_GEMINI_API_KEY_2) keys.push(import.meta.env.VITE_GEMINI_API_KEY_2);
-      if (import.meta.env.VITE_GEMINI_API_KEY_3) keys.push(import.meta.env.VITE_GEMINI_API_KEY_3);
-      if (keys.length === 0 && import.meta.env.GEMINI_API_KEY) keys.push(import.meta.env.GEMINI_API_KEY);
-    }
-  } catch (e) {}
-  return keys.filter(k => k && typeof k === 'string' && k.trim() !== "");
-};
-
-async function callDirectGemini(promptText) {
-  const keys = getApiKeys();
-  if (keys.length === 0) {
-    throw new Error("API Key missing in environment variables (.env).");
-  }
-
-  // Safe and direct working model endpoint
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${keys[0]}`;
-
-  const response = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: promptText }] }],
-      generationConfig: { temperature: 0.7, responseMimeType: "application/json" }
-    })
-  });
-
-  if (!response.ok) {
-    const errText = await response.text();
-    throw new Error(`Gemini API Error (${response.status}): ${errText}`);
-  }
-
-  const data = await response.json();
-  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!text) throw new Error("Empty response received from Gemini API.");
-  return text;
-}
-
 function cleanAndParseJSON(text) {
+  if (!text) throw new Error("Empty response received from AI.");
   let cleaned = text.trim();
   if (cleaned.startsWith("```json")) {
     cleaned = cleaned.replace(/^```json/, "").replace(/```$/, "").trim();
@@ -81,14 +42,14 @@ export async function generateAndAuditPaper(config) {
   "answerKey": "string"
 }`;
 
-  let rawText1 = await callDirectGemini(prompt1);
+  let rawText1 = await callGeminiAPI(prompt1);
   let currentPaper = cleanAndParseJSON(rawText1);
 
   if (onProgress) onProgress({ text: "[Stage 2/4] Running CBSE compliance & syllabus blueprint audit..." });
   
   const prompt2 = `Audit this question paper JSON for Class ${targetClass} ${targetSubject} for complete accuracy and proper section distribution. Return ONLY valid corrected JSON.\n${JSON.stringify(currentPaper)}`;
   try {
-    let rawText2 = await callDirectGemini(prompt2);
+    let rawText2 = await callGeminiAPI(prompt2);
     if (rawText2) {
       const audited2 = cleanAndParseJSON(rawText2);
       if (audited2 && audited2.sections) currentPaper = audited2;
@@ -99,7 +60,7 @@ export async function generateAndAuditPaper(config) {
   
   const prompt3 = `Final technical edit on this paper JSON for Class ${targetClass} ${targetSubject}. Ensure formatting and answer keys are flawless. Return ONLY valid JSON.\n${JSON.stringify(currentPaper)}`;
   try {
-    let rawText3 = await callDirectGemini(prompt3);
+    let rawText3 = await callGeminiAPI(prompt3);
     if (rawText3) {
       const audited3 = cleanAndParseJSON(rawText3);
       if (audited3 && audited3.sections) currentPaper = audited3;
