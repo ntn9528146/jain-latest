@@ -7,17 +7,9 @@ import PracticalStudio from '../components/paper/PracticalStudio.jsx';
 import PaperViewer from '../components/paper/PaperViewer.jsx';
 import ProfileModal from '../components/profile/ProfileModal.jsx';
 import { getFacultyPaperStats, incrementPaperCount } from '../services/paperStatsService.js';
-import pipelineService, { executePaperPipeline, generateAndAuditPaper } from '../services/geminiPipelineService.js';
+import { executePaperPipeline } from '../services/geminiPipelineService.js';
 
-const executePaperPipelineSafe = async (config) => {
-  const fn = executePaperPipeline || generateAndAuditPaper || pipelineService?.executePaperPipeline || pipelineService?.generateAndAuditPaper || pipelineService;
-  if (typeof fn === 'function') {
-    return await fn(config);
-  }
-  throw new Error("Pipeline function not found in module exports.");
-};
-
-export const CreatePaper = ({ faculty, onLogout }) => {
+const CreatePaper = ({ faculty, onLogout }) => {
   const [activeMode, setActiveMode] = useState('cbse');
   const [stats, setStats] = useState({ totalTheoryPapers: 0, totalPracticalPapers: 0, bySubject: {} });
   const [showProfile, setShowProfile] = useState(false);
@@ -40,7 +32,7 @@ export const CreatePaper = ({ faculty, onLogout }) => {
     setPipelineStatus('Stage 1/4: Initializing Pipeline...');
 
     try {
-      const result = await executePaperPipelineSafe({
+      const result = await executePaperPipeline({
         ...config,
         onProgress: (p) => setPipelineStatus(p.text)
       });
