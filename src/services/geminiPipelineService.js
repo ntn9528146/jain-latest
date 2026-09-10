@@ -1,8 +1,66 @@
-// --- STRICT PERMANENT EXPORTS ---
-export async function executePaperPipeline(config) {
-  return await generateAndAuditPaper(config);
+// --- 1. DEFINE CORE FUNCTIONS FIRST ---
+async function callGeminiAIWithRetry(promptText, keys, temperature) {
+  if (keys.length === 0) {
+    throw new Error("No VITE_GEMINI_API_KEY found in environment variables.");
+  }
+
+  const modelName = "gemini-1.5-flash";
+  let lastError = null;
+
+  for (let k = 0; k < keys.length; k++) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${keys[k]}`;
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: promptText }] }],
+          generationConfig: { temperature, responseMimeType: "application/json" }
+        })
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        lastError = new Error(`API error ${response.status}: ${errText}`);
+        continue;
+      }
+
+      const data = await response.json();
+      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (text) return text;
+    } catch (err) {
+      lastError = err;
+      continue;
+    }
+  }
+  throw lastError || new Error("All API keys failed to generate content.");
 }
 
+function cleanAndParseJSON(text) {
+  if (!text) throw new Error("Empty response received from AI.");
+  let cleaned = text.trim();
+  if (cleaned.startsWith("```json")) {
+    cleaned = cleaned.replace(/^```json/, "").replace(/```$/, "").trim();
+  } else if (cleaned.startsWith("```")) {
+    cleaned = cleaned.replace(/^```/, "").replace(/```$/, "").trim();
+  }
+  return JSON.parse(cleaned);
+}
+
+const getApiKeys = () => {
+  let keys = [];
+  try {
+    if (typeof import.meta !== "undefined" && import.meta.env) {
+      if (import.meta.env.VITE_GEMINI_API_KEY) keys.push(import.meta.env.VITE_GEMINI_API_KEY);
+      if (import.meta.env.VITE_GEMINI_API_KEY_2) keys.push(import.meta.env.VITE_GEMINI_API_KEY_2);
+      if (import.meta.env.VITE_GEMINI_API_KEY_3) keys.push(import.meta.env.VITE_GEMINI_API_KEY_3);
+      if (keys.length === 0 && import.meta.env.GEMINI_API_KEY) keys.push(import.meta.env.GEMINI_API_KEY);
+    }
+  } catch (e) {}
+  return keys.filter(k => k && typeof k === 'string' && k.trim() !== "");
+};
+
+// --- 2. EXPORT FUNCTIONS ---
 export async function generateAndAuditPaper(config) {
   const { selectedClass, selectedSubject, onProgress } = config;
   const targetSubject = selectedSubject || "Mathematics";
@@ -63,66 +121,9 @@ Return ONLY valid JSON with the exact same schema structure containing corrected
   return currentPaper;
 }
 
-const getApiKeys = () => {
-  let keys = [];
-  try {
-    if (typeof import.meta !== "undefined" && import.meta.env) {
-      if (import.meta.env.VITE_GEMINI_API_KEY) keys.push(import.meta.env.VITE_GEMINI_API_KEY);
-      if (import.meta.env.VITE_GEMINI_API_KEY_2) keys.push(import.meta.env.VITE_GEMINI_API_KEY_2);
-      if (import.meta.env.VITE_GEMINI_API_KEY_3) keys.push(import.meta.env.VITE_GEMINI_API_KEY_3);
-      if (keys.length === 0 && import.meta.env.GEMINI_API_KEY) keys.push(import.meta.env.GEMINI_API_KEY);
-    }
-  } catch (e) {}
-  return keys.filter(k => k && typeof k === 'string' && k.trim() !== "");
-};
-
-async function callGeminiAIWithRetry(promptText, keys, temperature) {
-  if (keys.length === 0) {
-    throw new Error("No VITE_GEMINI_API_KEY found in environment variables.");
-  }
-
-  const modelName = "gemini-1.5-flash";
-  let lastError = null;
-
-  for (let k = 0; k < keys.length; k++) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${keys[k]}`;
-    try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: promptText }] }],
-          generationConfig: { temperature, responseMimeType: "application/json" }
-        })
-      });
-
-      if (!response.ok) {
-        const errText = await response.text();
-        lastError = new Error(`API error ${response.status}: ${errText}`);
-        continue;
-      }
-
-      const data = await response.json();
-      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (text) return text;
-    } catch (err) {
-      lastError = err;
-      continue;
-    }
-  }
-  throw lastError || new Error("All API keys failed to generate content.");
+export async function executePaperPipeline(config) {
+  return await generateAndAuditPaper(config);
 }
 
-function cleanAndParseJSON(text) {
-  if (!text) throw new Error("Empty response received from AI.");
-  let cleaned = text.trim();
-  if (cleaned.startsWith("```json")) {
-    cleaned = cleaned.replace(/^```json/, "").replace(/```$/, "").trim();
-  } else if (cleaned.startsWith("```")) {
-    cleaned = cleaned.replace(/^```/, "").replace(/```$/, "").trim();
-  }
-  return JSON.parse(cleaned);
-}
-
-// Ensure default export is directly the executePaperPipeline function
+// --- 3. DEFAULT EXPORT ANCHOR ---
 export default executePaperPipeline;
