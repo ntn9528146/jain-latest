@@ -1,4 +1,4 @@
-// --- STRICT 4-STAGE CBSE EXAMINATION PAPER GENERATION & AUDIT ENGINE ---
+// --- 4-STAGE STRICT CBSE EXAM PAPER PIPELINE ENGINE ---
 
 export async function executePaperPipeline(config) {
   return await generateAndAuditPaper(config);
@@ -24,7 +24,6 @@ async function callGeminiStrictAI(promptText, temperature = 0.5) {
     throw new Error("No VITE_GEMINI_API_KEY found in environment variables.");
   }
 
-  // Stable v1beta endpoint with flash model for fast and precise evaluation
   const modelName = "gemini-1.5-flash";
   let lastError = null;
 
@@ -82,9 +81,7 @@ export async function generateAndAuditPaper(config) {
   const targetSubject = selectedSubject || "Mathematics";
   const targetClass = selectedClass || "10th";
 
-  // ----------------------------------------------------
   // STAGE 1: Initial Assembly & Matrix Construction
-  // ----------------------------------------------------
   if (onProgress) {
     onProgress({ text: `[Stage 1/4] Assembling original question matrix for ${targetSubject} (Class ${targetClass}) via AI generator...` });
   }
@@ -116,21 +113,15 @@ Return ONLY valid JSON with this exact structure:
   const rawText1 = await callGeminiStrictAI(stage1Prompt, 0.7);
   let currentPaper = cleanAndParseJSON(rawText1);
 
-  // ----------------------------------------------------
-  // STAGE 2: Compliance Auditing (Checking Board Guidelines & Blueprint)
-  // ----------------------------------------------------
+  // STAGE 2: Compliance Auditing
   if (onProgress) {
     onProgress({ text: `[Stage 2/4] Running CBSE board compliance & syllabus blueprint audit...` });
   }
 
   const stage2Prompt = `
-You are a Rigorous CBSE Board Compliance Inspector. 
-Audit the following question paper JSON for Class ${targetClass} ${targetSubject}.
-Verify that question counts per section, total marks, and competency levels strictly align with official CBSE curriculum guidelines. Correct any structural gaps.
-
+You are a Rigorous CBSE Board Compliance Inspector. Audit the following question paper JSON for Class ${targetClass} ${targetSubject}. Verify question counts per section, total marks, and competency levels.
 Current Paper JSON:
 ${JSON.stringify(currentPaper)}
-
 Return ONLY a valid JSON object matching the exact original schema with fully audited and corrected data.
 `;
 
@@ -140,20 +131,15 @@ Return ONLY a valid JSON object matching the exact original schema with fully au
     currentPaper = auditedPaper2;
   }
 
-  // ----------------------------------------------------
   // STAGE 3: Error Purging & Formatting / LaTeX Correction
-  // ----------------------------------------------------
   if (onProgress) {
     onProgress({ text: `[Stage 3/4] Purging formatting errors, verifying LaTeX math expressions, and checking answer keys...` });
   }
 
   const stage3Prompt = `
-You are a Senior Academic Technical Editor. 
-Inspect the following examination paper JSON for Class ${targetClass} ${targetSubject} to purge any typographical mistakes, ambiguous phrasing, missing options in MCQs, or incorrect LaTeX symbol formatting in math/science questions. Ensure answer keys match perfectly.
-
+You are a Senior Academic Technical Editor. Inspect the following examination paper JSON for Class ${targetClass} ${targetSubject} to purge typographical mistakes, ambiguous phrasing, or incorrect LaTeX formatting.
 Current Paper JSON:
 ${JSON.stringify(currentPaper)}
-
 Return ONLY a valid JSON object matching the exact original schema with thoroughly cleaned and verified data.
 `;
 
@@ -163,9 +149,7 @@ Return ONLY a valid JSON object matching the exact original schema with thorough
     currentPaper = auditedPaper3;
   }
 
-  // ----------------------------------------------------
   // STAGE 4: Final Verification & Release Readiness
-  // ----------------------------------------------------
   if (onProgress) {
     onProgress({ text: `[Stage 4/4] Final verification complete. Paper verified 100% error-free and ready for display.` });
   }
@@ -175,4 +159,5 @@ Return ONLY a valid JSON object matching the exact original schema with thorough
   return currentPaper;
 }
 
+// --- DUAL EXPORT SUPPORT TO PREVENT ANY MODULE MISMATCH ---
 export default executePaperPipeline;
