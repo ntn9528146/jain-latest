@@ -9,7 +9,7 @@ import ProfileModal from '../components/profile/ProfileModal.jsx';
 import { getFacultyPaperStats, incrementPaperCount } from '../services/paperStatsService.js';
 import { executePaperPipeline } from '../services/geminiPipelineService.js';
 
-export const CreatePaper = ({ faculty, onLogout }) => {
+export function CreatePaper({ faculty, onLogout }) {
   const [activeMode, setActiveMode] = useState('cbse');
   const [stats, setStats] = useState({ totalTheoryPapers: 0, totalPracticalPapers: 0, bySubject: {} });
   const [showProfile, setShowProfile] = useState(false);
@@ -179,6 +179,6 @@ export const CreatePaper = ({ faculty, onLogout }) => {
       )}
     </div>
   );
-};
+}
 
 export default CreatePaper;
