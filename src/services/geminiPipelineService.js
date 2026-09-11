@@ -1,4 +1,4 @@
-// --- 5-STAGE ULTRA-RIGOROUS DEVGYAN-INNOVATION PIPELINE ---
+// --- ULTIMATE 5-STAGE DEVGYAN-INNOVATION PIPELINE ---
 
 const getActiveApiKey = () => {
   try {

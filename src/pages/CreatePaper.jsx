@@ -7,15 +7,7 @@ import PracticalStudio from '../components/paper/PracticalStudio.jsx';
 import PaperViewer from '../components/paper/PaperViewer.jsx';
 import ProfileModal from '../components/profile/ProfileModal.jsx';
 import { getFacultyPaperStats, incrementPaperCount } from '../services/paperStatsService.js';
-import * as pipelineModule from '../services/geminiPipelineService.js';
-
-const executePaperPipelineSafe = async (config) => {
-  const fn = pipelineModule.executePaperPipeline || pipelineModule.generateAndAuditPaper || pipelineModule.default;
-  if (typeof fn === 'function') {
-    return await fn(config);
-  }
-  throw new Error("Pipeline function not found in module exports.");
-};
+import { executePaperPipeline } from '../services/geminiPipelineService.js';
 
 export const CreatePaper = ({ faculty, onLogout }) => {
   const [activeMode, setActiveMode] = useState('cbse');
@@ -40,7 +32,7 @@ export const CreatePaper = ({ faculty, onLogout }) => {
     setPipelineStatus('Stage 1/5: Initializing Pipeline...');
 
     try {
-      const result = await executePaperPipelineSafe({
+      const result = await executePaperPipeline({
         ...config,
         onProgress: (p) => setPipelineStatus(p.text)
       });
