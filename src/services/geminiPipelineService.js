@@ -1,4 +1,4 @@
-// --- 5-STAGE ULTRA-RIGOROUS PIPELINE WITH DUAL EXPORTS ---
+// --- 5-STAGE ULTRA-RIGOROUS DEVGYAN-INNOVATION PIPELINE ---
 
 const getActiveApiKey = () => {
   try {
@@ -74,7 +74,7 @@ export async function generateAndAuditPaper(config) {
   const paperType = isPractical ? "Practical & Viva Examination" : "CBSE Board Examination";
 
   if (onProgress) {
-    onProgress({ text: `[Stage 1/5] Initializing unique question matrix generation for ${targetSubject} (${paperType})...` });
+    onProgress({ text: `[Stage 1/5] Initializing unique question matrix for ${targetSubject} (${paperType})...` });
   }
 
   const uniqueToken = Math.random().toString(36).substring(2, 12) + Date.now();
@@ -162,5 +162,4 @@ export async function executePaperPipeline(config) {
   return await generateAndAuditPaper(config);
 }
 
-// Absolute dual exports to satisfy any import style
 export default executePaperPipeline;

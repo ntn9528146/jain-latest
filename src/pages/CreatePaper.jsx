@@ -7,9 +7,18 @@ import PracticalStudio from '../components/paper/PracticalStudio.jsx';
 import PaperViewer from '../components/paper/PaperViewer.jsx';
 import ProfileModal from '../components/profile/ProfileModal.jsx';
 import { getFacultyPaperStats, incrementPaperCount } from '../services/paperStatsService.js';
-import { executePaperPipeline } from '../services/geminiPipelineService.js';
+import * as pipelineModule from '../services/geminiPipelineService.js';
 
-const CreatePaper = ({ faculty, onLogout }) => {
+// Bulletproof wrapper to protect against any export caching/mismatch issues
+const executePaperPipelineSafe = async (config) => {
+  const fn = pipelineModule.executePaperPipeline || pipelineModule.generateAndAuditPaper || pipelineModule.default;
+  if (typeof fn === 'function') {
+    return await fn(config);
+  }
+  throw new Error("Pipeline function not found in module exports.");
+};
+
+export const CreatePaper = ({ faculty, onLogout }) => {
   const [activeMode, setActiveMode] = useState('cbse');
   const [stats, setStats] = useState({ totalTheoryPapers: 0, totalPracticalPapers: 0, bySubject: {} });
   const [showProfile, setShowProfile] = useState(false);
@@ -29,10 +38,10 @@ const CreatePaper = ({ faculty, onLogout }) => {
 
   const handleGeneratePaper = async (config) => {
     setLoading(true);
-    setPipelineStatus('Stage 1/4: Initializing Pipeline...');
+    setPipelineStatus('Stage 1/5: Initializing Pipeline...');
 
     try {
-      const result = await executePaperPipeline({
+      const result = await executePaperPipelineSafe({
         ...config,
         onProgress: (p) => setPipelineStatus(p.text)
       });
@@ -52,10 +61,10 @@ const CreatePaper = ({ faculty, onLogout }) => {
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
       <header className="bg-slate-900 border-b border-slate-800 px-6 py-3.5 flex flex-wrap justify-between items-center gap-4">
         <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-xl bg-indigo-600 flex items-center justify-center font-black text-white text-lg">P</div>
+          <div className="h-9 w-9 rounded-xl bg-indigo-600 flex items-center justify-center font-black text-white text-lg">D</div>
           <div>
             <h1 className="text-sm font-bold text-white flex items-center gap-2">
-              {faculty?.schoolName || "Academic Studio"}
+              {faculty?.schoolName || "DevGyan-Innovation Studio"}
               <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
                 {faculty?.role || "Faculty"}
               </span>
@@ -134,7 +143,7 @@ const CreatePaper = ({ faculty, onLogout }) => {
               <div className="h-4 w-4 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin"></div>
               <span className="font-semibold">{pipelineStatus}</span>
             </div>
-            <span className="font-mono text-[10px] text-indigo-400">Multi-Stage Zero Error Execution</span>
+            <span className="font-mono text-[10px] text-indigo-400">DevGyan-Innovation 5-Stage AI Engine</span>
           </div>
         )}
 
