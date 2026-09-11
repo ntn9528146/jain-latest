@@ -9,7 +9,6 @@ import ProfileModal from '../components/profile/ProfileModal.jsx';
 import { getFacultyPaperStats, incrementPaperCount } from '../services/paperStatsService.js';
 import * as pipelineModule from '../services/geminiPipelineService.js';
 
-// Bulletproof wrapper to protect against any export caching/mismatch issues
 const executePaperPipelineSafe = async (config) => {
   const fn = pipelineModule.executePaperPipeline || pipelineModule.generateAndAuditPaper || pipelineModule.default;
   if (typeof fn === 'function') {
