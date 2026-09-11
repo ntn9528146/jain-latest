@@ -1,5 +1,4 @@
-// --- 5-STAGE ULTRA-RIGOROUS CBSE & PRACTICAL EXAMINATION AUDIT ENGINE ---
-// Powered exclusively for DevGyan-Innovation Academic Studio
+// --- 5-STAGE ULTRA-RIGOROUS PIPELINE WITH DUAL EXPORTS ---
 
 const getActiveApiKey = () => {
   try {
@@ -74,9 +73,6 @@ export async function generateAndAuditPaper(config) {
   const targetClass = selectedClass || "10th";
   const paperType = isPractical ? "Practical & Viva Examination" : "CBSE Board Examination";
 
-  // -----------------------------------------------------------------
-  // STAGE 1: Initial Unique Question Matrix Generation
-  // -----------------------------------------------------------------
   if (onProgress) {
     onProgress({ text: `[Stage 1/5] Initializing unique question matrix generation for ${targetSubject} (${paperType})...` });
   }
@@ -85,10 +81,10 @@ export async function generateAndAuditPaper(config) {
   const stage1Prompt = `
 You are an expert Chief Examiner for DevGyan-Innovation. Generate a completely fresh, unique, and rigorous ${paperType} JSON for Class ${targetClass} ${targetSubject} following official board guidelines. 
 Unique Generation Seed: ${uniqueToken}
-Ensure all questions are 100% unique, newly framed, and formatted cleanly.
+Ensure all questions are 100% unique, newly framed, and formatted cleanly with proper LaTeX expressions.
 Return ONLY valid JSON with this exact structure:
 {
-  "title": "DevGyan-Innovation Assessment - ${targetSubject}",
+  "title": "DevGyan-Innovation Academic Studio - ${targetSubject}",
   "className": "${targetClass}",
   "subject": "${targetSubject}",
   "duration": "3 Hours",
@@ -112,19 +108,11 @@ Return ONLY valid JSON with this exact structure:
   let rawText1 = await callGeminiEngine(stage1Prompt);
   let currentPaper = cleanAndParseJSON(rawText1);
 
-  // -----------------------------------------------------------------
-  // STAGE 2: CBSE Blueprint & Section Structuring Audit
-  // -----------------------------------------------------------------
   if (onProgress) {
     onProgress({ text: `[Stage 2/5] Running official board blueprint & section structure audit...` });
   }
 
-  const stage2Prompt = `
-You are a Senior Board Curriculum Inspector for DevGyan-Innovation. Audit this paper JSON for Class ${targetClass} ${targetSubject}. Ensure correct section distribution (Sections A, B, C, D, E) and proper marks weightage.
-Current Paper JSON:
-${JSON.stringify(currentPaper)}
-Return ONLY valid JSON matching the exact schema with corrected structure.`;
-
+  const stage2Prompt = `You are a Senior Board Curriculum Inspector for DevGyan-Innovation. Audit this paper JSON for Class ${targetClass} ${targetSubject}. Ensure correct section distribution and marks weightage.\n${JSON.stringify(currentPaper)}`;
   try {
     let rawText2 = await callGeminiEngine(stage2Prompt);
     if (rawText2) {
@@ -133,19 +121,11 @@ Return ONLY valid JSON matching the exact schema with corrected structure.`;
     }
   } catch (e) {}
 
-  // -----------------------------------------------------------------
-  // STAGE 3: Mathematical Precision, Fraction & LaTeX Formatting Audit
-  // -----------------------------------------------------------------
   if (onProgress) {
     onProgress({ text: `[Stage 3/5] Purging equation overlaps, fixing fraction formatting, and validating LaTeX...` });
   }
 
-  const stage3Prompt = `
-You are a Technical Mathematical Editor for DevGyan-Innovation. Review all questions, options, and equations. Ensure no two equations or terms merge together (e.g., ensure proper spacing like $2x + 3y = 11$ and $2x - 4y = -24$ as separate lines or distinct expressions). Format fractions correctly using LaTeX (e.g. $\\frac{1}{2}$).
-Current Paper JSON:
-${JSON.stringify(currentPaper)}
-Return ONLY valid JSON matching the exact schema.`;
-
+  const stage3Prompt = `You are a Technical Mathematical Editor for DevGyan-Innovation. Review all questions, options, and equations. Ensure proper spacing and LaTeX fraction formatting (e.g. $\\frac{1}{2}$). Return valid JSON.\n${JSON.stringify(currentPaper)}`;
   try {
     let rawText3 = await callGeminiEngine(stage3Prompt);
     if (rawText3) {
@@ -154,19 +134,11 @@ Return ONLY valid JSON matching the exact schema.`;
     }
   } catch (e) {}
 
-  // -----------------------------------------------------------------
-  // STAGE 4: Diagram & Case Study Context Verification
-  // -----------------------------------------------------------------
   if (onProgress) {
     onProgress({ text: `[Stage 4/5] Verifying diagram descriptions and case-study context accuracy...` });
   }
 
-  const stage4Prompt = `
-You are a Quality Assurance Lead for DevGyan-Innovation. Verify that any diagram-based or case-study question contains precise descriptive text and correct corresponding sub-questions.
-Current Paper JSON:
-${JSON.stringify(currentPaper)}
-Return ONLY valid JSON matching the exact schema.`;
-
+  const stage4Prompt = `You are a Quality Assurance Lead for DevGyan-Innovation. Verify diagram descriptions and case-study context accuracy. Return valid JSON.\n${JSON.stringify(currentPaper)}`;
   try {
     let rawText4 = await callGeminiEngine(stage4Prompt);
     if (rawText4) {
@@ -175,9 +147,6 @@ Return ONLY valid JSON matching the exact schema.`;
     }
   } catch (e) {}
 
-  // -----------------------------------------------------------------
-  // STAGE 5: Final Branding & Release Verification
-  // -----------------------------------------------------------------
   if (onProgress) {
     onProgress({ text: `[Stage 5/5] Finalizing DevGyan-Innovation branding and locking 100% error-free paper...` });
   }
@@ -186,10 +155,6 @@ Return ONLY valid JSON matching the exact schema.`;
   currentPaper.subject = targetSubject;
   currentPaper.className = targetClass;
 
-  if (onProgress) {
-    onProgress({ text: "Paper successfully compiled and verified by DevGyan-Innovation!" });
-  }
-
   return currentPaper;
 }
 
@@ -197,4 +162,5 @@ export async function executePaperPipeline(config) {
   return await generateAndAuditPaper(config);
 }
 
+// Absolute dual exports to satisfy any import style
 export default executePaperPipeline;
