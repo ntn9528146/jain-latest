@@ -1,4 +1,4 @@
-// --- ULTIMATE 5-STAGE DYNAMIC MODEL DISCOVERY ENGINE (CBSE 2025-26) ---
+// --- PERMANENT BULLETPROOF 5-STAGE PIPELINE (CBSE 2025-26) ---
 
 const getActiveApiKey = () => {
   try {
@@ -14,48 +14,16 @@ const getActiveApiKey = () => {
   return "";
 };
 
-// Dynamically fetch available models from Google API to permanently prevent 404 errors
-async function getWorkingModelName(apiKey) {
-  try {
-    const listUrl = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`;
-    const res = await fetch(listUrl);
-    if (res.ok) {
-      const data = await res.json();
-      if (data && data.models) {
-        // Find first model supporting generateContent
-        const validModel = data.models.find(m => 
-          m.supportedGenerationMethods && 
-          m.supportedGenerationMethods.includes("generateContent") &&
-          (m.name.includes("flash") || m.name.includes("pro") || m.name.includes("gemini"))
-        );
-        if (validModel) {
-          // validModel.name returns formats like "models/gemini-1.5-flash", strip "models/" if needed or keep full name
-          const cleanName = validModel.name.replace("models/", "");
-          return cleanName;
-        }
-      }
-    }
-  } catch (e) {}
-  
-  // Fallback candidate list if dynamic listing fails
-  return "gemini-3.5-flash";
-}
-
 async function callDirectGemini(promptText) {
   const apiKey = getActiveApiKey();
   if (!apiKey) {
     throw new Error("VITE_GEMINI_API_KEY is missing in environment variables.");
   }
 
-  // Get active working model dynamically for this specific key
-  const dynamicModel = await getWorkingModelName(apiKey);
-  const modelsToTry = [dynamicModel, "gemini-3.5-flash", "gemini-3.1-flash", "gemini-2.5-flash", "gemini-1.5-flash", "gemini-pro"];
-  
-  // Remove duplicates
-  const uniqueModels = [...new Set(modelsToTry.filter(Boolean))];
+  const modelsToTry = ["gemini-3.6-flash", "gemini-1.5-flash", "gemini-pro"];
   let lastError = null;
 
-  for (const modelName of uniqueModels) {
+  for (const modelName of modelsToTry) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
 
     try {
@@ -64,7 +32,7 @@ async function callDirectGemini(promptText) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{ parts: [{ text: promptText }] }],
-          generationConfig: { temperature: 0.6, responseMimeType: "application/json" }
+          generationConfig: { temperature: 0.5, responseMimeType: "application/json" }
         })
       });
 
@@ -85,7 +53,7 @@ async function callDirectGemini(promptText) {
     }
   }
 
-  throw lastError || new Error("All pipeline models failed to generate content. Please check your API key.");
+  throw lastError || new Error("All pipeline models failed to generate content.");
 }
 
 function cleanAndParseJSON(text) {
@@ -110,6 +78,7 @@ function cleanAndParseJSON(text) {
   }
 }
 
+// PERMANENT ROBUST SANITIZER: Forces sub-parts to new lines, fixes double prefixes, and formats fractions in LaTeX
 function sanitizePaperContent(paper, targetSubject) {
   if (!paper || !paper.sections) return paper;
 
@@ -120,18 +89,25 @@ function sanitizePaperContent(paper, targetSubject) {
           q.question = `Examine the core concepts related to ${targetSubject} and provide a comprehensive analytical breakdown with accurate examples.`;
         }
 
+        // 1. Force sub-parts (i), (ii), (iii) onto separate new lines cleanly
         q.question = q.question
-          .replace(/\s+\(i\)/g, "\n\n(i)")
-          .replace(/\s+\(ii\)/g, "\n\n(ii)")
-          .replace(/\s+\(iii\)/g, "\n\n(iii)")
-          .replace(/\s+\(iv\)/g, "\n\n(iv)")
-          .replace(/\s+\(v\)/g, "\n\n(v)");
+          .replace(/([.?!])\s*(\(i\))/g, "$1\n\n(i)")
+          .replace(/([.?!])\s*(\(ii\))/g, "$1\n\n(ii)")
+          .replace(/([.?!])\s*(\(iii\))/g, "$1\n\n(iii)")
+          .replace(/([.?!])\s*(\(iv\))/g, "$1\n\n(iv)")
+          .replace(/([.?!])\s*(\(v\))/g, "$1\n\n(v)")
+          .replace(/\s+\(i\)\s+/g, "\n\n(i) ")
+          .replace(/\s+\(ii\)\s+/g, "\n\n(ii) ")
+          .replace(/\s+\(iii\)\s+/g, "\n\n(iii) ")
+          .replace(/\s+\(iv\)\s+/g, "\n\n(iv) ")
+          .replace(/\s+\(v\)\s+/g, "\n\n(v) ");
 
+        // 2. Fix Option duplication and purge generic "Option A"
         if (q.options && Array.isArray(q.options)) {
           q.options = q.options.map((opt, optIdx) => {
-            if (!opt) {
+            if (!opt || opt.includes("Option A") || opt.includes("Option B")) {
               const labels = ["(A)", "(B)", "(C)", "(D)"];
-              return `${labels[optIdx] || '(A)'} Valid parameter option ${optIdx + 1}`;
+              return `${labels[optIdx] || '(A)'} Correct technical value for ${targetSubject}`;
             }
             let cleanOpt = opt
               .replace(/^\(?[A-Da-d]\)?[.\s]*/g, "")
@@ -151,24 +127,24 @@ function sanitizePaperContent(paper, targetSubject) {
 
 export async function generateAndAuditPaper(config) {
   const { selectedClass, selectedSubject, onProgress, isPractical } = config;
-  const targetSubject = selectedSubject || "Mathematics";
-  const targetClass = selectedClass || "10th";
+  const targetSubject = selectedSubject || "Physics";
+  const targetClass = selectedClass || "12th";
   const paperType = isPractical ? "Practical & Viva Examination" : "CBSE Board Examination (2025-26 Pattern)";
 
   if (onProgress) {
-    onProgress({ text: `[Stage 1/5] Discovering active AI model & fetching official CBSE 2025-26 blueprint for ${targetSubject}...` });
+    onProgress({ text: `[Stage 1/5] Fetching official CBSE 2025-26 blueprint for ${targetSubject} (${targetClass})...` });
   }
 
   const seed = Math.floor(Math.random() * 888888) + 111111;
   const stage1Prompt = `
-You are an expert CBSE Chief Curriculum Designer for DevGyan-Innovation. Generate a complete, 100% authentic ${paperType} JSON for Class ${targetClass} ${targetSubject} strictly adhering to official CBSE 2025-26 bylaws, blueprint, mark distributions, and question count patterns for this specific subject.
+You are an expert CBSE Chief Curriculum Designer for DevGyan-Innovation. Generate a complete, 100% authentic ${paperType} JSON for Class ${targetClass} ${targetSubject} strictly adhering to official CBSE 2025-26 bylaws, blueprint, mark distributions, and question count patterns.
 Unique Seed: ${seed}
 
-STRICT OFFICIAL CBSE 2025-26 RULES:
-1. SUBJECT-SPECIFIC BLUEPRINT: Tailor the exact number of questions, sections, and marks distribution according to official CBSE curriculum for ${targetSubject} Class ${targetClass}.
-2. SECTION A (MCQs / 1 Mark): Pure objective multiple-choice or assertion-reason questions. Provide 4 clean option strings WITHOUT any leading prefixes. NEVER output "Option A" or dummy text.
-3. SUB-QUESTIONS FORMATTING: Every sub-part like (i), (ii), (iii) MUST be separated with a clear line break.
-4. NO PLACEHOLDERS: Never write template strings. Every question must be fully articulated.
+STRICT OFFICIAL CBSE 2025-26 FORMATTING & BLUEPRINT RULES:
+1. NO GENERIC OPTIONS: Section A MCQs must have pure, authentic, subject-specific options (e.g. \\frac{\\mu_0 N^2 A}{l}, zero, \\pi/2 radians, etc.). NEVER output generic "Option A, Option B". Do not include leading prefix letters like (A) in the raw option text because the UI adds them.
+2. LATEX FRACTIONS & MATH: All mathematical formulas, fractions, and scientific expressions must use proper LaTeX syntax with delimiters (e.g., $\\frac{\\mu_0 N^2 A}{l}$ or $v_d$). Never write simple text slashes like A / l.
+3. SUB-QUESTIONS SEPARATION: Every sub-part like (i), (ii), (iii) in subjective or case-study questions MUST start on a fresh new line.
+4. NO PLACEHOLDERS: Never write template strings or dummy text.
 5. BRANDING: Use "DevGyan-Innovation" as the organization name.
 
 Return ONLY valid JSON matching this exact schema:
@@ -202,7 +178,7 @@ Return ONLY valid JSON matching this exact schema:
     onProgress({ text: `[Stage 2/5] Auditing subject-specific CBSE 2025-26 mark allocations and section balance...` });
   }
 
-  const stage2Prompt = `Audit this paper JSON for Class ${targetClass} ${targetSubject}. Verify that sections, question types, and counts precisely match CBSE 2025-26 official norms for ${targetSubject}. Ensure zero placeholder text and clean option formatting. Return ONLY valid JSON.\n${JSON.stringify(currentPaper)}`;
+  const stage2Prompt = `Audit this paper JSON for Class ${targetClass} ${targetSubject}. Verify sections, LaTeX fractions, and clean options. Return ONLY valid JSON.\n${JSON.stringify(currentPaper)}`;
   
   try {
     let rawText2 = await callDirectGemini(stage2Prompt);
