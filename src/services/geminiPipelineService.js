@@ -20,8 +20,8 @@ async function callDirectGemini(promptText) {
     throw new Error("VITE_GEMINI_API_KEY is missing in environment variables.");
   }
 
-  // Use the verified stable active flash model
-  const modelsToTry = ["gemini-2.5-flash"];
+  // Use the recommended active gemini-3.6-flash model
+  const modelsToTry = ["gemini-3.6-flash", "gemini-1.5-flash"];
   let lastError = null;
 
   for (const modelName of modelsToTry) {
