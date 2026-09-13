@@ -1,5 +1,60 @@
-// --- ULTIMATE FORMATTING-LOCKED 5-STAGE PIPELINE ---
-import { callGeminiApi } from './geminiApiService.js';
+// --- BULLETPROOF 5-STAGE PIPELINE WITH LOCAL KEY RESOLUTION ---
+
+const getActiveApiKey = () => {
+  try {
+    if (typeof import.meta !== "undefined" && import.meta.env) {
+      if (import.meta.env.VITE_GEMINI_API_KEY) return import.meta.env.VITE_GEMINI_API_KEY;
+      if (import.meta.env.VITE_GEMINI_API_KEY_2) return import.meta.env.VITE_GEMINI_API_KEY_2;
+    }
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('VITE_GEMINI_API_KEY') || localStorage.getItem('gemini_api_key');
+      if (stored) return stored;
+    }
+  } catch (e) {}
+  return "";
+};
+
+async function callDirectGemini(promptText) {
+  const apiKey = getActiveApiKey();
+  if (!apiKey) {
+    throw new Error("VITE_GEMINI_API_KEY is missing in environment variables.");
+  }
+
+  const modelsToTry = ["gemini-3.6-flash", "gemini-1.5-flash", "gemini-pro", "gemini-1.5-pro"];
+  let lastError = null;
+
+  for (const modelName of modelsToTry) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: promptText }] }],
+          generationConfig: { temperature: 0.7, responseMimeType: "application/json" }
+        })
+      });
+
+      if (!response.ok) {
+        const errData = await response.text();
+        lastError = new Error(`Model ${modelName} failed [${response.status}]: ${errData}`);
+        continue;
+      }
+
+      const data = await response.json();
+      const textResult = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      if (textResult) {
+        return textResult;
+      }
+    } catch (err) {
+      lastError = err;
+      continue;
+    }
+  }
+
+  throw lastError || new Error("All pipeline models failed to generate content.");
+}
 
 function cleanAndParseJSON(text) {
   if (!text) throw new Error("Empty response received from AI engine.");
@@ -38,11 +93,11 @@ export async function generateAndAuditPaper(config) {
 You are an expert Chief Examiner for DevGyan-Innovation. Generate a complete, rigorous, and professional ${paperType} JSON for Class ${targetClass} ${targetSubject} following official CBSE guidelines.
 Generation Seed: ${uniqueToken}
 
-CRITICAL FORMATTING RULES TO PREVENT ERRORS:
-1. EQUATIONS SEPARATION: Never merge two linear or quadratic equations together. Always keep proper spaces or line breaks (e.g., "$2x + 3y = 11$ and $2x - 4y = -24$").
-2. TABLES & STATISTICS: For median/mean/mode or data distribution tables, NEVER use LaTeX array strings like \\begin{array}. Write them cleanly in clear textual format or structured table description.
-3. SUB-QUESTIONS & CASE STUDIES: Every sub-part like (i), (ii), (iii) MUST be separated clearly or placed on a new line description. Never jam them into a single continuous paragraph.
-4. BRANDING: Use "DevGyan-Innovation" as the organization name. Remove any reference to Gemini.
+CRITICAL FORMATTING RULES:
+1. EQUATIONS SEPARATION: Never merge two equations. Always keep proper spacing or line breaks (e.g. "$2x + 3y = 11$" and "$2x - 4y = -24$").
+2. TABLES & STATISTICS: Do not use LaTeX array strings like \\begin{array}. Write tabular data in clean text/table descriptions.
+3. SUB-QUESTIONS & CASE STUDIES: Every sub-part like (i), (ii), (iii) MUST be separated clearly or placed on a new line description.
+4. BRANDING: Use "DevGyan-Innovation" as the brand name.
 
 Return ONLY valid JSON matching this schema:
 {
@@ -67,7 +122,7 @@ Return ONLY valid JSON matching this schema:
   "answerKey": "Detailed step-by-step marking scheme verified by DevGyan-Innovation."
 }`;
 
-  let rawText1 = await callGeminiApi(stage1Prompt);
+  let rawText1 = await callDirectGemini(stage1Prompt);
   let currentPaper = cleanAndParseJSON(rawText1);
 
   if (onProgress) {
@@ -76,7 +131,7 @@ Return ONLY valid JSON matching this schema:
 
   const stage2Prompt = `Audit this question paper JSON for Class ${targetClass} ${targetSubject}. Check that sections (A, B, C, D, E) are properly distributed according to CBSE standards. Return ONLY valid JSON.\n${JSON.stringify(currentPaper)}`;
   try {
-    let rawText2 = await callGeminiApi(stage2Prompt);
+    let rawText2 = await callDirectGemini(stage2Prompt);
     if (rawText2) {
       const audited2 = cleanAndParseJSON(rawText2);
       if (audited2 && audited2.sections) currentPaper = audited2;
@@ -87,9 +142,9 @@ Return ONLY valid JSON matching this schema:
     onProgress({ text: `[Stage 3/5] Fixing equation overlapping and spacing issues...` });
   }
 
-  const stage3Prompt = `Strictly check all questions. Ensure no two equations are fused or written together without spacing (e.g. '$2x+3y=11 2x-4y=-24$' is forbidden; separate them cleanly). Ensure proper LaTeX notation for fractions. Return ONLY valid JSON.\n${JSON.stringify(currentPaper)}`;
+  const stage3Prompt = `Strictly check all questions. Ensure no two equations are fused or written together without spacing. Return ONLY valid JSON.\n${JSON.stringify(currentPaper)}`;
   try {
-    let rawText3 = await callGeminiApi(stage3Prompt);
+    let rawText3 = await callDirectGemini(stage3Prompt);
     if (rawText3) {
       const audited3 = cleanAndParseJSON(rawText3);
       if (audited3 && audited3.sections) currentPaper = audited3;
@@ -102,7 +157,7 @@ Return ONLY valid JSON matching this schema:
 
   const stage4Prompt = `Review case studies and subjective questions with sub-parts ((i), (ii), (iii)). Ensure every sub-part is properly formatted on a new line or clearly separated. Return ONLY valid JSON.\n${JSON.stringify(currentPaper)}`;
   try {
-    let rawText4 = await callGeminiApi(stage4Prompt);
+    let rawText4 = await callDirectGemini(stage4Prompt);
     if (rawText4) {
       const audited4 = cleanAndParseJSON(rawText4);
       if (audited4 && audited4.sections) currentPaper = audited4;
