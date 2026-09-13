@@ -1,4 +1,4 @@
-// --- PERMANENT BULLETPROOF 5-STAGE PIPELINE (CBSE 2025-26) ---
+// --- ABSOLUTE PERMANENT FIX FOR EXPORT & PIPELINE ---
 
 const getActiveApiKey = () => {
   try {
@@ -78,7 +78,6 @@ function cleanAndParseJSON(text) {
   }
 }
 
-// PERMANENT ROBUST SANITIZER: Forces sub-parts to new lines, fixes double prefixes, and formats fractions in LaTeX
 function sanitizePaperContent(paper, targetSubject) {
   if (!paper || !paper.sections) return paper;
 
@@ -89,7 +88,7 @@ function sanitizePaperContent(paper, targetSubject) {
           q.question = `Examine the core concepts related to ${targetSubject} and provide a comprehensive analytical breakdown with accurate examples.`;
         }
 
-        // 1. Force sub-parts (i), (ii), (iii) onto separate new lines cleanly
+        // Force sub-parts (i), (ii), (iii) onto separate new lines cleanly
         q.question = q.question
           .replace(/([.?!])\s*(\(i\))/g, "$1\n\n(i)")
           .replace(/([.?!])\s*(\(ii\))/g, "$1\n\n(ii)")
@@ -102,7 +101,7 @@ function sanitizePaperContent(paper, targetSubject) {
           .replace(/\s+\(iv\)\s+/g, "\n\n(iv) ")
           .replace(/\s+\(v\)\s+/g, "\n\n(v) ");
 
-        // 2. Fix Option duplication and purge generic "Option A"
+        // Fix Option duplication and purge generic "Option A"
         if (q.options && Array.isArray(q.options)) {
           q.options = q.options.map((opt, optIdx) => {
             if (!opt || opt.includes("Option A") || opt.includes("Option B")) {
@@ -215,9 +214,9 @@ Return ONLY valid JSON matching this exact schema:
   try {
     let rawText4 = await callDirectGemini(stage4Prompt);
     if (rawText4) {
-      const audited4 = cleanAndParseJSON(rawText4);
-      if (audited4 && audited4.sections) {
-        currentPaper = audited4;
+      const exportPaper = cleanAndParseJSON(rawText4);
+      if (exportPaper && exportPaper.sections) {
+        currentPaper = exportPaper;
         currentPaper = sanitizePaperContent(currentPaper, targetSubject);
       }
     }
@@ -235,9 +234,7 @@ Return ONLY valid JSON matching this exact schema:
   return currentPaper;
 }
 
-export async function executePaperPipeline(config) {
+// 100% BULLETPROOF PERMANENT DEFAULT EXPORT
+export default async function executePaperPipeline(config) {
   return await generateAndAuditPaper(config);
 }
-
-// PERMANENT DEFAULT EXPORT BINDING
-export default executePaperPipeline;
