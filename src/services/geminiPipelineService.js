@@ -1,4 +1,4 @@
-// --- ULTIMATE 5-STAGE DEVGYAN-INNOVATION PIPELINE ---
+// --- BULLETPROOF 5-STAGE DEVGYAN-INNOVATION PIPELINE ---
 
 const getActiveApiKey = () => {
   try {
@@ -32,7 +32,7 @@ async function callGeminiEngine(promptText) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{ parts: [{ text: promptText }] }],
-          generationConfig: { temperature: 0.8, responseMimeType: "application/json" }
+          generationConfig: { temperature: 0.7, responseMimeType: "application/json" }
         })
       });
 
@@ -58,13 +58,30 @@ async function callGeminiEngine(promptText) {
 
 function cleanAndParseJSON(text) {
   if (!text) throw new Error("Empty response received from AI engine.");
+  
   let cleaned = text.trim();
   if (cleaned.startsWith("```json")) {
     cleaned = cleaned.replace(/^```json/, "").replace(/```$/, "").trim();
   } else if (cleaned.startsWith("```")) {
     cleaned = cleaned.replace(/^```/, "").replace(/```$/, "").trim();
   }
-  return JSON.parse(cleaned);
+
+  try {
+    return JSON.parse(cleaned);
+  } catch (e) {
+    // Advanced recovery: extract substring from first '{' to last '}'
+    const firstBrace = cleaned.indexOf('{');
+    const lastBrace = cleaned.lastIndexOf('}');
+    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+      const jsonString = cleaned.substring(firstBrace, lastBrace + 1);
+      try {
+        return JSON.parse(jsonString);
+      } catch (err) {
+        throw new Error("Failed to parse AI JSON response: " + e.message);
+      }
+    }
+    throw new Error("Invalid JSON structure received from AI.");
+  }
 }
 
 export async function generateAndAuditPaper(config) {
@@ -112,7 +129,7 @@ Return ONLY valid JSON with this exact structure:
     onProgress({ text: `[Stage 2/5] Running official board blueprint & section structure audit...` });
   }
 
-  const stage2Prompt = `You are a Senior Board Curriculum Inspector for DevGyan-Innovation. Audit this paper JSON for Class ${targetClass} ${targetSubject}. Ensure correct section distribution and marks weightage.\n${JSON.stringify(currentPaper)}`;
+  const stage2Prompt = `You are a Senior Board Curriculum Inspector for DevGyan-Innovation. Audit this paper JSON for Class ${targetClass} ${targetSubject}. Ensure correct section distribution and marks weightage. Return ONLY valid JSON.\n${JSON.stringify(currentPaper)}`;
   try {
     let rawText2 = await callGeminiEngine(stage2Prompt);
     if (rawText2) {
@@ -125,7 +142,7 @@ Return ONLY valid JSON with this exact structure:
     onProgress({ text: `[Stage 3/5] Purging equation overlaps, fixing fraction formatting, and validating LaTeX...` });
   }
 
-  const stage3Prompt = `You are a Technical Mathematical Editor for DevGyan-Innovation. Review all questions, options, and equations. Ensure proper spacing and LaTeX fraction formatting (e.g. $\\frac{1}{2}$). Return valid JSON.\n${JSON.stringify(currentPaper)}`;
+  const stage3Prompt = `You are a Technical Mathematical Editor for DevGyan-Innovation. Review all questions, options, and equations. Ensure proper spacing and LaTeX fraction formatting (e.g. $\\frac{1}{2}$). Return ONLY valid JSON.\n${JSON.stringify(currentPaper)}`;
   try {
     let rawText3 = await callGeminiEngine(stage3Prompt);
     if (rawText3) {
@@ -138,7 +155,7 @@ Return ONLY valid JSON with this exact structure:
     onProgress({ text: `[Stage 4/5] Verifying diagram descriptions and case-study context accuracy...` });
   }
 
-  const stage4Prompt = `You are a Quality Assurance Lead for DevGyan-Innovation. Verify diagram descriptions and case-study context accuracy. Return valid JSON.\n${JSON.stringify(currentPaper)}`;
+  const stage4Prompt = `You are a Quality Assurance Lead for DevGyan-Innovation. Verify diagram descriptions and case-study context accuracy. Return ONLY valid JSON.\n${JSON.stringify(currentPaper)}`;
   try {
     let rawText4 = await callGeminiEngine(stage4Prompt);
     if (rawText4) {
