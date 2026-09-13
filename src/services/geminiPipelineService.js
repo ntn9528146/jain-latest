@@ -40,7 +40,7 @@ async function callGeminiWithAutoRetry(promptText, retryCount = 0) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{ parts: [{ text: promptText }] }],
-          generationConfig: { temperature: 0.3, responseMimeType: "application/json" }
+          generationConfig: { temperature: 0.2, responseMimeType: "application/json" }
         })
       });
 
@@ -90,6 +90,7 @@ function cleanAndParseJSON(text) {
   }
 }
 
+// 100% BULLETPROOF DETERMINISTIC SANITIZER
 function sanitizePaperContent(paper, targetSubject) {
   if (!paper || !paper.sections) return paper;
 
@@ -100,7 +101,7 @@ function sanitizePaperContent(paper, targetSubject) {
           q.question = `Examine the core scientific and mathematical principles of ${targetSubject} with appropriate analytical derivations and formulas.`;
         }
 
-        // Force sub-parts (i), (ii), (iii) onto separate new lines cleanly
+        // 1. FORCE SUB-PARTS (i), (ii), (iii), (iv) ONTO SEPARATE NEW LINES ABSOLUTELY
         q.question = q.question
           .replace(/([.?!])\s*(\(i\))/g, "$1\n\n(i)")
           .replace(/([.?!])\s*(\(ii\))/g, "$1\n\n(ii)")
@@ -112,13 +113,11 @@ function sanitizePaperContent(paper, targetSubject) {
           .replace(/\s+(\(iii\)\s)/g, "\n\n(iii) ")
           .replace(/\s+(\(iv\)\s)/g, "\n\n(iv) ")
           .replace(/\s+(\(v\)\s)/g, "\n\n(v) ")
-          .replace(/:\s*\(i\)/g, ":\n\n(i)")
-          .replace(/;\s*\(i\)/g, ";\n\n(i)")
-          .replace(/([a-zA-Z])\s+\(i\)\s+/g, "$1\n\n(i) ")
-          .replace(/([a-zA-Z])\s+\(ii\)\s+/g, "$1\n\n(ii) ")
-          .replace(/([a-zA-Z])\s+\(iii\)\s+/g, "$1\n\n(iii) ");
+          .replace(/([a-zA-Z0-9.,)]+)\s+\((i|ii|iii|iv|v)\)\s+/g, "$1\n\n($2) ")
+          .replace(/:\s*\((i|ii|iii|iv|v)\)/g, ":\n\n($1)")
+          .replace(/;\s*\((i|ii|iii|iv|v)\)/g, ";\n\n($1)");
 
-        // Clean options to keep pure text without adding duplicate prefix labels
+        // 2. FIX OPTION CORRUPTION: Clean pure option text without adding prefixes
         if (q.options && Array.isArray(q.options)) {
           q.options = q.options.map((opt) => {
             if (!opt || /option\s*[a-d]/i.test(opt) || opt.length < 2 || opt === "Option A" || opt === "Option B") {
@@ -157,9 +156,9 @@ You are an expert CBSE Chief Curriculum Designer for DevGyan-Innovation. Generat
 Unique Seed: ${seed}
 
 STRICT OFFICIAL CBSE 2025-26 FORMATTING & BLUEPRINT RULES:
-1. PURE OPTION TEXT ONLY: For Section A MCQs, provide ONLY the raw option text without any leading prefix like "(A)", "(B)", or "Option A", because the user interface automatically adds them.
-2. LATEX MATH & FRACTIONS: All mathematical and scientific expressions, fractions, and formulas MUST be wrapped in single dollar signs using proper LaTeX syntax (e.g. $\\frac{\\mu_0 N^2 A}{l}$ or $v_d$). Never write unrendered text slashes like A / l.
-3. SUB-QUESTIONS SEPARATION: Every sub-part like (i), (ii), (iii) in subjective or case-study questions MUST start on a fresh new line.
+1. PURE OPTION TEXT ONLY: For Section A MCQs, provide ONLY the raw option text without any leading prefix like "(A)", "(B)", or "Option A", because the user interface automatically adds them. Ensure complete mathematical/scientific text without truncation.
+2. PROPER LATEX SYNTAX: All mathematical expressions, fractions, vectors, and symbols MUST use valid LaTeX wrapped in single dollar signs (e.g., $\\vec{\\tau} = \\vec{p} \\times \\vec{E}$, $\\frac{1}{4\\pi \\varepsilon_0}$, $\\frac{\\mu_0 N^2 A}{l}$). Never leave raw unrendered text.
+3. SUB-QUESTIONS SEPARATION: Every sub-part like (i), (ii), (iii) in subjective or case-study questions MUST start on a fresh new line with clear spacing.
 4. NO PLACEHOLDERS: Never write template strings. Every question must be fully articulated.
 5. BRANDING: Use "DevGyan-Innovation" as the organization name.
 
@@ -212,7 +211,7 @@ Return ONLY valid JSON matching this exact schema:
   let paper = cleanAndParseJSON(rawText);
   
   if (onProgress) {
-    onProgress({ text: `[Stage 2/2] Sanitizing options, enforcing LaTeX fractions & sub-part line breaks...` });
+    onProgress({ text: `[Stage 2/2] Sanitizing options, enforcing LaTeX formatting & sub-part line breaks...` });
   }
 
   paper = sanitizePaperContent(paper, targetSubject);
