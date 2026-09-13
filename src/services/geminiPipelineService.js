@@ -1,4 +1,4 @@
-// --- ULTIMATE DYNAMIC CBSE 2025-26 COMPLIANT PIPELINE ---
+// --- ULTIMATE 5-STAGE DEVGYAN-INNOVATION ENGINE (CBSE 2025-26) ---
 
 const getActiveApiKey = () => {
   try {
@@ -78,19 +78,18 @@ function cleanAndParseJSON(text) {
   }
 }
 
-// Advanced Sanitizer to fix double prefixes like "(A) (A)" and force sub-parts onto new lines
+// Advanced Sanitizer: Fixes double option prefixes like "(A) (A)" and forces sub-parts onto new lines
 function sanitizePaperContent(paper, targetSubject) {
   if (!paper || !paper.sections) return paper;
 
   paper.sections.forEach(sec => {
     if (sec.questions && Array.isArray(sec.questions)) {
       sec.questions.forEach((q) => {
-        // 1. Purge dummy text
         if (!q.question || q.question.includes("Standard question number") || q.question.includes("$.{qNo}")) {
           q.question = `Examine the core concepts related to ${targetSubject} and provide a comprehensive analytical breakdown with accurate examples.`;
         }
 
-        // 2. Force sub-parts (i), (ii), (iii) onto separate new lines
+        // Force sub-parts (i), (ii), (iii) onto separate new lines
         q.question = q.question
           .replace(/\s+\(i\)/g, "\n\n(i)")
           .replace(/\s+\(ii\)/g, "\n\n(ii)")
@@ -98,14 +97,13 @@ function sanitizePaperContent(paper, targetSubject) {
           .replace(/\s+\(iv\)/g, "\n\n(iv)")
           .replace(/\s+\(v\)/g, "\n\n(v)");
 
-        // 3. Fix double option prefixes like "(A) (A)" or "A."
+        // Fix option duplication by stripping any AI-generated prefix and assigning clean labels
         if (q.options && Array.isArray(q.options)) {
           q.options = q.options.map((opt, optIdx) => {
             if (!opt) {
               const labels = ["(A)", "(B)", "(C)", "(D)"];
               return `${labels[optIdx] || '(A)'} Valid parameter option ${optIdx + 1}`;
             }
-            // Strip any leading labels like (A), A., a), etc. so renderer doesn't double-print
             let cleanOpt = opt
               .replace(/^\(?[A-Da-d]\)?[.\s]*/g, "")
               .replace(/^Option\s+[A-Da-d][.\s]*/gi, "")
@@ -138,10 +136,10 @@ You are an expert CBSE Chief Curriculum Designer for DevGyan-Innovation. Generat
 Unique Seed: ${seed}
 
 STRICT OFFICIAL CBSE 2025-26 RULES:
-1. SUBJECT-SPECIFIC BLUEPRINT: Tailor the exact number of questions, sections (A, B, C, D, E), and marks distribution according to official CBSE curriculum for ${targetSubject} Class ${targetClass}. (e.g., Science has Physics/Chem/Bio, Social Science has History/Civics/Geo/Econ, IT Code 402 has employability & subject-specific skills, Mathematics has 38 questions across 5 sections).
-2. SECTION A (MCQs / 1 Mark): Pure objective multiple-choice or assertion-reason questions. Provide 4 clean option strings WITHOUT any leading prefixes (e.g., just "Pie Chart" or "Linear Equation", because option prefix like (A) will be added automatically). NEVER output "Option A" or dummy text.
-3. SUB-QUESTIONS FORMATTING: Every sub-part like (i), (ii), (iii) MUST be separated with a clear line break so they never merge into a single paragraph.
-4. NO PLACEHOLDERS: Never write template strings. Every question must be fully articulated and academic-grade.
+1. SUBJECT-SPECIFIC BLUEPRINT: Tailor the exact number of questions, sections (A, B, C, D, E), and marks distribution according to official CBSE curriculum for ${targetSubject} Class ${targetClass}.
+2. SECTION A (MCQs / 1 Mark): Pure objective multiple-choice or assertion-reason questions. Provide 4 clean option strings WITHOUT any leading prefixes. NEVER output "Option A" or dummy text.
+3. SUB-QUESTIONS FORMATTING: Every sub-part like (i), (ii), (iii) MUST be separated with a clear line break.
+4. NO PLACEHOLDERS: Never write template strings. Every question must be fully articulated.
 5. BRANDING: Use "DevGyan-Innovation" as the organization name.
 
 Return ONLY valid JSON matching this exact schema:
@@ -152,7 +150,7 @@ Return ONLY valid JSON matching this exact schema:
   "duration": "3 Hours",
   "maxMarks": ${targetSubject.includes("Computer") || targetSubject.includes("IT") || targetSubject.includes("AI") ? 70 : 80},
   "generalInstructions": [
-    "1. Please check that this question paper contains 38 printed pages / questions.",
+    "1. Please check that this question paper contains all printed sections.",
     "2. All questions are compulsory. Internal choices are provided in respective sections."
   ],
   "sections": [
@@ -235,7 +233,5 @@ Return ONLY valid JSON matching this exact schema:
 export async function executePaperPipeline(config) {
   return await generateAndAuditPaper(config);
 }
-
-export default executePaperPipeline;
 
 export default executePaperPipeline;
