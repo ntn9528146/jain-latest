@@ -1,4 +1,4 @@
-// --- PERMANENT BULLETPROOF 5-STAGE PIPELINE (CBSE 2025-26) ---
+// --- ULTIMATE 5-STAGE DYNAMIC MODEL DISCOVERY ENGINE (CBSE 2025-26) ---
 
 const getActiveApiKey = () => {
   try {
@@ -14,16 +14,48 @@ const getActiveApiKey = () => {
   return "";
 };
 
+// Dynamically fetch available models from Google API to permanently prevent 404 errors
+async function getWorkingModelName(apiKey) {
+  try {
+    const listUrl = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`;
+    const res = await fetch(listUrl);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.models) {
+        // Find first model supporting generateContent
+        const validModel = data.models.find(m => 
+          m.supportedGenerationMethods && 
+          m.supportedGenerationMethods.includes("generateContent") &&
+          (m.name.includes("flash") || m.name.includes("pro") || m.name.includes("gemini"))
+        );
+        if (validModel) {
+          // validModel.name returns formats like "models/gemini-1.5-flash", strip "models/" if needed or keep full name
+          const cleanName = validModel.name.replace("models/", "");
+          return cleanName;
+        }
+      }
+    }
+  } catch (e) {}
+  
+  // Fallback candidate list if dynamic listing fails
+  return "gemini-3.5-flash";
+}
+
 async function callDirectGemini(promptText) {
   const apiKey = getActiveApiKey();
   if (!apiKey) {
     throw new Error("VITE_GEMINI_API_KEY is missing in environment variables.");
   }
 
-  const modelsToTry = ["gemini-3.6-flash", "gemini-1.5-flash"];
+  // Get active working model dynamically for this specific key
+  const dynamicModel = await getWorkingModelName(apiKey);
+  const modelsToTry = [dynamicModel, "gemini-3.5-flash", "gemini-3.1-flash", "gemini-2.5-flash", "gemini-1.5-flash", "gemini-pro"];
+  
+  // Remove duplicates
+  const uniqueModels = [...new Set(modelsToTry.filter(Boolean))];
   let lastError = null;
 
-  for (const modelName of modelsToTry) {
+  for (const modelName of uniqueModels) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
 
     try {
@@ -53,7 +85,7 @@ async function callDirectGemini(promptText) {
     }
   }
 
-  throw lastError || new Error("All pipeline models failed to generate content.");
+  throw lastError || new Error("All pipeline models failed to generate content. Please check your API key.");
 }
 
 function cleanAndParseJSON(text) {
@@ -124,7 +156,7 @@ export async function generateAndAuditPaper(config) {
   const paperType = isPractical ? "Practical & Viva Examination" : "CBSE Board Examination (2025-26 Pattern)";
 
   if (onProgress) {
-    onProgress({ text: `[Stage 1/5] Fetching official CBSE 2025-26 blueprint for ${targetSubject} (${targetClass})...` });
+    onProgress({ text: `[Stage 1/5] Discovering active AI model & fetching official CBSE 2025-26 blueprint for ${targetSubject}...` });
   }
 
   const seed = Math.floor(Math.random() * 888888) + 111111;
