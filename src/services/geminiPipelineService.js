@@ -1,4 +1,4 @@
-// --- ULTIMATE 5-STAGE DEVGYAN-INNOVATION ENGINE (CBSE 2025-26) ---
+// --- PERMANENT BULLETPROOF 5-STAGE PIPELINE (CBSE 2025-26) ---
 
 const getActiveApiKey = () => {
   try {
@@ -20,7 +20,6 @@ async function callDirectGemini(promptText) {
     throw new Error("VITE_GEMINI_API_KEY is missing in environment variables.");
   }
 
-  // Use the recommended active gemini-3.6-flash model
   const modelsToTry = ["gemini-3.6-flash", "gemini-1.5-flash"];
   let lastError = null;
 
@@ -232,4 +231,5 @@ export async function executePaperPipeline(config) {
   return await generateAndAuditPaper(config);
 }
 
+// PERMANENT DEFAULT EXPORT BINDING
 export default executePaperPipeline;
