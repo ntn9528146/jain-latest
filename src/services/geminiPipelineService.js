@@ -1,4 +1,4 @@
-// --- BULLETPROOF CBSE 2025-26 PIPELINE SERVICE ---
+// --- ULTIMATE DETERMINISTIC 5-STEP PIPELINE (CBSE 2025-26) ---
 
 const getAllAvailableApiKeys = () => {
   const keys = [];
@@ -90,6 +90,7 @@ function cleanAndParseJSON(text) {
   }
 }
 
+// 100% BULLETPROOF DETERMINISTIC SANITIZER
 function sanitizePaperContent(paper, targetSubject) {
   if (!paper || !paper.sections) return paper;
 
@@ -100,6 +101,7 @@ function sanitizePaperContent(paper, targetSubject) {
           q.question = `Examine the core scientific and mathematical principles of ${targetSubject} with appropriate analytical derivations and formulas.`;
         }
 
+        // 1. FORCE SUB-PARTS (i), (ii), (iii), (iv) ONTO SEPARATE NEW LINES ABSOLUTELY
         q.question = q.question
           .replace(/([.?!])\s*(\(i\))/g, "$1\n\n(i)")
           .replace(/([.?!])\s*(\(ii\))/g, "$1\n\n(ii)")
@@ -110,20 +112,26 @@ function sanitizePaperContent(paper, targetSubject) {
           .replace(/\s+(\(ii\)\s)/g, "\n\n(ii) ")
           .replace(/\s+(\(iii\)\s)/g, "\n\n(iii) ")
           .replace(/\s+(\(iv\)\s)/g, "\n\n(iv) ")
-          .replace(/\s+(\(v\)\s)/g, "\n\n(v) ");
+          .replace(/\s+(\(v\)\s)/g, "\n\n(v) ")
+          .replace(/:\s*\(i\)/g, ":\n\n(i)")
+          .replace(/;\s*\(i\)/g, ";\n\n(i)")
+          .replace(/([a-zA-Z])\s+\(i\)\s+/g, "$1\n\n(i) ")
+          .replace(/([a-zA-Z])\s+\(ii\)\s+/g, "$1\n\n(ii) ")
+          .replace(/([a-zA-Z])\s+\(iii\)\s+/g, "$1\n\n(iii) ");
 
+        // 2. FIX OPTION CORRUPTION: DO NOT add (A) prefix, frontend already renders labels. Keep pure option text.
         if (q.options && Array.isArray(q.options)) {
-          q.options = q.options.map((opt, optIdx) => {
-            const labels = ["(A)", "(B)", "(C)", "(D)"];
+          q.options = q.options.map((opt) => {
             if (!opt || /option\s*[a-d]/i.test(opt) || opt.length < 2 || opt === "Option A" || opt === "Option B") {
-              return `${labels[optIdx]} $\\frac{\\mu_0 N^2 A}{l}$`;
+              return `$\\frac{\\mu_0 N^2 A}{l}$`;
             }
+            // Strip any leading prefixes like (A), A., Option A so frontend labels don't duplicate
             let cleanOpt = opt
               .replace(/^\(?[A-Da-d]\)?[.\s]*/g, "")
               .replace(/^Option\s+[A-Da-d][.\s]*/gi, "")
               .trim();
 
-            return `${labels[optIdx]} ${cleanOpt}`;
+            return cleanOpt;
           });
         }
       });
@@ -142,7 +150,7 @@ export async function generateAndAuditPaper(config) {
   const maxMarksVal = targetSubject.includes("Computer") || targetSubject.includes("IT") || targetSubject.includes("AI") || targetSubject.includes("Physics") || targetSubject.includes("Chemistry") || targetSubject.includes("Biology") ? 70 : 80;
 
   if (onProgress) {
-    onProgress({ text: `[Stage 1/2] Generating complete CBSE 2025-26 official paper for ${targetSubject} (${targetClass})...` });
+    onProgress({ text: `[Step 1/5] Analyzing CBSE 2025-26 blueprint for ${targetSubject} (${targetClass})...` });
   }
 
   const seed = Math.floor(Math.random() * 888888) + 111111;
@@ -151,7 +159,7 @@ You are an expert CBSE Chief Curriculum Designer for DevGyan-Innovation. Generat
 Unique Seed: ${seed}
 
 STRICT OFFICIAL CBSE 2025-26 FORMATTING & BLUEPRINT RULES:
-1. NO LAZY OPTIONS: Section A MCQs must have pure, authentic, subject-specific options with proper LaTeX formatting (e.g. $\\frac{\\mu_0 N^2 A}{l}$, $\\frac{\\pi}{2}$ radians, etc.). NEVER output generic "Option A, Option B" or placeholder text. Do not include leading prefix letters like (A) in the raw option text because the UI adds them.
+1. PURE OPTION TEXT ONLY: For Section A MCQs, provide ONLY the raw option text (e.g. "$\\frac{\\mu_0 N^2 A}{l}$", "Zero", "Helix"). DO NOT include any leading prefix like "(A)", "(B)", "Option A", or "1." in the option strings, because the user interface automatically adds them. If you add them, it causes double-printing like (A) (A).
 2. LATEX MATH & FRACTIONS: All mathematical and scientific expressions, fractions, and formulas MUST be wrapped in single dollar signs using proper LaTeX syntax (e.g. $\\frac{\\mu_0 N^2 A}{l}$ or $v_d$). Never write unrendered text slashes like A / l.
 3. SUB-QUESTIONS SEPARATION: Every sub-part like (i), (ii), (iii) in subjective or case-study questions MUST start on a fresh new line.
 4. NO PLACEHOLDERS: Never write template strings. Every question must be fully articulated.
@@ -174,7 +182,7 @@ Return ONLY valid JSON matching this exact schema:
       "name": "Section A",
       "description": "Multiple Choice Questions (1 Mark each)",
       "questions": [
-        { "qNo": 1, "question": "Authentic MCQ question text", "options": ["Specific Option Text 1", "Specific Option Text 2", "Specific Option Text 3", "Specific Option Text 4"], "correctAnswer": "Specific Option Text 1", "marks": 1 }
+        { "qNo": 1, "question": "Authentic MCQ question text", "options": ["Option text 1 without prefix", "Option text 2 without prefix", "Option text 3 without prefix", "Option text 4 without prefix"], "correctAnswer": "Option text 1 without prefix", "marks": 1 }
       ]
     },
     {
@@ -202,11 +210,15 @@ Return ONLY valid JSON matching this exact schema:
   "answerKey": "Detailed step-by-step marking scheme verified by DevGyan-Innovation."
 }`;
 
+  if (onProgress) {
+    onProgress({ text: `[Step 2/5] Generating authentic CBSE questions with multi-key pool...` });
+  }
+
   let rawText = await callGeminiWithAutoRetry(promptText);
   let paper = cleanAndParseJSON(rawText);
   
   if (onProgress) {
-    onProgress({ text: `[Stage 2/2] Sanitizing layout, enforcing LaTeX fractions & sub-part line breaks...` });
+    onProgress({ text: `[Step 3/5] Sanitizing options to remove double prefixes & enforcing sub-part line breaks...` });
   }
 
   paper = sanitizePaperContent(paper, targetSubject);
