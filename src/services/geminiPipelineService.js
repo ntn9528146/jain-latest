@@ -1,4 +1,4 @@
-// --- BULLETPROOF 5-STAGE PIPELINE WITH LOCAL KEY RESOLUTION ---
+// --- BULLETPROOF 5-STAGE PIPELINE WITH REAL QUESTION GENERATION ---
 
 const getActiveApiKey = () => {
   try {
@@ -32,7 +32,7 @@ async function callDirectGemini(promptText) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{ parts: [{ text: promptText }] }],
-          generationConfig: { temperature: 0.7, responseMimeType: "application/json" }
+          generationConfig: { temperature: 0.8, responseMimeType: "application/json" }
         })
       });
 
@@ -85,21 +85,22 @@ export async function generateAndAuditPaper(config) {
   const paperType = isPractical ? "Practical & Viva Examination" : "CBSE Board Examination";
 
   if (onProgress) {
-    onProgress({ text: `[Stage 1/5] Assembling unique question matrix for ${targetSubject} (${paperType})...` });
+    onProgress({ text: `[Stage 1/5] Generating authentic, unique questions for ${targetSubject} (${paperType})...` });
   }
 
   const uniqueToken = Math.random().toString(36).substring(2, 12) + Date.now();
   const stage1Prompt = `
-You are an expert Chief Examiner for DevGyan-Innovation. Generate a complete, rigorous, and professional ${paperType} JSON for Class ${targetClass} ${targetSubject} following official CBSE guidelines.
+You are an expert Chief CBSE Examiner and Curriculum Designer for DevGyan-Innovation. Generate a complete, rigorous, and professional ${paperType} JSON for Class ${targetClass} ${targetSubject} following official CBSE board blueprint guidelines (Sections A, B, C, D, E).
 Generation Seed: ${uniqueToken}
 
-CRITICAL FORMATTING RULES:
-1. EQUATIONS SEPARATION: Never merge two equations. Always keep proper spacing or line breaks (e.g. "$2x + 3y = 11$" and "$2x - 4y = -24$").
-2. TABLES & STATISTICS: Do not use LaTeX array strings like \\begin{array}. Write tabular data in clean text/table descriptions.
-3. SUB-QUESTIONS & CASE STUDIES: Every sub-part like (i), (ii), (iii) MUST be separated clearly or placed on a new line description.
-4. BRANDING: Use "DevGyan-Innovation" as the brand name.
+STRICT INSTRUCTIONS:
+1. NO DUMMY TEXT: Every question must be fully framed, authentic, syllabus-compliant, and rich in content. Never write placeholder text like "Standard question number".
+2. REAL OPTIONS: For MCQs in Section A, provide 4 distinct, meaningful, subject-specific options (e.g., "(A) 2 cm", "(B) 4 cm", "(C) 6 cm", "(D) 8 cm"). Never use generic "Option A, Option B".
+3. EQUATIONS SEPARATION: Never merge equations. Keep proper spacing (e.g., "$2x + 3y = 11$" and "$2x - 4y = -24$").
+4. SUB-QUESTIONS: Sub-parts like (i), (ii), (iii) must be clearly separated.
+5. BRANDING: Use "DevGyan-Innovation" as the brand name.
 
-Return ONLY valid JSON matching this schema:
+Return ONLY valid JSON matching this exact schema:
 {
   "title": "DevGyan-Innovation Academic Studio - ${targetSubject}",
   "className": "${targetClass}",
@@ -113,9 +114,9 @@ Return ONLY valid JSON matching this schema:
   "sections": [
     {
       "name": "Section A",
-      "description": "Multiple Choice Questions",
+      "description": "Multiple Choice Questions (1 Mark each)",
       "questions": [
-        { "qNo": 1, "question": "Sample question with clear math like $2x + 3y = 11$", "options": ["(A) opt1", "(B) opt2", "(C) opt3", "(D) opt4"], "correctAnswer": "(A) opt1", "marks": 1 }
+        { "qNo": 1, "question": "Write authentic question here with proper math like $2x + 3y = 11$", "options": ["(A) Choice 1", "(B) Choice 2", "(C) Choice 3", "(D) Choice 4"], "correctAnswer": "(A) Choice 1", "marks": 1 }
       ]
     }
   ],
@@ -129,7 +130,7 @@ Return ONLY valid JSON matching this schema:
     onProgress({ text: `[Stage 2/5] Running CBSE structure & blueprint compliance audit...` });
   }
 
-  const stage2Prompt = `Audit this question paper JSON for Class ${targetClass} ${targetSubject}. Check that sections (A, B, C, D, E) are properly distributed according to CBSE standards. Return ONLY valid JSON.\n${JSON.stringify(currentPaper)}`;
+  const stage2Prompt = `Audit this question paper JSON for Class ${targetClass} ${targetSubject}. Check that sections (A, B, C, D, E) are properly distributed according to CBSE standards and contain real, non-dummy questions. Return ONLY valid JSON.\n${JSON.stringify(currentPaper)}`;
   try {
     let rawText2 = await callDirectGemini(stage2Prompt);
     if (rawText2) {
@@ -142,7 +143,7 @@ Return ONLY valid JSON matching this schema:
     onProgress({ text: `[Stage 3/5] Fixing equation overlapping and spacing issues...` });
   }
 
-  const stage3Prompt = `Strictly check all questions. Ensure no two equations are fused or written together without spacing. Return ONLY valid JSON.\n${JSON.stringify(currentPaper)}`;
+  const stage3Prompt = `Strictly check all questions. Ensure no placeholder text exists, equations are well-spaced, and options are real. Return ONLY valid JSON.\n${JSON.stringify(currentPaper)}`;
   try {
     let rawText3 = await callDirectGemini(stage3Prompt);
     if (rawText3) {
@@ -155,7 +156,7 @@ Return ONLY valid JSON matching this schema:
     onProgress({ text: `[Stage 4/5] Formatting case studies and sub-questions onto separate lines...` });
   }
 
-  const stage4Prompt = `Review case studies and subjective questions with sub-parts ((i), (ii), (iii)). Ensure every sub-part is properly formatted on a new line or clearly separated. Return ONLY valid JSON.\n${JSON.stringify(currentPaper)}`;
+  const stage4Prompt = `Review subjective questions and case studies with sub-parts ((i), (ii), (iii)). Ensure every sub-part is properly formatted on a new line. Return ONLY valid JSON.\n${JSON.stringify(currentPaper)}`;
   try {
     let rawText4 = await callDirectGemini(stage4Prompt);
     if (rawText4) {
