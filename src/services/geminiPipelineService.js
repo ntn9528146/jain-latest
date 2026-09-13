@@ -1,4 +1,4 @@
-// --- BULLETPROOF CBSE 2025-26 PIPELINE SERVICE ---
+// --- ULTIMATE BULLETPROOF CBSE 2025-26 PIPELINE SERVICE ---
 
 const getAllAvailableApiKeys = () => {
   const keys = [];
@@ -68,6 +68,7 @@ async function callGeminiWithAutoRetry(promptText, retryCount = 0) {
   throw lastError || new Error("All AI models are currently experiencing high demand. Please try again in a moment.");
 }
 
+// ROBUST JSON CLEANER: Fixes bad escaped characters in LaTeX strings before parsing
 function cleanAndParseJSON(text) {
   if (!text) throw new Error("Empty response received from AI engine.");
   let cleaned = text.trim();
@@ -77,16 +78,25 @@ function cleanAndParseJSON(text) {
     cleaned = cleaned.replace(/^```/, "").replace(/```$/, "").trim();
   }
 
+  // Pre-process unescaped backslashes in LaTeX tokens
+  cleaned = cleaned.replace(/\\([^\\"\/bfnrtu])/g, "\\\\$1");
+
   try {
     return JSON.parse(cleaned);
   } catch (e) {
-    const firstBrace = cleaned.indexOf('{');
-    const lastBrace = cleaned.lastIndexOf('}');
-    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
-      const jsonString = cleaned.substring(firstBrace, lastBrace + 1);
-      return JSON.parse(jsonString);
+    try {
+      // Fallback: try parsing raw without extra escaping fix if already valid
+      let rawCleaned = text.trim().replace(/^```json/, "").replace(/^```/, "").replace(/```$/, "").trim();
+      return JSON.parse(rawCleaned);
+    } catch (err2) {
+      const firstBrace = cleaned.indexOf('{');
+      const lastBrace = cleaned.lastIndexOf('}');
+      if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+        const jsonString = cleaned.substring(firstBrace, lastBrace + 1);
+        return JSON.parse(jsonString);
+      }
+      throw new Error("Failed to parse AI JSON response: " + e.message);
     }
-    throw new Error("Failed to parse AI JSON response: " + e.message);
   }
 }
 
@@ -101,7 +111,7 @@ function sanitizePaperContent(paper, targetSubject) {
           q.question = `Examine the core scientific and mathematical principles of ${targetSubject} with appropriate analytical derivations and formulas.`;
         }
 
-        // 1. FORCE SUB-PARTS (i), (ii), (iii), (iv) ONTO SEPARATE NEW LINES ABSOLUTELY
+        // Force sub-parts (i), (ii), (iii), (iv) onto separate new lines cleanly
         q.question = q.question
           .replace(/([.?!])\s*(\(i\))/g, "$1\n\n(i)")
           .replace(/([.?!])\s*(\(ii\))/g, "$1\n\n(ii)")
@@ -117,7 +127,7 @@ function sanitizePaperContent(paper, targetSubject) {
           .replace(/:\s*\((i|ii|iii|iv|v)\)/g, ":\n\n($1)")
           .replace(/;\s*\((i|ii|iii|iv|v)\)/g, ";\n\n($1)");
 
-        // 2. FIX OPTION CORRUPTION: Clean pure option text without adding prefixes
+        // Clean options to keep pure text without adding duplicate prefix labels
         if (q.options && Array.isArray(q.options)) {
           q.options = q.options.map((opt) => {
             if (!opt || /option\s*[a-d]/i.test(opt) || opt.length < 2 || opt === "Option A" || opt === "Option B") {
