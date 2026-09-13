@@ -20,7 +20,8 @@ async function callDirectGemini(promptText) {
     throw new Error("VITE_GEMINI_API_KEY is missing in environment variables.");
   }
 
-  const modelsToTry = ["gemini-3.6-flash", "gemini-2.5-flash", "gemini-1.5-flash"];
+  // Updated to currently supported active models to eliminate 404 errors
+  const modelsToTry = ["gemini-2.5-flash", "gemini-2.0-flash-exp", "gemini-1.5-flash-latest"];
   let lastError = null;
 
   for (const modelName of modelsToTry) {
@@ -78,7 +79,6 @@ function cleanAndParseJSON(text) {
   }
 }
 
-// Advanced Sanitizer: Fixes double option prefixes like "(A) (A)" and forces sub-parts onto new lines
 function sanitizePaperContent(paper, targetSubject) {
   if (!paper || !paper.sections) return paper;
 
@@ -136,7 +136,7 @@ You are an expert CBSE Chief Curriculum Designer for DevGyan-Innovation. Generat
 Unique Seed: ${seed}
 
 STRICT OFFICIAL CBSE 2025-26 RULES:
-1. SUBJECT-SPECIFIC BLUEPRINT: Tailor the exact number of questions, sections (A, B, C, D, E), and marks distribution according to official CBSE curriculum for ${targetSubject} Class ${targetClass}.
+1. SUBJECT-SPECIFIC BLUEPRINT: Tailor the exact number of questions, sections, and marks distribution according to official CBSE curriculum for ${targetSubject} Class ${targetClass}.
 2. SECTION A (MCQs / 1 Mark): Pure objective multiple-choice or assertion-reason questions. Provide 4 clean option strings WITHOUT any leading prefixes. NEVER output "Option A" or dummy text.
 3. SUB-QUESTIONS FORMATTING: Every sub-part like (i), (ii), (iii) MUST be separated with a clear line break.
 4. NO PLACEHOLDERS: Never write template strings. Every question must be fully articulated.
