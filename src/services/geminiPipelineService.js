@@ -1,4 +1,4 @@
-// --- ULTIMATE DETERMINISTIC 5-STEP PIPELINE (CBSE 2025-26) ---
+// --- BULLETPROOF CBSE 2025-26 PIPELINE SERVICE ---
 
 const getAllAvailableApiKeys = () => {
   const keys = [];
@@ -90,7 +90,6 @@ function cleanAndParseJSON(text) {
   }
 }
 
-// 100% BULLETPROOF DETERMINISTIC SANITIZER
 function sanitizePaperContent(paper, targetSubject) {
   if (!paper || !paper.sections) return paper;
 
@@ -101,7 +100,7 @@ function sanitizePaperContent(paper, targetSubject) {
           q.question = `Examine the core scientific and mathematical principles of ${targetSubject} with appropriate analytical derivations and formulas.`;
         }
 
-        // 1. FORCE SUB-PARTS (i), (ii), (iii), (iv) ONTO SEPARATE NEW LINES ABSOLUTELY
+        // Force sub-parts (i), (ii), (iii) onto separate new lines cleanly
         q.question = q.question
           .replace(/([.?!])\s*(\(i\))/g, "$1\n\n(i)")
           .replace(/([.?!])\s*(\(ii\))/g, "$1\n\n(ii)")
@@ -119,13 +118,12 @@ function sanitizePaperContent(paper, targetSubject) {
           .replace(/([a-zA-Z])\s+\(ii\)\s+/g, "$1\n\n(ii) ")
           .replace(/([a-zA-Z])\s+\(iii\)\s+/g, "$1\n\n(iii) ");
 
-        // 2. FIX OPTION CORRUPTION: DO NOT add (A) prefix, frontend already renders labels. Keep pure option text.
+        // Clean options to keep pure text without adding duplicate prefix labels
         if (q.options && Array.isArray(q.options)) {
           q.options = q.options.map((opt) => {
             if (!opt || /option\s*[a-d]/i.test(opt) || opt.length < 2 || opt === "Option A" || opt === "Option B") {
               return `$\\frac{\\mu_0 N^2 A}{l}$`;
             }
-            // Strip any leading prefixes like (A), A., Option A so frontend labels don't duplicate
             let cleanOpt = opt
               .replace(/^\(?[A-Da-d]\)?[.\s]*/g, "")
               .replace(/^Option\s+[A-Da-d][.\s]*/gi, "")
@@ -150,7 +148,7 @@ export async function generateAndAuditPaper(config) {
   const maxMarksVal = targetSubject.includes("Computer") || targetSubject.includes("IT") || targetSubject.includes("AI") || targetSubject.includes("Physics") || targetSubject.includes("Chemistry") || targetSubject.includes("Biology") ? 70 : 80;
 
   if (onProgress) {
-    onProgress({ text: `[Step 1/5] Analyzing CBSE 2025-26 blueprint for ${targetSubject} (${targetClass})...` });
+    onProgress({ text: `[Stage 1/2] Generating complete CBSE 2025-26 official paper for ${targetSubject} (${targetClass})...` });
   }
 
   const seed = Math.floor(Math.random() * 888888) + 111111;
@@ -159,7 +157,7 @@ You are an expert CBSE Chief Curriculum Designer for DevGyan-Innovation. Generat
 Unique Seed: ${seed}
 
 STRICT OFFICIAL CBSE 2025-26 FORMATTING & BLUEPRINT RULES:
-1. PURE OPTION TEXT ONLY: For Section A MCQs, provide ONLY the raw option text (e.g. "$\\frac{\\mu_0 N^2 A}{l}$", "Zero", "Helix"). DO NOT include any leading prefix like "(A)", "(B)", "Option A", or "1." in the option strings, because the user interface automatically adds them. If you add them, it causes double-printing like (A) (A).
+1. PURE OPTION TEXT ONLY: For Section A MCQs, provide ONLY the raw option text without any leading prefix like "(A)", "(B)", or "Option A", because the user interface automatically adds them.
 2. LATEX MATH & FRACTIONS: All mathematical and scientific expressions, fractions, and formulas MUST be wrapped in single dollar signs using proper LaTeX syntax (e.g. $\\frac{\\mu_0 N^2 A}{l}$ or $v_d$). Never write unrendered text slashes like A / l.
 3. SUB-QUESTIONS SEPARATION: Every sub-part like (i), (ii), (iii) in subjective or case-study questions MUST start on a fresh new line.
 4. NO PLACEHOLDERS: Never write template strings. Every question must be fully articulated.
@@ -210,15 +208,11 @@ Return ONLY valid JSON matching this exact schema:
   "answerKey": "Detailed step-by-step marking scheme verified by DevGyan-Innovation."
 }`;
 
-  if (onProgress) {
-    onProgress({ text: `[Step 2/5] Generating authentic CBSE questions with multi-key pool...` });
-  }
-
   let rawText = await callGeminiWithAutoRetry(promptText);
   let paper = cleanAndParseJSON(rawText);
   
   if (onProgress) {
-    onProgress({ text: `[Step 3/5] Sanitizing options to remove double prefixes & enforcing sub-part line breaks...` });
+    onProgress({ text: `[Stage 2/2] Sanitizing options, enforcing LaTeX fractions & sub-part line breaks...` });
   }
 
   paper = sanitizePaperContent(paper, targetSubject);
@@ -233,4 +227,5 @@ export async function executePaperPipeline(config) {
   return await generateAndAuditPaper(config);
 }
 
-export default executePaperPipeline;
+const defaultExport = executePaperPipeline;
+export default defaultExport;
