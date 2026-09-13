@@ -1,4 +1,4 @@
-// --- SINGLE-CALL BULLETPROOF ENGINE WITH AUTO-RETRY & MULTI-KEY POOL (CBSE 2025-26) ---
+// --- BULLETPROOF CBSE 2025-26 PIPELINE SERVICE ---
 
 const getAllAvailableApiKeys = () => {
   const keys = [];
@@ -46,9 +46,8 @@ async function callGeminiWithAutoRetry(promptText, retryCount = 0) {
 
       if (!response.ok) {
         const errData = await response.text();
-        // If overloaded (503) or rate-limited (429), try next model/key
         if ((response.status === 503 || response.status === 429) && retryCount < 4) {
-          await new Promise(resolve => setTimeout(resolve, 1500)); // Wait 1.5s before retry
+          await new Promise(resolve => setTimeout(resolve, 1500));
           return await callGeminiWithAutoRetry(promptText, retryCount + 1);
         }
         lastError = new Error(`Model ${modelName} failed [${response.status}]: ${errData}`);
@@ -91,7 +90,6 @@ function cleanAndParseJSON(text) {
   }
 }
 
-// BULLETPROOF SANITIZER: Enforces line breaks, clean options, and LaTeX math formatting
 function sanitizePaperContent(paper, targetSubject) {
   if (!paper || !paper.sections) return paper;
 
@@ -102,7 +100,6 @@ function sanitizePaperContent(paper, targetSubject) {
           q.question = `Examine the core scientific and mathematical principles of ${targetSubject} with appropriate analytical derivations and formulas.`;
         }
 
-        // Force sub-parts (i), (ii), (iii) onto separate new lines cleanly
         q.question = q.question
           .replace(/([.?!])\s*(\(i\))/g, "$1\n\n(i)")
           .replace(/([.?!])\s*(\(ii\))/g, "$1\n\n(ii)")
@@ -115,7 +112,6 @@ function sanitizePaperContent(paper, targetSubject) {
           .replace(/\s+(\(iv\)\s)/g, "\n\n(iv) ")
           .replace(/\s+(\(v\)\s)/g, "\n\n(v) ");
 
-        // Clean options and eliminate lazy "Option A"
         if (q.options && Array.isArray(q.options)) {
           q.options = q.options.map((opt, optIdx) => {
             const labels = ["(A)", "(B)", "(C)", "(D)"];
@@ -225,5 +221,4 @@ export async function executePaperPipeline(config) {
   return await generateAndAuditPaper(config);
 }
 
-// EXPLICIT DEFAULT EXPORT BINDING
 export default executePaperPipeline;
