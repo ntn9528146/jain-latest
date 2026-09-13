@@ -20,8 +20,8 @@ async function callDirectGemini(promptText) {
     throw new Error("VITE_GEMINI_API_KEY is missing in environment variables.");
   }
 
-  // Strictly use active v1beta flash models
-  const modelsToTry = ["gemini-2.5-flash", "gemini-2.0-flash-exp"];
+  // Use the verified stable active flash model
+  const modelsToTry = ["gemini-2.5-flash"];
   let lastError = null;
 
   for (const modelName of modelsToTry) {
@@ -146,7 +146,7 @@ Return ONLY valid JSON matching this exact schema:
   "className": "${targetClass}",
   "subject": "${targetSubject}",
   "duration": "3 Hours",
-  "maxMarks": ${targetSubject.includes("Computer") || targetSubject.includes("IT") || targetSubject.includes("AI") ? 70 : 80},
+  "maxMarks": ${targetSubject.includes("Computer") || targetSubject.includes("IT") || targetSubject.includes("AI") || targetSubject.includes("Physics") || targetSubject.includes("Chemistry") || targetSubject.includes("Biology") ? 70 : 80},
   "generalInstructions": [
     "1. Please check that this question paper contains all printed sections.",
     "2. All questions are compulsory. Internal choices are provided in respective sections."
