@@ -20,7 +20,6 @@ async function callDirectGemini(promptText) {
     throw new Error("VITE_GEMINI_API_KEY is missing in environment variables.");
   }
 
-  // Updated to currently supported active models to eliminate 404 errors
   const modelsToTry = ["gemini-2.5-flash", "gemini-2.0-flash-exp", "gemini-1.5-flash-latest"];
   let lastError = null;
 
@@ -89,7 +88,6 @@ function sanitizePaperContent(paper, targetSubject) {
           q.question = `Examine the core concepts related to ${targetSubject} and provide a comprehensive analytical breakdown with accurate examples.`;
         }
 
-        // Force sub-parts (i), (ii), (iii) onto separate new lines
         q.question = q.question
           .replace(/\s+\(i\)/g, "\n\n(i)")
           .replace(/\s+\(ii\)/g, "\n\n(ii)")
@@ -97,7 +95,6 @@ function sanitizePaperContent(paper, targetSubject) {
           .replace(/\s+\(iv\)/g, "\n\n(iv)")
           .replace(/\s+\(v\)/g, "\n\n(v)");
 
-        // Fix option duplication by stripping any AI-generated prefix and assigning clean labels
         if (q.options && Array.isArray(q.options)) {
           q.options = q.options.map((opt, optIdx) => {
             if (!opt) {
