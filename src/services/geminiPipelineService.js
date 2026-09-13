@@ -1,4 +1,4 @@
-// --- BULLETPROOF 5-STAGE PIPELINE WITH REAL QUESTION GENERATION ---
+// --- 5-STAGE DEVGYAN-INNOVATION PIPELINE WITH DUAL EXPORTS ---
 
 const getActiveApiKey = () => {
   try {
@@ -94,10 +94,10 @@ You are an expert Chief CBSE Examiner and Curriculum Designer for DevGyan-Innova
 Generation Seed: ${uniqueToken}
 
 STRICT INSTRUCTIONS:
-1. NO DUMMY TEXT: Every question must be fully framed, authentic, syllabus-compliant, and rich in content. Never write placeholder text like "Standard question number".
+1. NO DUMMY TEXT: Every question must be fully framed, authentic, syllabus-compliant, and rich in content. Never write placeholder text.
 2. REAL OPTIONS: For MCQs in Section A, provide 4 distinct, meaningful, subject-specific options (e.g., "(A) 2 cm", "(B) 4 cm", "(C) 6 cm", "(D) 8 cm"). Never use generic "Option A, Option B".
 3. EQUATIONS SEPARATION: Never merge equations. Keep proper spacing (e.g., "$2x + 3y = 11$" and "$2x - 4y = -24$").
-4. SUB-QUESTIONS: Sub-parts like (i), (ii), (iii) must be clearly separated.
+4. SUB-QUESTIONS: Sub-parts like (i), (ii), (iii) must be clearly separated on new lines.
 5. BRANDING: Use "DevGyan-Innovation" as the brand name.
 
 Return ONLY valid JSON matching this exact schema:
@@ -180,4 +180,5 @@ export async function executePaperPipeline(config) {
   return await generateAndAuditPaper(config);
 }
 
+// Dual exports to satisfy both default and named imports perfectly
 export default executePaperPipeline;
