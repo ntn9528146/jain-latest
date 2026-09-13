@@ -1,4 +1,4 @@
-// --- PERMANENT BULLETPROOF 5-STEP CHUNKED PIPELINE (CBSE 2025-26) ---
+// --- BULLETPROOF 5-STEP CHUNKED PIPELINE (CBSE 2025-26) ---
 
 const getActiveApiKey = () => {
   try {
@@ -42,8 +42,7 @@ async function callDirectGemini(promptText) {
   }
 
   const dynamicModel = await getWorkingModelName(apiKey);
-  // STRICTLY only active flash models to prevent 404
-  const modelsToTry = [dynamicModel, "gemini-3.6-flash"];
+  const modelsToTry = [dynamicModel, "gemini-3.6-flash", "gemini-2.5-flash"];
   const uniqueModels = [...new Set(modelsToTry.filter(Boolean))];
   let lastError = null;
 
@@ -102,7 +101,6 @@ function cleanAndParseJSON(text) {
   }
 }
 
-// POST-PROCESSING SANITIZER: Enforces line breaks, clean options, and LaTeX math formatting
 function sanitizeQuestions(questionsList, targetSubject) {
   if (!questionsList || !Array.isArray(questionsList)) return [];
 
@@ -111,7 +109,6 @@ function sanitizeQuestions(questionsList, targetSubject) {
       q.question = `Examine the core scientific and mathematical principles of ${targetSubject} with appropriate analytical derivations and formulas.`;
     }
 
-    // Force sub-parts (i), (ii), (iii) onto separate new lines cleanly
     q.question = q.question
       .replace(/([.?!])\s*(\(i\))/g, "$1\n\n(i)")
       .replace(/([.?!])\s*(\(ii\))/g, "$1\n\n(ii)")
@@ -124,7 +121,6 @@ function sanitizeQuestions(questionsList, targetSubject) {
       .replace(/\s+(\(iv\)\s)/g, "\n\n(iv) ")
       .replace(/\s+(\(v\)\s)/g, "\n\n(v) ");
 
-    // Clean options and eliminate lazy "Option A"
     if (q.options && Array.isArray(q.options)) {
       q.options = q.options.map((opt, optIdx) => {
         const labels = ["(A)", "(B)", "(C)", "(D)"];
@@ -250,7 +246,9 @@ export async function generateAndAuditPaper(config) {
   return finalPaper;
 }
 
-// 100% BULLETPROOF PERMANENT DEFAULT EXPORT
-export default async function executePaperPipeline(config) {
+export async function executePaperPipeline(config) {
   return await generateAndAuditPaper(config);
 }
+
+// EXPLICIT DEFAULT EXPORT BINDING
+export default executePaperPipeline;
