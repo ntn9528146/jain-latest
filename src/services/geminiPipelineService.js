@@ -1,4 +1,4 @@
-// --- 5-STAGE DEVGYAN-INNOVATION PIPELINE WITH DUAL EXPORTS ---
+// --- 5-STAGE DEVGYAN-INNOVATION PIPELINE WITH UPDATED MODELS ---
 
 const getActiveApiKey = () => {
   try {
@@ -20,7 +20,8 @@ async function callDirectGemini(promptText) {
     throw new Error("VITE_GEMINI_API_KEY is missing in environment variables.");
   }
 
-  const modelsToTry = ["gemini-3.6-flash", "gemini-1.5-flash", "gemini-pro", "gemini-1.5-pro"];
+  // Updated valid flash models sequence to avoid 404 deprecated errors
+  const modelsToTry = ["gemini-3.6-flash", "gemini-2.5-flash", "gemini-1.5-flash"];
   let lastError = null;
 
   for (const modelName of modelsToTry) {
@@ -32,7 +33,7 @@ async function callDirectGemini(promptText) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{ parts: [{ text: promptText }] }],
-          generationConfig: { temperature: 0.8, responseMimeType: "application/json" }
+          generationConfig: { temperature: 0.7, responseMimeType: "application/json" }
         })
       });
 
@@ -95,7 +96,7 @@ Generation Seed: ${uniqueToken}
 
 STRICT INSTRUCTIONS:
 1. NO DUMMY TEXT: Every question must be fully framed, authentic, syllabus-compliant, and rich in content. Never write placeholder text.
-2. REAL OPTIONS: For MCQs in Section A, provide 4 distinct, meaningful, subject-specific options (e.g., "(A) 2 cm", "(B) 4 cm", "(C) 6 cm", "(D) 8 cm"). Never use generic "Option A, Option B".
+2. REAL OPTIONS: For MCQs in Section A, provide 4 distinct, meaningful, subject-specific options (e.g., "(A) Choice 1", "(B) Choice 2", "(C) Choice 3", "(D) Choice 4"). Never use generic "Option A, Option B".
 3. EQUATIONS SEPARATION: Never merge equations. Keep proper spacing (e.g., "$2x + 3y = 11$" and "$2x - 4y = -24$").
 4. SUB-QUESTIONS: Sub-parts like (i), (ii), (iii) must be clearly separated on new lines.
 5. BRANDING: Use "DevGyan-Innovation" as the brand name.
@@ -180,5 +181,4 @@ export async function executePaperPipeline(config) {
   return await generateAndAuditPaper(config);
 }
 
-// Dual exports to satisfy both default and named imports perfectly
 export default executePaperPipeline;
