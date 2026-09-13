@@ -237,3 +237,5 @@ export async function executePaperPipeline(config) {
 }
 
 export default executePaperPipeline;
+
+export default executePaperPipeline;
