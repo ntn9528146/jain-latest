@@ -1,4 +1,4 @@
-// --- ULTIMATE BULLETPROOF CBSE 2025-26 PIPELINE SERVICE ---
+// --- BULLETPROOF CBSE 2025-26 PIPELINE SERVICE ---
 
 const getAllAvailableApiKeys = () => {
   const keys = [];
@@ -68,7 +68,6 @@ async function callGeminiWithAutoRetry(promptText, retryCount = 0) {
   throw lastError || new Error("All AI models are currently experiencing high demand. Please try again in a moment.");
 }
 
-// ROBUST JSON CLEANER: Fixes bad escaped characters in LaTeX strings before parsing
 function cleanAndParseJSON(text) {
   if (!text) throw new Error("Empty response received from AI engine.");
   let cleaned = text.trim();
@@ -85,7 +84,6 @@ function cleanAndParseJSON(text) {
     return JSON.parse(cleaned);
   } catch (e) {
     try {
-      // Fallback: try parsing raw without extra escaping fix if already valid
       let rawCleaned = text.trim().replace(/^```json/, "").replace(/^```/, "").replace(/```$/, "").trim();
       return JSON.parse(rawCleaned);
     } catch (err2) {
@@ -100,7 +98,6 @@ function cleanAndParseJSON(text) {
   }
 }
 
-// 100% BULLETPROOF DETERMINISTIC SANITIZER
 function sanitizePaperContent(paper, targetSubject) {
   if (!paper || !paper.sections) return paper;
 
@@ -236,5 +233,4 @@ export async function executePaperPipeline(config) {
   return await generateAndAuditPaper(config);
 }
 
-const defaultExport = executePaperPipeline;
-export default defaultExport;
+export default executePaperPipeline;
