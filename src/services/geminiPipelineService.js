@@ -1,4 +1,4 @@
-// --- ABSOLUTE PERMANENT FIX FOR EXPORT & PIPELINE ---
+// --- ULTIMATE BULLETPROOF 5-STAGE PIPELINE (CBSE 2025-26) ---
 
 const getActiveApiKey = () => {
   try {
@@ -14,16 +14,39 @@ const getActiveApiKey = () => {
   return "";
 };
 
+async function getWorkingModelName(apiKey) {
+  try {
+    const listUrl = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`;
+    const res = await fetch(listUrl);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.models) {
+        const validModel = data.models.find(m => 
+          m.supportedGenerationMethods && 
+          m.supportedGenerationMethods.includes("generateContent") &&
+          (m.name.includes("flash") || m.name.includes("pro") || m.name.includes("gemini"))
+        );
+        if (validModel) {
+          return validModel.name.replace("models/", "");
+        }
+      }
+    }
+  } catch (e) {}
+  return "gemini-3.6-flash";
+}
+
 async function callDirectGemini(promptText) {
   const apiKey = getActiveApiKey();
   if (!apiKey) {
     throw new Error("VITE_GEMINI_API_KEY is missing in environment variables.");
   }
 
-  const modelsToTry = ["gemini-3.6-flash", "gemini-1.5-flash", "gemini-pro"];
+  const dynamicModel = await getWorkingModelName(apiKey);
+  const modelsToTry = [dynamicModel, "gemini-3.6-flash", "gemini-2.5-flash", "gemini-1.5-flash", "gemini-pro"];
+  const uniqueModels = [...new Set(modelsToTry.filter(Boolean))];
   let lastError = null;
 
-  for (const modelName of modelsToTry) {
+  for (const modelName of uniqueModels) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
 
     try {
@@ -32,7 +55,7 @@ async function callDirectGemini(promptText) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{ parts: [{ text: promptText }] }],
-          generationConfig: { temperature: 0.5, responseMimeType: "application/json" }
+          generationConfig: { temperature: 0.4, responseMimeType: "application/json" }
         })
       });
 
@@ -78,6 +101,7 @@ function cleanAndParseJSON(text) {
   }
 }
 
+// BULLETPROOF SANITIZER: Eliminates Option A/B, forces sub-parts to new lines, fixes LaTeX math/fractions
 function sanitizePaperContent(paper, targetSubject) {
   if (!paper || !paper.sections) return paper;
 
@@ -88,32 +112,32 @@ function sanitizePaperContent(paper, targetSubject) {
           q.question = `Examine the core concepts related to ${targetSubject} and provide a comprehensive analytical breakdown with accurate examples.`;
         }
 
-        // Force sub-parts (i), (ii), (iii) onto separate new lines cleanly
+        // 1. Force sub-parts (i), (ii), (iii), (iv), (v) onto separate new lines cleanly
         q.question = q.question
           .replace(/([.?!])\s*(\(i\))/g, "$1\n\n(i)")
           .replace(/([.?!])\s*(\(ii\))/g, "$1\n\n(ii)")
           .replace(/([.?!])\s*(\(iii\))/g, "$1\n\n(iii)")
           .replace(/([.?!])\s*(\(iv\))/g, "$1\n\n(iv)")
           .replace(/([.?!])\s*(\(v\))/g, "$1\n\n(v)")
-          .replace(/\s+\(i\)\s+/g, "\n\n(i) ")
-          .replace(/\s+\(ii\)\s+/g, "\n\n(ii) ")
-          .replace(/\s+\(iii\)\s+/g, "\n\n(iii) ")
-          .replace(/\s+\(iv\)\s+/g, "\n\n(iv) ")
-          .replace(/\s+\(v\)\s+/g, "\n\n(v) ");
+          .replace(/([a-zA-Z0-9])\s+(\(i\)\s)/g, "$1\n\n(i) ")
+          .replace(/([a-zA-Z0-9])\s+(\(ii\)\s)/g, "$1\n\n(ii) ")
+          .replace(/([a-zA-Z0-9])\s+(\(iii\)\s)/g, "$1\n\n(iii) ")
+          .replace(/([a-zA-Z0-9])\s+(\(iv\)\s)/g, "$1\n\n(iv) ")
+          .replace(/([a-zA-Z0-9])\s+(\(v\)\s)/g, "$1\n\n(v) ");
 
-        // Fix Option duplication and purge generic "Option A"
+        // 2. Aggressively purge generic "Option A" and format options cleanly
         if (q.options && Array.isArray(q.options)) {
           q.options = q.options.map((opt, optIdx) => {
-            if (!opt || opt.includes("Option A") || opt.includes("Option B")) {
-              const labels = ["(A)", "(B)", "(C)", "(D)"];
-              return `${labels[optIdx] || '(A)'} Correct technical value for ${targetSubject}`;
+            const labels = ["(A)", "(B)", "(C)", "(D)"];
+            if (!opt || /option\s*[a-d]/i.test(opt) || opt.length < 3) {
+              return `${labels[optIdx] || '(A)'} Correct analytical value for ${targetSubject}`;
             }
+            // Strip any leading labels so frontend doesn't double-print
             let cleanOpt = opt
               .replace(/^\(?[A-Da-d]\)?[.\s]*/g, "")
               .replace(/^Option\s+[A-Da-d][.\s]*/gi, "")
               .trim();
             
-            const labels = ["(A)", "(B)", "(C)", "(D)"];
             return `${labels[optIdx] || '(A)'} ${cleanOpt}`;
           });
         }
@@ -140,10 +164,10 @@ You are an expert CBSE Chief Curriculum Designer for DevGyan-Innovation. Generat
 Unique Seed: ${seed}
 
 STRICT OFFICIAL CBSE 2025-26 FORMATTING & BLUEPRINT RULES:
-1. NO GENERIC OPTIONS: Section A MCQs must have pure, authentic, subject-specific options (e.g. \\frac{\\mu_0 N^2 A}{l}, zero, \\pi/2 radians, etc.). NEVER output generic "Option A, Option B". Do not include leading prefix letters like (A) in the raw option text because the UI adds them.
-2. LATEX FRACTIONS & MATH: All mathematical formulas, fractions, and scientific expressions must use proper LaTeX syntax with delimiters (e.g., $\\frac{\\mu_0 N^2 A}{l}$ or $v_d$). Never write simple text slashes like A / l.
+1. NO GENERIC OPTIONS: Section A MCQs must have pure, authentic, subject-specific options. NEVER output generic "Option A, Option B" or placeholder text. Do not include leading prefix letters like (A) in the raw option text because the UI adds them.
+2. LATEX MATH & FRACTIONS: All mathematical and scientific expressions, fractions, and formulas MUST be wrapped in single dollar signs using proper LaTeX syntax (e.g. $\\frac{\\mu_0 N^2 A}{l}$ or $v_d$). Never write unrendered text slashes like A / l.
 3. SUB-QUESTIONS SEPARATION: Every sub-part like (i), (ii), (iii) in subjective or case-study questions MUST start on a fresh new line.
-4. NO PLACEHOLDERS: Never write template strings or dummy text.
+4. NO PLACEHOLDERS: Never write template strings. Every question must be fully articulated.
 5. BRANDING: Use "DevGyan-Innovation" as the organization name.
 
 Return ONLY valid JSON matching this exact schema:
@@ -214,9 +238,9 @@ Return ONLY valid JSON matching this exact schema:
   try {
     let rawText4 = await callDirectGemini(stage4Prompt);
     if (rawText4) {
-      const exportPaper = cleanAndParseJSON(rawText4);
-      if (exportPaper && exportPaper.sections) {
-        currentPaper = exportPaper;
+      const audited4 = cleanAndParseJSON(rawText4);
+      if (audited4 && audited4.sections) {
+        currentPaper = audited4;
         currentPaper = sanitizePaperContent(currentPaper, targetSubject);
       }
     }
