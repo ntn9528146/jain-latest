@@ -1,4 +1,4 @@
-// --- ULTIMATE 5-STAGE DEVGYAN-INNOVATION ENGINE (CBSE 2025-26) ---
+// --- ULTIMATE DYNAMIC CBSE 2025-26 COMPLIANT PIPELINE ---
 
 const getActiveApiKey = () => {
   try {
@@ -78,22 +78,41 @@ function cleanAndParseJSON(text) {
   }
 }
 
+// Advanced Sanitizer to fix double prefixes like "(A) (A)" and force sub-parts onto new lines
 function sanitizePaperContent(paper, targetSubject) {
   if (!paper || !paper.sections) return paper;
 
   paper.sections.forEach(sec => {
     if (sec.questions && Array.isArray(sec.questions)) {
-      sec.questions.forEach((q, idx) => {
+      sec.questions.forEach((q) => {
+        // 1. Purge dummy text
         if (!q.question || q.question.includes("Standard question number") || q.question.includes("$.{qNo}")) {
           q.question = `Examine the core concepts related to ${targetSubject} and provide a comprehensive analytical breakdown with accurate examples.`;
         }
+
+        // 2. Force sub-parts (i), (ii), (iii) onto separate new lines
+        q.question = q.question
+          .replace(/\s+\(i\)/g, "\n\n(i)")
+          .replace(/\s+\(ii\)/g, "\n\n(ii)")
+          .replace(/\s+\(iii\)/g, "\n\n(iii)")
+          .replace(/\s+\(iv\)/g, "\n\n(iv)")
+          .replace(/\s+\(v\)/g, "\n\n(v)");
+
+        // 3. Fix double option prefixes like "(A) (A)" or "A."
         if (q.options && Array.isArray(q.options)) {
           q.options = q.options.map((opt, optIdx) => {
-            if (!opt || opt.includes("Option A") || opt.includes("Option B") || opt.includes("Choice")) {
+            if (!opt) {
               const labels = ["(A)", "(B)", "(C)", "(D)"];
               return `${labels[optIdx] || '(A)'} Valid parameter option ${optIdx + 1}`;
             }
-            return opt;
+            // Strip any leading labels like (A), A., a), etc. so renderer doesn't double-print
+            let cleanOpt = opt
+              .replace(/^\(?[A-Da-d]\)?[.\s]*/g, "")
+              .replace(/^Option\s+[A-Da-d][.\s]*/gi, "")
+              .trim();
+            
+            const labels = ["(A)", "(B)", "(C)", "(D)"];
+            return `${labels[optIdx] || '(A)'} ${cleanOpt}`;
           });
         }
       });
@@ -110,41 +129,38 @@ export async function generateAndAuditPaper(config) {
   const paperType = isPractical ? "Practical & Viva Examination" : "CBSE Board Examination (2025-26 Pattern)";
 
   if (onProgress) {
-    onProgress({ text: `[Stage 1/5] Generating official CBSE 2025-26 pattern paper for ${targetSubject} (${targetClass})...` });
+    onProgress({ text: `[Stage 1/5] Fetching official CBSE 2025-26 blueprint for ${targetSubject} (${targetClass})...` });
   }
 
   const seed = Math.floor(Math.random() * 888888) + 111111;
   const stage1Prompt = `
-You are an expert CBSE Chief Curriculum Designer for DevGyan-Innovation. Generate a complete, 100% authentic ${paperType} JSON for Class ${targetClass} ${targetSubject} strictly adhering to official CBSE 2025-26 bylaws and blueprint.
+You are an expert CBSE Chief Curriculum Designer for DevGyan-Innovation. Generate a complete, 100% authentic ${paperType} JSON for Class ${targetClass} ${targetSubject} strictly adhering to official CBSE 2025-26 bylaws, blueprint, mark distributions, and question count patterns for this specific subject.
 Unique Seed: ${seed}
 
-STRICT OFFICIAL CBSE BLUEPRINT RULES (2025-26):
-1. TOTAL MARKS & SECTIONS: Total marks must be 80 (Theory) or 70 (Computer/IT). Questions must be divided into Sections A, B, C, D, and E.
-2. SECTION A (MCQs / 1 Mark): Q.No 1 to 20 must be pure Multiple Choice Questions. Each MCQ must contain 4 distinct, real, subject-specific options (e.g. (A), (B), (C), (D)). Never output generic "Option A" or dummy text.
-3. SECTION B (VSA / 2 Marks): Q.No 21 to 25. Very short answer questions.
-4. SECTION C (SA / 3 Marks): Q.No 26 to 31. Short answer questions.
-5. SECTION D (LA / 5 Marks): Q.No 32 to 35. Long answer questions.
-6. SECTION E (Case Study / 4 Marks): Q.No 36 to 38. Case study-based questions with sub-parts (i), (ii), (iii) on separate lines.
-7. NO PLACEHOLDERS: Never write template strings. Every question must be fully articulated.
-8. BRANDING: Use "DevGyan-Innovation" as the organization name.
+STRICT OFFICIAL CBSE 2025-26 RULES:
+1. SUBJECT-SPECIFIC BLUEPRINT: Tailor the exact number of questions, sections (A, B, C, D, E), and marks distribution according to official CBSE curriculum for ${targetSubject} Class ${targetClass}. (e.g., Science has Physics/Chem/Bio, Social Science has History/Civics/Geo/Econ, IT Code 402 has employability & subject-specific skills, Mathematics has 38 questions across 5 sections).
+2. SECTION A (MCQs / 1 Mark): Pure objective multiple-choice or assertion-reason questions. Provide 4 clean option strings WITHOUT any leading prefixes (e.g., just "Pie Chart" or "Linear Equation", because option prefix like (A) will be added automatically). NEVER output "Option A" or dummy text.
+3. SUB-QUESTIONS FORMATTING: Every sub-part like (i), (ii), (iii) MUST be separated with a clear line break so they never merge into a single paragraph.
+4. NO PLACEHOLDERS: Never write template strings. Every question must be fully articulated and academic-grade.
+5. BRANDING: Use "DevGyan-Innovation" as the organization name.
 
-Return ONLY valid JSON matching this exact structure:
+Return ONLY valid JSON matching this exact schema:
 {
   "title": "DevGyan-Innovation Academic Studio - ${targetSubject} (${targetClass})",
   "className": "${targetClass}",
   "subject": "${targetSubject}",
   "duration": "3 Hours",
-  "maxMarks": ${targetSubject.includes("Computer") || targetSubject.includes("IT") ? 70 : 80},
+  "maxMarks": ${targetSubject.includes("Computer") || targetSubject.includes("IT") || targetSubject.includes("AI") ? 70 : 80},
   "generalInstructions": [
-    "1. This question paper contains 38 questions. All Questions are compulsory.",
-    "2. This Question Paper is divided into 5 Sections A, B, C, D and E."
+    "1. Please check that this question paper contains 38 printed pages / questions.",
+    "2. All questions are compulsory. Internal choices are provided in respective sections."
   ],
   "sections": [
     {
       "name": "Section A",
-      "description": "Section A consists of 20 questions of 1 mark each.",
+      "description": "Multiple Choice Questions (1 Mark each)",
       "questions": [
-        { "qNo": 1, "question": "Authentic MCQ question text here", "options": ["(A) Specific Option 1", "(B) Specific Option 2", "(C) Specific Option 3", "(D) Specific Option 4"], "correctAnswer": "(A) Specific Option 1", "marks": 1 }
+        { "qNo": 1, "question": "Authentic MCQ question text", "options": ["Specific Option Text 1", "Specific Option Text 2", "Specific Option Text 3", "Specific Option Text 4"], "correctAnswer": "Specific Option Text 1", "marks": 1 }
       ]
     }
   ],
@@ -156,10 +172,10 @@ Return ONLY valid JSON matching this exact structure:
   currentPaper = sanitizePaperContent(currentPaper, targetSubject);
 
   if (onProgress) {
-    onProgress({ text: `[Stage 2/5] Auditing CBSE 2025-26 section distribution and mark weightage...` });
+    onProgress({ text: `[Stage 2/5] Auditing subject-specific CBSE 2025-26 mark allocations and section balance...` });
   }
 
-  const stage2Prompt = `Audit this paper JSON for Class ${targetClass} ${targetSubject}. Verify that Sections A, B, C, D, and E strictly follow CBSE 2025-26 question counts and mark allocations. Ensure zero placeholder text exists. Return ONLY valid JSON.\n${JSON.stringify(currentPaper)}`;
+  const stage2Prompt = `Audit this paper JSON for Class ${targetClass} ${targetSubject}. Verify that sections, question types, and counts precisely match CBSE 2025-26 official norms for ${targetSubject}. Ensure zero placeholder text and clean option formatting. Return ONLY valid JSON.\n${JSON.stringify(currentPaper)}`;
   
   try {
     let rawText2 = await callDirectGemini(stage2Prompt);
@@ -173,10 +189,10 @@ Return ONLY valid JSON matching this exact structure:
   } catch (e) {}
 
   if (onProgress) {
-    onProgress({ text: `[Stage 3/5] Verifying equation spacing, LaTeX formatting, and option clarity...` });
+    onProgress({ text: `[Stage 3/5] Verifying equation spacing and purging duplicate prefixes...` });
   }
 
-  const stage3Prompt = `Check all equations and options for spacing and clarity. Ensure no text merges together. Return ONLY valid JSON.\n${JSON.stringify(currentPaper)}`;
+  const stage3Prompt = `Check all equations and options. Ensure no double prefixes exist in options. Return ONLY valid JSON.\n${JSON.stringify(currentPaper)}`;
   try {
     let rawText3 = await callDirectGemini(stage3Prompt);
     if (rawText3) {
@@ -189,10 +205,10 @@ Return ONLY valid JSON matching this exact structure:
   } catch (e) {}
 
   if (onProgress) {
-    onProgress({ text: `[Stage 4/5] Aligning sub-questions and case studies onto separate clean lines...` });
+    onProgress({ text: `[Stage 4/5] Enforcing strict line breaks for sub-questions (i), (ii), (iii)...` });
   }
 
-  const stage4Prompt = `Review case studies and sub-parts ((i), (ii), (iii)). Ensure proper line breaks. Return ONLY valid JSON.\n${JSON.stringify(currentPaper)}`;
+  const stage4Prompt = `Review case studies and sub-parts ((i), (ii), (iii)). Ensure every sub-part starts on a new line. Return ONLY valid JSON.\n${JSON.stringify(currentPaper)}`;
   try {
     let rawText4 = await callDirectGemini(stage4Prompt);
     if (rawText4) {
