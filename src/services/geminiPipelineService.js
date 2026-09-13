@@ -240,3 +240,6 @@ export async function executePaperPipeline(config) {
 }
 
 export default executePaperPipeline;
+
+// Explicit default export to resolve import binding
+export default executePaperPipeline;
