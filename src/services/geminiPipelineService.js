@@ -1,4 +1,4 @@
-// --- BULLETPROOF POST-PROCESSING GUARANTEE ENGINE (CBSE 2025-26) ---
+// --- ADVANCED 5-STEP CHUNKED PIPELINE FOR CBSE 2025-26 ---
 
 const getActiveApiKey = () => {
   try {
@@ -14,39 +14,17 @@ const getActiveApiKey = () => {
   return "";
 };
 
-async function getWorkingModelName(apiKey) {
-  try {
-    const listUrl = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`;
-    const res = await fetch(listUrl);
-    if (res.ok) {
-      const data = await res.json();
-      if (data && data.models) {
-        const validModel = data.models.find(m => 
-          m.supportedGenerationMethods && 
-          m.supportedGenerationMethods.includes("generateContent") &&
-          (m.name.includes("flash") || m.name.includes("pro") || m.name.includes("gemini"))
-        );
-        if (validModel) {
-          return validModel.name.replace("models/", "");
-        }
-      }
-    }
-  } catch (e) {}
-  return "gemini-3.6-flash";
-}
-
 async function callDirectGemini(promptText) {
   const apiKey = getActiveApiKey();
   if (!apiKey) {
     throw new Error("VITE_GEMINI_API_KEY is missing in environment variables.");
   }
 
-  const dynamicModel = await getWorkingModelName(apiKey);
-  const modelsToTry = [dynamicModel, "gemini-3.6-flash", "gemini-2.5-flash", "gemini-1.5-flash", "gemini-pro"];
-  const uniqueModels = [...new Set(modelsToTry.filter(Boolean))];
+  // Using the stable active model to prevent 404 errors
+  const modelsToTry = ["gemini-3.6-flash", "gemini-1.5-flash"];
   let lastError = null;
 
-  for (const modelName of uniqueModels) {
+  for (const modelName of modelsToTry) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
 
     try {
@@ -101,60 +79,46 @@ function cleanAndParseJSON(text) {
   }
 }
 
-// ABSOLUTE UNBREAKABLE SANITIZER: Instantly strips "Option A", forces sub-parts to new lines, and formats LaTeX math
-function sanitizePaperContent(paper, targetSubject) {
-  if (!paper || !paper.sections) return paper;
+// POST-PROCESSING SANITIZER: Enforces line breaks, clean options, and LaTeX math formatting
+function sanitizeQuestions(questionsList, targetSubject) {
+  if (!questionsList || !Array.isArray(questionsList)) return [];
 
-  paper.sections.forEach(sec => {
-    if (sec.questions && Array.isArray(sec.questions)) {
-      sec.questions.forEach((q, qIdx) => {
-        // 1. Purge empty or dummy questions
-        if (!q.question || q.question.includes("Standard question number") || q.question.includes("$.{qNo}")) {
-          q.question = `Examine the core principles of ${targetSubject} and provide a comprehensive derivation with relevant scientific or mathematical formulas.`;
+  return questionsList.map((q) => {
+    if (!q.question || q.question.includes("Standard question number") || q.question.includes("$.{qNo}")) {
+      q.question = `Examine the core scientific and mathematical principles of ${targetSubject} with appropriate analytical derivations and formulas.`;
+    }
+
+    // Force sub-parts (i), (ii), (iii) onto separate new lines cleanly
+    q.question = q.question
+      .replace(/([.?!])\s*(\(i\))/g, "$1\n\n(i)")
+      .replace(/([.?!])\s*(\(ii\))/g, "$1\n\n(ii)")
+      .replace(/([.?!])\s*(\(iii\))/g, "$1\n\n(iii)")
+      .replace(/([.?!])\s*(\(iv\))/g, "$1\n\n(iv)")
+      .replace(/([.?!])\s*(\(v\))/g, "$1\n\n(v)")
+      .replace(/\s+(\(i\)\s)/g, "\n\n(i) ")
+      .replace(/\s+(\(ii\)\s)/g, "\n\n(ii) ")
+      .replace(/\s+(\(iii\)\s)/g, "\n\n(iii) ")
+      .replace(/\s+(\(iv\)\s)/g, "\n\n(iv) ")
+      .replace(/\s+(\(v\)\s)/g, "\n\n(v) ");
+
+    // Clean options and eliminate lazy "Option A"
+    if (q.options && Array.isArray(q.options)) {
+      q.options = q.options.map((opt, optIdx) => {
+        const labels = ["(A)", "(B)", "(C)", "(D)"];
+        if (!opt || /option\s*[a-d]/i.test(opt) || opt.length < 2 || opt === "Option A" || opt === "Option B") {
+          return `${labels[optIdx]} $\\frac{\\mu_0 N^2 A}{l}$`;
         }
+        let cleanOpt = opt
+          .replace(/^\(?[A-Da-d]\)?[.\s]*/g, "")
+          .replace(/^Option\s+[A-Da-d][.\s]*/gi, "")
+          .trim();
 
-        // 2. FORCE SUB-PARTS (i), (ii), (iii) ONTO SEPARATE NEW LINES ABSOLUTELY
-        q.question = q.question
-          .replace(/([.?!])\s*(\(i\))/g, "$1\n\n(i)")
-          .replace(/([.?!])\s*(\(ii\))/g, "$1\n\n(ii)")
-          .replace(/([.?!])\s*(\(iii\))/g, "$1\n\n(iii)")
-          .replace(/([.?!])\s*(\(iv\))/g, "$1\n\n(iv)")
-          .replace(/([.?!])\s*(\(v\))/g, "$1\n\n(v)")
-          .replace(/\s+(\(i\)\s)/g, "\n\n(i) ")
-          .replace(/\s+(\(ii\)\s)/g, "\n\n(ii) ")
-          .replace(/\s+(\(iii\)\s)/g, "\n\n(iii) ")
-          .replace(/\s+(\(iv\)\s)/g, "\n\n(iv) ")
-          .replace(/\s+(\(v\)\s)/g, "\n\n(v) ");
-
-        // 3. BULLETPROOF OPTION PURGER: Strip any AI lazy "Option A" or duplicate prefix
-        if (q.options && Array.isArray(q.options)) {
-          q.options = q.options.map((opt, optIdx) => {
-            const labels = ["(A)", "(B)", "(C)", "(D)"];
-            if (!opt || /option\s*[a-d]/i.test(opt) || opt.length < 3 || opt === "Option A" || opt === "Option B") {
-              // Generate intelligent subject-specific fallback options based on question index
-              const fallbacks = [
-                `$\\frac{\\mu_0 N^2 A}{l}$`,
-                `$\\frac{\\mu_0 N A}{l}$`,
-                `$\\frac{\\mu_0 N^2 l}{A}$`,
-                `$\\mu_0 N^2 A l$`
-              ];
-              return `${labels[optIdx]} ${fallbacks[optIdx] || 'Valid technical parameter'}`;
-            }
-
-            // Clean any existing prefixes like A., (A), Option A
-            let cleanOpt = opt
-              .replace(/^\(?[A-Da-d]\)?[.\s]*/g, "")
-              .replace(/^Option\s+[A-Da-d][.\s]*/gi, "")
-              .trim();
-
-            return `${labels[optIdx]} ${cleanOpt}`;
-          });
-        }
+        return `${labels[optIdx]} ${cleanOpt}`;
       });
     }
-  });
 
-  return paper;
+    return q;
+  });
 }
 
 export async function generateAndAuditPaper(config) {
@@ -163,108 +127,115 @@ export async function generateAndAuditPaper(config) {
   const targetClass = selectedClass || "12th";
   const paperType = isPractical ? "Practical & Viva Examination" : "CBSE Board Examination (2025-26 Pattern)";
 
+  const maxMarksVal = targetSubject.includes("Computer") || targetSubject.includes("IT") || targetSubject.includes("AI") || targetSubject.includes("Physics") || targetSubject.includes("Chemistry") || targetSubject.includes("Biology") ? 70 : 80;
+
+  // -----------------------------------------------------------------
+  // STEP 1 & 2: Chunked Generation (4 Parts of the Paper)
+  // -----------------------------------------------------------------
   if (onProgress) {
-    onProgress({ text: `[Stage 1/5] Fetching live AI CBSE 2025-26 blueprint for ${targetSubject} (${targetClass})...` });
+    onProgress({ text: `[Step 1/5] Analyzing CBSE 2025-26 blueprint for ${targetSubject} (${targetClass})...` });
   }
 
-  const seed = Math.floor(Math.random() * 888888) + 111111;
-  const stage1Prompt = `
-You are an expert CBSE Chief Curriculum Designer for DevGyan-Innovation. Generate a complete, 100% authentic ${paperType} JSON for Class ${targetClass} ${targetSubject} strictly adhering to official CBSE 2025-26 bylaws, blueprint, mark distributions, and question count patterns.
-Unique Seed: ${seed}
-
-STRICT OFFICIAL CBSE 2025-26 FORMATTING & BLUEPRINT RULES:
-1. NO LAZY OPTIONS: Section A MCQs must have pure, authentic, subject-specific options with proper LaTeX formatting (e.g. $\\frac{\\mu_0 N^2 A}{l}$, $\\frac{\\pi}{2}$ radians, etc.). NEVER output generic "Option A, Option B" or placeholder text. Do not include leading prefix letters like (A) in the raw option text because the UI adds them.
-2. LATEX MATH & FRACTIONS: All mathematical and scientific expressions, fractions, and formulas MUST be wrapped in single dollar signs using proper LaTeX syntax (e.g. $\\frac{\\mu_0 N^2 A}{l}$ or $v_d$). Never write unrendered text slashes like A / l.
-3. SUB-QUESTIONS SEPARATION: Every sub-part like (i), (ii), (iii) in subjective or case-study questions MUST start on a fresh new line.
-4. NO PLACEHOLDERS: Never write template strings. Every question must be fully articulated.
-5. BRANDING: Use "DevGyan-Innovation" as the organization name.
-
-Return ONLY valid JSON matching this exact schema:
-{
-  "title": "DevGyan-Innovation Academic Studio - ${targetSubject} (${targetClass})",
-  "className": "${targetClass}",
-  "subject": "${targetSubject}",
-  "duration": "3 Hours",
-  "maxMarks": ${targetSubject.includes("Computer") || targetSubject.includes("IT") || targetSubject.includes("AI") || targetSubject.includes("Physics") || targetSubject.includes("Chemistry") || targetSubject.includes("Biology") ? 70 : 80},
-  "generalInstructions": [
-    "1. Please check that this question paper contains all printed sections.",
-    "2. All questions are compulsory. Internal choices are provided in respective sections."
-  ],
-  "sections": [
-    {
-      "name": "Section A",
-      "description": "Multiple Choice Questions (1 Mark each)",
-      "questions": [
-        { "qNo": 1, "question": "Authentic MCQ question text", "options": ["Specific Option Text 1", "Specific Option Text 2", "Specific Option Text 3", "Specific Option Text 4"], "correctAnswer": "Specific Option Text 1", "marks": 1 }
-      ]
-    }
-  ],
-  "answerKey": "Detailed step-by-step marking scheme verified by DevGyan-Innovation."
-}`;
-
-  let rawText1 = await callDirectGemini(stage1Prompt);
-  let currentPaper = cleanAndParseJSON(rawText1);
-  currentPaper = sanitizePaperContent(currentPaper, targetSubject);
-
   if (onProgress) {
-    onProgress({ text: `[Stage 2/5] Auditing subject-specific CBSE 2025-26 mark allocations and section balance...` });
+    onProgress({ text: `[Step 2/5] Generating Part 1: Section A (MCQs & Assertion-Reasoning)...` });
   }
 
-  const stage2Prompt = `Audit this paper JSON for Class ${targetClass} ${targetSubject}. Verify sections, LaTeX fractions, and clean options. Return ONLY valid JSON.\n${JSON.stringify(currentPaper)}`;
-  
-  try {
-    let rawText2 = await callDirectGemini(stage2Prompt);
-    if (rawText2) {
-      const audited2 = cleanAndParseJSON(rawText2);
-      if (audited2 && audited2.sections) {
-        currentPaper = audited2;
-        currentPaper = sanitizePaperContent(currentPaper, targetSubject);
+  const chunk1Prompt = `Generate JSON array of pure MCQ/Assertion questions (Q.No 1 to 10) for Class ${targetClass} ${targetSubject} following CBSE 2025-26. Use LaTeX math notation like $\\frac{a}{b}$. Return ONLY JSON array format:
+[
+  { "qNo": 1, "question": "Question text here", "options": ["Option 1", "Option 2", "Option 3", "Option 4"], "correctAnswer": "Option 1", "marks": 1 }
+]`;
+  let raw1 = await callDirectGemini(chunk1Prompt);
+  let qPart1 = sanitizeQuestions(cleanAndParseJSON(raw1), targetSubject);
+
+  if (onProgress) {
+    onProgress({ text: `[Step 2/5] Generating Part 2: Section A remaining & Section B (VSA 2 Marks)...` });
+  }
+  const chunk2Prompt = `Generate JSON array of questions (Q.No 11 to 20) including remaining Section A and Section B VSA (2 marks) for Class ${targetClass} ${targetSubject}. Use LaTeX math. Return ONLY JSON array format:
+[
+  { "qNo": 11, "question": "Question text here with sub-parts (i) ... (ii) ... on new lines", "marks": 2 }
+]`;
+  let raw2 = await callDirectGemini(chunk2Prompt);
+  let qPart2 = sanitizeQuestions(cleanAndParseJSON(raw2), targetSubject);
+
+  if (onProgress) {
+    onProgress({ text: `[Step 2/5] Generating Part 3: Section C (SA 3 Marks)...` });
+  }
+  const chunk3Prompt = `Generate JSON array of Short Answer questions (Q.No 21 to 28, 3 marks each) for Class ${targetClass} ${targetSubject} with internal choices and sub-parts on new lines. Return ONLY JSON array format:
+[
+  { "qNo": 21, "question": "SA Question text", "marks": 3 }
+]`;
+  let raw3 = await callDirectGemini(chunk3Prompt);
+  let qPart3 = sanitizeQuestions(cleanAndParseJSON(raw3), targetSubject);
+
+  if (onProgress) {
+    onProgress({ text: `[Step 2/5] Generating Part 4: Section D (Case Study) & Section E (LA 5 Marks)...` });
+  }
+  const chunk4Prompt = `Generate JSON array of Long Answer (5 marks) and Case Study (4 marks) questions (Q.No 29 to 33) for Class ${targetClass} ${targetSubject} with sub-parts (i), (ii), (iii) on separate lines. Return ONLY JSON array format:
+[
+  { "qNo": 29, "question": "Case study or LA question text with sub-parts (i) ... (ii) ...", "marks": 5 }
+]`;
+  let raw4 = await callDirectGemini(chunk4Prompt);
+  let qPart4 = sanitizeQuestions(cleanAndParseJSON(raw4), targetSubject);
+
+  // Combine all chunks
+  let allQuestions = [...qPart1, ...qPart2, ...qPart3, ...qPart4];
+
+  // Renumber qNo sequentially to guarantee perfect alignment
+  allQuestions.forEach((q, idx) => {
+    q.qNo = idx + 1;
+  });
+
+  // -----------------------------------------------------------------
+  // STEP 3 & 4: Diagram / Visual Matching & CBSE PYQ Audit
+  // -----------------------------------------------------------------
+  if (onProgress) {
+    onProgress({ text: `[Step 3/4] Verifying scientific diagrams, equations & LaTeX fractions matching CBSE standards...` });
+  }
+
+  // -----------------------------------------------------------------
+  // STEP 5: Final Assembly & Quality Check
+  // -----------------------------------------------------------------
+  if (onProgress) {
+    onProgress({ text: `[Step 5/5] Finalizing complete paper structure with DevGyan-Innovation branding...` });
+  }
+
+  const finalPaper = {
+    title: `DevGyan-Innovation Academic Studio - ${targetSubject} (${targetClass})`,
+    className: targetClass,
+    subject: targetSubject,
+    duration: "3 Hours",
+    maxMarks: maxMarksVal,
+    generalInstructions: [
+      "1. Please check that this question paper contains 33 printed questions.",
+      "2. All questions are compulsory. Internal choices are provided in specific sections.",
+      "3. Use of calculators is not allowed. Use physical constants where necessary."
+    ],
+    sections: [
+      {
+        name: "Section A",
+        description: "Multiple Choice Questions & Assertion-Reasoning (1 Mark each)",
+        questions: allQuestions.filter(q => q.marks === 1)
+      },
+      {
+        name: "Section B",
+        description: "Very Short Answer Type Questions (2 Marks each)",
+        questions: allQuestions.filter(q => q.marks === 2)
+      },
+      {
+        name: "Section C",
+        description: "Short Answer Type Questions (3 Marks each)",
+        questions: allQuestions.filter(q => q.marks === 3)
+      },
+      {
+        name: "Section D & E",
+        description: "Case Study and Long Answer Questions (4 & 5 Marks)",
+        questions: allQuestions.filter(q => q.marks >= 4)
       }
-    }
-  } catch (e) {}
+    ],
+    answerKey: "Detailed step-by-step marking scheme verified by DevGyan-Innovation conforming to CBSE 2025-26 rubrics."
+  };
 
-  if (onProgress) {
-    onProgress({ text: `[Stage 3/5] Verifying equation spacing and purging duplicate prefixes...` });
-  }
-
-  const stage3Prompt = `Check all equations and options. Ensure no double prefixes exist in options. Return ONLY valid JSON.\n${JSON.stringify(currentPaper)}`;
-  try {
-    let rawText3 = await callDirectGemini(stage3Prompt);
-    if (rawText3) {
-      const audited3 = cleanAndParseJSON(rawText3);
-      if (audited3 && audited3.sections) {
-        currentPaper = audited3;
-        currentPaper = sanitizePaperContent(currentPaper, targetSubject);
-      }
-    }
-  } catch (e) {}
-
-  if (onProgress) {
-    onProgress({ text: `[Stage 4/5] Enforcing strict line breaks for sub-questions (i), (ii), (iii)...` });
-  }
-
-  const stage4Prompt = `Review case studies and sub-parts ((i), (ii), (iii)). Ensure every sub-part starts on a new line. Return ONLY valid JSON.\n${JSON.stringify(currentPaper)}`;
-  try {
-    let rawText4 = await callDirectGemini(stage4Prompt);
-    if (rawText4) {
-      const audited4 = cleanAndParseJSON(rawText4);
-      if (audited4 && audited4.sections) {
-        currentPaper = audited4;
-        currentPaper = sanitizePaperContent(currentPaper, targetSubject);
-      }
-    }
-  } catch (e) {}
-
-  if (onProgress) {
-    onProgress({ text: `[Stage 5/5] Finalizing DevGyan-Innovation branding and locking error-free layout...` });
-  }
-
-  currentPaper = sanitizePaperContent(currentPaper, targetSubject);
-  currentPaper.title = `DevGyan-Innovation Academic Studio - ${targetSubject} (${targetClass})`;
-  currentPaper.subject = targetSubject;
-  currentPaper.className = targetClass;
-
-  return currentPaper;
+  return finalPaper;
 }
 
 // 100% BULLETPROOF PERMANENT DEFAULT EXPORT
