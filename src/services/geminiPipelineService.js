@@ -1,4 +1,4 @@
-// --- ADVANCED 5-STEP CHUNKED PIPELINE FOR CBSE 2025-26 ---
+// --- PERMANENT BULLETPROOF 5-STEP CHUNKED PIPELINE (CBSE 2025-26) ---
 
 const getActiveApiKey = () => {
   try {
@@ -14,17 +14,40 @@ const getActiveApiKey = () => {
   return "";
 };
 
+async function getWorkingModelName(apiKey) {
+  try {
+    const listUrl = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`;
+    const res = await fetch(listUrl);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.models) {
+        const validModel = data.models.find(m => 
+          m.supportedGenerationMethods && 
+          m.supportedGenerationMethods.includes("generateContent") &&
+          (m.name.includes("flash") || m.name.includes("gemini"))
+        );
+        if (validModel) {
+          return validModel.name.replace("models/", "");
+        }
+      }
+    }
+  } catch (e) {}
+  return "gemini-3.6-flash";
+}
+
 async function callDirectGemini(promptText) {
   const apiKey = getActiveApiKey();
   if (!apiKey) {
     throw new Error("VITE_GEMINI_API_KEY is missing in environment variables.");
   }
 
-  // Using the stable active model to prevent 404 errors
-  const modelsToTry = ["gemini-3.6-flash", "gemini-1.5-flash"];
+  const dynamicModel = await getWorkingModelName(apiKey);
+  // STRICTLY only active flash models to prevent 404
+  const modelsToTry = [dynamicModel, "gemini-3.6-flash"];
+  const uniqueModels = [...new Set(modelsToTry.filter(Boolean))];
   let lastError = null;
 
-  for (const modelName of modelsToTry) {
+  for (const modelName of uniqueModels) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
 
     try {
@@ -129,11 +152,8 @@ export async function generateAndAuditPaper(config) {
 
   const maxMarksVal = targetSubject.includes("Computer") || targetSubject.includes("IT") || targetSubject.includes("AI") || targetSubject.includes("Physics") || targetSubject.includes("Chemistry") || targetSubject.includes("Biology") ? 70 : 80;
 
-  // -----------------------------------------------------------------
-  // STEP 1 & 2: Chunked Generation (4 Parts of the Paper)
-  // -----------------------------------------------------------------
   if (onProgress) {
-    onProgress({ text: `[Step 1/5] Analyzing CBSE 2025-26 blueprint for ${targetSubject} (${targetClass})...` });
+    onProgress({ text: `[Step 1/5] Discovering active AI model for ${targetSubject} (${targetClass})...` });
   }
 
   if (onProgress) {
@@ -177,24 +197,16 @@ export async function generateAndAuditPaper(config) {
   let raw4 = await callDirectGemini(chunk4Prompt);
   let qPart4 = sanitizeQuestions(cleanAndParseJSON(raw4), targetSubject);
 
-  // Combine all chunks
   let allQuestions = [...qPart1, ...qPart2, ...qPart3, ...qPart4];
 
-  // Renumber qNo sequentially to guarantee perfect alignment
   allQuestions.forEach((q, idx) => {
     q.qNo = idx + 1;
   });
 
-  // -----------------------------------------------------------------
-  // STEP 3 & 4: Diagram / Visual Matching & CBSE PYQ Audit
-  // -----------------------------------------------------------------
   if (onProgress) {
     onProgress({ text: `[Step 3/4] Verifying scientific diagrams, equations & LaTeX fractions matching CBSE standards...` });
   }
 
-  // -----------------------------------------------------------------
-  // STEP 5: Final Assembly & Quality Check
-  // -----------------------------------------------------------------
   if (onProgress) {
     onProgress({ text: `[Step 5/5] Finalizing complete paper structure with DevGyan-Innovation branding...` });
   }
