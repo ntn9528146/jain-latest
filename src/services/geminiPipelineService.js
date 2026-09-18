@@ -1,30 +1,5 @@
-// --- ENTERPRISE CBSE REPOSITORY & 3-KEY PIPELINE SERVICE ---
-
-// Centralized Blueprint Repository matching official CBSE SQP standards across all subjects
-const CBSE_BLUEPRINTS = {
-  "History": { className: "12th", maxMarks: 80, totalQuestions: 34, sections: ["Section A", "Section B", "Section C", "Section D", "Section E"] },
-  "Geography": { className: "12th", maxMarks: 70, totalQuestions: 30, sections: ["Section A", "Section B", "Section C", "Section D", "Section E"] },
-  "Political Science": { className: "12th", maxMarks: 80, totalQuestions: 30, sections: ["Section A", "Section B", "Section C", "Section D", "Section E"] },
-  "Physics": { className: "12th", maxMarks: 70, totalQuestions: 33, sections: ["Section A", "Section B", "Section C", "Section D", "Section E"] },
-  "Chemistry": { className: "12th", maxMarks: 70, totalQuestions: 33, sections: ["Section A", "Section B", "Section C", "Section D", "Section E"] },
-  "Biology": { className: "12th", maxMarks: 70, totalQuestions: 33, sections: ["Section A", "Section B", "Section C", "Section D", "Section E"] },
-  "Mathematics": { className: "12th", maxMarks: 80, totalQuestions: 38, sections: ["Section A", "Section B", "Section C", "Section D", "Section E"] },
-  "Applied Mathematics": { className: "12th", maxMarks: 80, totalQuestions: 38, sections: ["Section A", "Section B", "Section C", "Section D", "Section E"] },
-  "Psychology": { className: "12th", maxMarks: 70, totalQuestions: 33, sections: ["Section A", "Section B", "Section C", "Section D", "Section E", "Section F"] },
-  "Home Science": { className: "12th", maxMarks: 70, totalQuestions: 35, sections: ["Section A", "Section B", "Section C", "Section D"] },
-  "Informatics Practices": { className: "12th", maxMarks: 70, totalQuestions: 37, sections: ["Section A", "Section B", "Section C", "Section D", "Section E"] },
-  "Computer Science": { className: "12th", maxMarks: 70, totalQuestions: 37, sections: ["Section A", "Section B", "Section C", "Section D", "Section E"] },
-  "Legal Studies": { className: "12th", maxMarks: 80, totalQuestions: 40, sections: ["Section A", "Section B", "Section C", "Section D"] },
-  "Business Studies": { className: "12th", maxMarks: 80, totalQuestions: 34, sections: ["Section A", "Section B", "Section C", "Section D"] },
-  "Economics": { className: "12th", maxMarks: 80, totalQuestions: 34, sections: ["Section A", "Section B"] },
-  "Accountancy": { className: "12th", maxMarks: 80, totalQuestions: 34, sections: ["Part A", "Part B"] },
-  "Hindi Core": { className: "12th", maxMarks: 80, totalQuestions: 12, sections: ["Khand K", "Khand Kh", "Khand G"] },
-  "Hindi Elective": { className: "12th", maxMarks: 80, totalQuestions: 13, sections: ["Khand K", "Khand Kh", "Khand G"] },
-  "English Core": { className: "12th", maxMarks: 80, totalQuestions: 13, sections: ["Section A", "Section B", "Section C"] },
-  "English Elective": { className: "12th", maxMarks: 80, totalQuestions: 13, sections: ["Section A", "Section B", "Section C"] },
-  "NCC": { className: "12th", maxMarks: 70, totalQuestions: 21, sections: ["Section A", "Section B", "Section C", "Section D", "Section E", "Section F"] },
-  "Physical Education": { className: "12th", maxMarks: 70, totalQuestions: 37, sections: ["Section A", "Section B", "Section C", "Section D", "Section E"] }
-};
+// --- ENTERPRISE MULTI-KEY 3-PART PIPELINE ENGINE (9th to 12th) ---
+import { CBSE_BLUEPRINTS } from '../config/blueprints.js';
 
 const getApiKeyByPart = (partIndex) => {
   try {
@@ -101,7 +76,6 @@ function parseJSONSafely(text) {
   }
 }
 
-// 4-Stage Audit & Sanitization Engine
 function auditAndSanitizePaper(paperObj, targetSubject, targetClass) {
   if (!paperObj.sections || !Array.isArray(paperObj.sections)) {
     throw new Error("Audit Error: Invalid sections structure.");
@@ -137,43 +111,44 @@ export async function generateAndAuditPaper(config) {
   const targetSubject = selectedSubject || "History";
   const targetClass = selectedClass || "12th";
 
-  // Step 1: Fetch Saved Blueprint from Repository (Matching Uploaded Sample Papers)
-  const blueprint = CBSE_BLUEPRINTS[targetSubject] || {
-    className: targetClass,
+  // Determine group mapping (9th-10th or 11th-12th)
+  const isJunior = targetClass.includes("9") || targetClass.includes("10") || targetClass.toLowerCase().includes("ix") || targetClass.toLowerCase().includes("x");
+  const groupKey = isJunior ? "9th-10th" : "11th-12th";
+
+  const blueprint = CBSE_BLUEPRINTS[groupKey]?.[targetSubject] || {
     maxMarks: 80,
     totalQuestions: 34,
     sections: ["Section A", "Section B", "Section C"]
   };
 
   if (onProgress) {
-    onProgress({ text: `[Repository Match] Loaded official CBSE sample paper blueprint for ${targetSubject} (${blueprint.maxMarks} Marks)...` });
+    onProgress({ text: `[Repository Match] Loaded official CBSE sample paper blueprint for ${targetSubject} (${targetClass}) [${blueprint.maxMarks} Marks]...` });
   }
 
-  // PART 1: API Key 1 - Generating Section A (MCQs & Assertion-Reasoning)
+  // PART 1: API Key 1 - MCQs and Section A
   if (onProgress) {
-    onProgress({ text: `[Part 1/3] API Key 1 generating Section A MCQs & Assertion-Reasoning...` });
+    onProgress({ text: `[Part 1/3] API Key 1 generating Section A MCQs & Objective questions...` });
   }
-  const prompt1 = `Using the official CBSE SQP blueprint for ${targetClass} ${targetSubject}, generate a JSON array of Section A Multiple Choice Questions (1 mark each). NO placeholders. Format: [{ "qNo": 1, "question": "...", "options": ["A", "B", "C", "D"], "marks": 1 }]`;
+  const prompt1 = `Using the official CBSE SQP blueprint for Class ${targetClass} ${targetSubject}, generate a JSON array of Section A Multiple Choice Questions (1 mark each). NO placeholders. Format: [{ "qNo": 1, "question": "...", "options": ["A", "B", "C", "D"], "marks": 1 }]`;
   let raw1 = await callGeminiChunk(prompt1, 0);
   let part1Q = parseJSONSafely(raw1);
 
-  // PART 2: API Key 2 - Generating Middle Sections (Short Answers)
+  // PART 2: API Key 2 - Short Answers
   if (onProgress) {
     onProgress({ text: `[Part 2/3] API Key 2 generating Short Answer sections in background...` });
   }
-  const prompt2 = `Using the official CBSE SQP blueprint for ${targetClass} ${targetSubject}, generate a JSON array of middle section questions (Short Answer 2 or 3 marks each). Ensure subparts start on fresh lines. NO placeholders. Format: [{ "qNo": 21, "question": "...", "marks": 3 }]`;
+  const prompt2 = `Using the official CBSE SQP blueprint for Class ${targetClass} ${targetSubject}, generate a JSON array of middle section questions (Short Answer 2 or 3 marks each). Ensure subparts start on fresh lines. NO placeholders. Format: [{ "qNo": 21, "question": "...", "marks": 3 }]`;
   let raw2 = await callGeminiChunk(prompt2, 1);
   let part2Q = parseJSONSafely(raw2);
 
-  // PART 3: API Key 3 - Generating Final Sections (Case Study, Long Answer, Map)
+  // PART 3: API Key 3 - Long Answers & Case Studies
   if (onProgress) {
     onProgress({ text: `[Part 3/3] API Key 3 generating Case Study, Source-based & Long Answers...` });
   }
-  const prompt3 = `Using the official CBSE SQP blueprint for ${targetClass} ${targetSubject}, generate a JSON array of final section questions (Case Study with sub-parts, and Long Answers). NO placeholders. Format: [{ "qNo": 31, "question": "...", "marks": 5 }]`;
+  const prompt3 = `Using the official CBSE SQP blueprint for Class ${targetClass} ${targetSubject}, generate a JSON array of final section questions (Case Study with sub-parts, and Long Answers). NO placeholders. Format: [{ "qNo": 31, "question": "...", "marks": 5 }]`;
   let raw3 = await callGeminiChunk(prompt3, 2);
   let part3Q = parseJSONSafely(raw3);
 
-  // Background Assembly & 4-Stage Audit
   if (onProgress) {
     onProgress({ text: `[Auditing] Running 4-stage background quality audit on generated paper chunks...` });
   }
