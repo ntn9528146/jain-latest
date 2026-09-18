@@ -1,4 +1,4 @@
-// --- 4-STAGE MULTI-KEY BACKGROUND AUDITED PIPELINE FOR CBSE EXAMS ---
+// --- BULLETPROOF 4-STAGE PIPELINE WITH FALLBACK BLUEPRINT FOR CBSE EXAMS ---
 
 const getApiKey = (index) => {
   try {
@@ -14,40 +14,41 @@ const getApiKey = (index) => {
   return "";
 };
 
-async function callGeminiRaw(promptText, apiKeyIndex) {
+async function callGeminiRawWithRetry(promptText, apiKeyIndex, maxRetries = 3) {
   const apiKey = getApiKey(apiKeyIndex) || getApiKey(0);
   if (!apiKey) throw new Error("API keys missing in environment variables.");
 
   const models = ["gemini-3.6-flash", "gemini-3.5-flash"];
-  let lastErr = null;
 
-  for (const model of models) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-    try {
-      const resp = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: promptText }] }],
-          generationConfig: { temperature: 0.2, responseMimeType: "application/json" }
-        })
-      });
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    for (const model of models) {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+      try {
+        const resp = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: promptText }] }],
+            generationConfig: { temperature: 0.2, responseMimeType: "application/json" }
+          })
+        });
 
-      if (resp.ok) {
-        const data = await resp.json();
-        const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-        if (text) return text;
-      } else {
-        if (resp.status === 503 || resp.status === 429) {
-          await new Promise(r => setTimeout(r, 4000));
-          continue;
+        if (resp.ok) {
+          const data = await resp.json();
+          const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+          if (text) return text;
+        } else {
+          if (resp.status === 503 || resp.status === 429) {
+            await new Promise(r => setTimeout(r, 3000 * (attempt + 1)));
+            continue;
+          }
         }
+      } catch (e) {
+        continue;
       }
-    } catch (e) {
-      lastErr = e;
     }
   }
-  throw lastErr || new Error(`API Stage ${apiKeyIndex + 1} failed.`);
+  throw new Error(`API Stage ${apiKeyIndex + 1} rate limited or unavailable.`);
 }
 
 function parseJSONSafely(text) {
@@ -74,22 +75,17 @@ function parseJSONSafely(text) {
   }
 }
 
-// 4-Stage Audit & Sanitization Engine
 function auditAndSanitizePaper(paperObj, targetSubject, targetClass) {
   if (!paperObj.sections || !Array.isArray(paperObj.sections)) {
     throw new Error("Stage 4 Audit Error: Invalid paper sections structure.");
   }
 
-  let totalQCount = 0;
   paperObj.sections.forEach(sec => {
     if (sec.questions && Array.isArray(sec.questions)) {
       sec.questions.forEach(q => {
-        totalQCount++;
-        // Stage check: Eliminate any placeholders
         if (!q.question || q.question.includes("Standard question number") || q.question.includes("$.{qNo}") || q.question.length < 5) {
-          q.question = `Examine the principal historical and administrative framework related to ${targetSubject} during this epoch.`;
+          q.question = `Examine the principal theoretical and analytical framework related to ${targetSubject} in modern academic context.`;
         }
-        // Format sub-parts on fresh lines
         q.question = q.question
           .replace(/([.?!])\s*(\(i\))/g, "$1\n\n(i)")
           .replace(/([.?!])\s*(\(ii\))/g, "$1\n\n(ii)")
@@ -111,32 +107,39 @@ function auditAndSanitizePaper(paperObj, targetSubject, targetClass) {
 
 export async function generateAndAuditPaper(config) {
   const { selectedClass, selectedSubject, onProgress, isPractical } = config;
-  const targetSubject = selectedSubject || "History";
+  const targetSubject = selectedSubject || "Political Science";
   const targetClass = selectedClass || "12th";
   const maxMarksVal = targetSubject.includes("Physics") || targetSubject.includes("Chemistry") || targetSubject.includes("Biology") ? 70 : 80;
 
-  // STAGE 1: API Key 1 - Blueprint Search & Pattern Analysis
+  // STAGE 1: API Key 1 - Blueprint Analysis (with robust fallback)
   if (onProgress) {
-    onProgress({ text: `[Stage 1/4] API Key 1 searching official CBSE blueprint for ${targetClass} ${targetSubject} (Marks & Sections)...` });
+    onProgress({ text: `[Stage 1/4] API Key 1 analyzing official CBSE blueprint for ${targetClass} ${targetSubject}...` });
   }
-  const promptStage1 = `Analyze official CBSE 2025-26 guidelines for Class ${targetClass} ${targetSubject}. Return a JSON object specifying the blueprint: totalMarks (${maxMarksVal}), totalQuestions (e.g. 34), and sections array describing Section A (MCQs with Assertion-Reason), Section B (Short Answer), Section C (Long Answer), Section D (Source-based), Section E (Map/Long). Return ONLY JSON.`;
-  let rawBlueprint = await callGeminiRaw(promptStage1, 0);
-  let blueprint = parseJSONSafely(rawBlueprint);
+  
+  let blueprint;
+  try {
+    const promptStage1 = `Provide official CBSE 2025-26 blueprint for Class ${targetClass} ${targetSubject} as a JSON object with totalMarks (${maxMarksVal}), totalQuestions (34), and sections.`;
+    let rawBlueprint = await callGeminiRawWithRetry(promptStage1, 0, 2);
+    blueprint = parseJSONSafely(rawBlueprint);
+  } catch (err) {
+    // Fallback static blueprint to ensure 100% uptime when Google servers are busy
+    blueprint = { totalMarks: maxMarksVal, totalQuestions: 34, sections: ["Section A", "Section B", "Section C", "Section D", "Section E"] };
+  }
 
   // STAGE 2: API Key 2 - Section A & B Generation (MCQs & Short Answer)
   if (onProgress) {
-    onProgress({ text: `[Stage 2/4] API Key 2 generating Section A & B (MCQs & Assertion-Reason) in background...` });
+    onProgress({ text: `[Stage 2/4] API Key 2 generating Section A & B (MCQs & Short Answers) in background...` });
   }
-  const promptStage2 = `Generate a JSON array of official CBSE questions for Class ${targetClass} ${targetSubject} covering Section A (MCQs including Assertion-Reasoning) and Section B (Short Answer). NO placeholders. Format as JSON array of objects: qNo, question, options (for MCQs), marks.`;
-  let rawSecAB = await callGeminiRaw(promptStage2, 1);
+  const promptStage2 = `Generate a JSON array of official CBSE questions for Class ${targetClass} ${targetSubject} covering Section A (MCQs) and Section B (2 marks). NO placeholders. Format as JSON array of objects: qNo, question, options (for MCQs), marks.`;
+  let rawSecAB = await callGeminiRawWithRetry(promptStage2, 1, 3);
   let questionsAB = parseJSONSafely(rawSecAB);
 
-  // STAGE 3: API Key 3 - Section C, D & E Generation (Source-based & Long Answers)
+  // STAGE 3: API Key 3 - Section C, D & E Generation (Long Answers & Source-based)
   if (onProgress) {
-    onProgress({ text: `[Stage 3/4] API Key 3 generating Section C, D & E (Source-based Case Study & Long Answers)...` });
+    onProgress({ text: `[Stage 3/4] API Key 3 generating Section C, D & E (Source-based & Long Answers)...` });
   }
-  const promptStage3 = `Generate a JSON array of official CBSE questions for Class ${targetClass} ${targetSubject} covering Section C, Section D (Source-based with subparts (i), (ii) on fresh lines), and Section E (Map/Long Answer). NO placeholders. Format as JSON array of objects: qNo, question, marks.`;
-  let rawSecCDE = await callGeminiRaw(promptStage3, 2);
+  const promptStage3 = `Generate a JSON array of official CBSE questions for Class ${targetClass} ${targetSubject} covering Section C (3 marks), Section D (4 marks source-based with subparts), and Section E (5 marks long answers). NO placeholders. Format as JSON array of objects: qNo, question, marks.`;
+  let rawSecCDE = await callGeminiRawWithRetry(promptStage3, 2, 3);
   let questionsCDE = parseJSONSafely(rawSecCDE);
 
   // STAGE 4: Final Assembly & Multi-Stage Error Audit
@@ -161,18 +164,18 @@ export async function generateAndAuditPaper(config) {
     sections: [
       {
         name: "Section A",
-        description: "Multiple Choice & Assertion-Reasoning Questions (1 Mark)",
+        description: "Multiple Choice Questions (1 Mark each)",
         questions: allQs.filter(q => q.marks === 1)
       },
       {
         name: "Section B & C",
-        description: "Short & Long Answer Type Questions (2 & 3 Marks)",
+        description: "Short Answer Type Questions (2 & 3 Marks each)",
         questions: allQs.filter(q => q.marks === 2 || q.marks === 3)
       },
       {
         name: "Section D & E",
-        description: "Source-Based Case Study & Map/Long Answer Questions (4 & 5 Marks)",
-        questions: allQuestionsFiltered = allQs.filter(q => q.marks >= 4)
+        description: "Source-Based & Long Answer Questions (4 & 5 Marks each)",
+        questions: allQs.filter(q => q.marks >= 4)
       }
     ],
     answerKey: "Verified DevGyan-Innovation 4-stage audited marking scheme conforming to CBSE standards."
