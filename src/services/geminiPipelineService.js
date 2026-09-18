@@ -1,4 +1,4 @@
-// --- ULTIMATE CBSE EXACT BLUEPRINT & DYNAMIC SYNC ENGINE ---
+// --- ENTERPRISE RESILIENT 3-PART PIPELINE ENGINE (9th to 12th) ---
 import { BLUEPRINTS_9_10 } from '../config/blueprints9_10.js';
 import { BLUEPRINTS_11_12 } from '../config/blueprints11_12.js';
 
@@ -127,7 +127,6 @@ export async function generateAndAuditPaper(config) {
   const isJunior = targetClass.includes("9") || targetClass.includes("10") || targetClass.toLowerCase().includes("ix") || targetClass.toLowerCase().includes("x");
   const repo = isJunior ? BLUEPRINTS_9_10 : BLUEPRINTS_11_12;
 
-  // Exact matching blueprint from repository
   const blueprint = repo[targetSubject] || {
     maxMarks: 70,
     totalQuestions: 30,
@@ -138,7 +137,6 @@ export async function generateAndAuditPaper(config) {
     onProgress({ text: `[Dynamic Blueprint] Loaded exact CBSE standard for ${targetSubject} (${targetClass}): Max Marks = ${blueprint.maxMarks}, Exact Total Questions = ${blueprint.totalQuestions}...` });
   }
 
-  // PART 1: API Key 1 - MCQs
   if (onProgress) {
     onProgress({ text: `[Part 1/3] Generating Section A MCQs & Objective questions...` });
   }
@@ -146,7 +144,6 @@ export async function generateAndAuditPaper(config) {
   let raw1 = await callGeminiChunk(prompt1, 0);
   let part1Q = parseJSONSafely(raw1);
 
-  // PART 2: API Key 2 - Short Answers
   if (onProgress) {
     onProgress({ text: `[Part 2/3] Generating Short Answer sections in background...` });
   }
@@ -154,7 +151,6 @@ export async function generateAndAuditPaper(config) {
   let raw2 = await callGeminiChunk(prompt2, 1);
   let part2Q = parseJSONSafely(raw2);
 
-  // PART 3: API Key 3 - Long Answers / Source-Based
   if (onProgress) {
     onProgress({ text: `[Part 3/3] Generating Long Answer & Source-based questions...` });
   }
@@ -168,7 +164,6 @@ export async function generateAndAuditPaper(config) {
 
   let allQuestions = [...(Array.isArray(part1Q) ? part1Q : []), ...(Array.isArray(part2Q) ? part2Q : []), ...(Array.isArray(part3Q) ? part3Q : [])];
   
-  // Strictly enforce exact total questions matching CBSE blueprint
   if (allQuestions.length > blueprint.totalQuestions) {
     allQuestions = allQuestions.slice(0, blueprint.totalQuestions);
   } else if (allQuestions.length < blueprint.totalQuestions) {
