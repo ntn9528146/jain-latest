@@ -7,7 +7,6 @@ const getApiKeyByPart = (partIndex) => {
       if (partIndex === 1 && import.meta.env.VITE_GEMINI_API_KEY_2) return import.meta.env.VITE_GEMINI_API_KEY_2;
       if (partIndex === 2 && import.meta.env.VITE_GEMINI_API_KEY_3) return import.meta.env.VITE_GEMINI_API_KEY_3;
       
-      // Fallbacks
       if (import.meta.env.VITE_GEMINI_API_KEY_1) return import.meta.env.VITE_GEMINI_API_KEY_1;
       if (import.meta.env.VITE_GEMINI_API_KEY) return import.meta.env.VITE_GEMINI_API_KEY;
     }
@@ -92,12 +91,10 @@ function sanitizeQuestions(questionsList) {
   if (!questionsList || !Array.isArray(questionsList)) return [];
 
   return questionsList.map((q) => {
-    // Kill placeholders permanently
     if (!q.question || q.question.includes("Standard question number") || q.question.includes("$.{qNo}") || q.question.length < 5) {
       q.question = "Analyze the historical significance and key administrative policies associated with this period in Indian history.";
     }
 
-    // Force sub-parts onto fresh lines
     q.question = q.question
       .replace(/([.?!])\s*(\(i\))/g, "$1\n\n(i)")
       .replace(/([.?!])\s*(\(ii\))/g, "$1\n\n(ii)")
@@ -106,7 +103,6 @@ function sanitizeQuestions(questionsList) {
       .replace(/([a-zA-Z0-9.,)]+)\s+\((i\vert{}ii\vert{}iii\vert{}iv\vert{}v)\)\s+/g, "$1\n\n($2) ")
       .replace(/:\s*\((i\vert{}ii\vert{}iii\vert{}iv\vert{}v)\)/g, ":\n\n($1)");
 
-    // Clean options
     if (q.options && Array.isArray(q.options)) {
       q.options = q.options.map((opt) => {
         if (!opt || /option\s*[a-d]/i.test(opt) || opt.length < 2) {
@@ -127,7 +123,6 @@ export async function generateAndAuditPaper(config) {
   const paperType = isPractical ? "Practical Examination" : "CBSE Board Examination (2025-26 Pattern)";
   const maxMarksVal = targetSubject.includes("Physics") || targetSubject.includes("Chemistry") || targetSubject.includes("Biology") || targetSubject.includes("Computer") ? 70 : 80;
 
-  // PART 1: Using API Key 1 for Section A & B
   if (onProgress) {
     onProgress({ text: `[Part 1/3] Generating Section A & B using API Key 1 for ${targetSubject} (${targetClass})...` });
   }
@@ -138,7 +133,6 @@ export async function generateAndAuditPaper(config) {
   let raw1 = await callGeminiPart(prompt1, 0);
   let part1Q = sanitizeQuestions(cleanAndParseJSON(raw1));
 
-  // PART 2: Using API Key 2 for Section C & D
   if (onProgress) {
     onProgress({ text: `[Part 2/3] Generating Section C & D using API Key 2 with sub-part line breaks...` });
   }
@@ -149,7 +143,6 @@ export async function generateAndAuditPaper(config) {
   let raw2 = await callGeminiPart(prompt2, 1);
   let part2Q = sanitizeQuestions(cleanAndParseJSON(raw2));
 
-  // PART 3: Using API Key 3 for Section E
   if (onProgress) {
     onProgress({ text: `[Part 3/3] Generating Section E (Map/Long Answer) using API Key 3 for final assembly...` });
   }
@@ -160,7 +153,6 @@ export async function generateAndAuditPaper(config) {
   let raw3 = await callGeminiPart(prompt3, 2);
   let part3Q = sanitizeQuestions(cleanAndParseJSON(raw3));
 
-  // Combine all 3 parts sequentially
   let allQuestions = [...part1Q, ...part2Q, ...part3Q];
   allQuestions.forEach((q, idx) => {
     q.qNo = idx + 1;
