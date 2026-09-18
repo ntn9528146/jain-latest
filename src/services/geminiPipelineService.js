@@ -1,4 +1,4 @@
-// --- TRUE 3-PART MULTI-KEY CHUNKED PIPELINE FOR CBSE EXAMS ---
+// --- ROBUST AUTO-RETRY 3-PART PIPELINE SERVICE ---
 
 const getApiKeyByPart = (partIndex) => {
   try {
@@ -14,7 +14,7 @@ const getApiKeyByPart = (partIndex) => {
   return "";
 };
 
-async function callGeminiPart(promptText, partIndex) {
+async function callGeminiPartWithRetry(promptText, partIndex, maxRetries = 3) {
   let apiKey = getApiKeyByPart(partIndex);
   if (!apiKey) {
     apiKey = getApiKeyByPart(0);
@@ -24,43 +24,40 @@ async function callGeminiPart(promptText, partIndex) {
   }
 
   const modelsToTry = ["gemini-3.6-flash", "gemini-3.5-flash"];
-  let lastError = null;
 
-  for (const modelName of modelsToTry) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    for (const modelName of modelsToTry) {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
 
-    try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: promptText }] }],
-          generationConfig: { temperature: 0.2, responseMimeType: "application/json" }
-        })
-      });
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: promptText }] }],
+            generationConfig: { temperature: 0.2, responseMimeType: "application/json" }
+          })
+        });
 
-      if (!response.ok) {
-        const errData = await response.text();
-        if ((response.status === 503 || response.status === 429)) {
-          await new Promise(r => setTimeout(r, 2000));
-          continue;
+        if (response.ok) {
+          const data = await response.json();
+          const textResult = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+          if (textResult) {
+            return textResult;
+          }
+        } else {
+          if (response.status === 503 || response.status === 429) {
+            await new Promise(r => setTimeout(r, 3000 * (attempt + 1)));
+            continue;
+          }
         }
-        lastError = new Error(`Model ${modelName} failed [${response.status}]: ${errData}`);
+      } catch (err) {
         continue;
       }
-
-      const data = await response.json();
-      const textResult = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-      if (textResult) {
-        return textResult;
-      }
-    } catch (err) {
-      lastError = err;
-      continue;
     }
   }
 
-  throw lastError || new Error(`Part ${partIndex + 1} generation failed across all models.`);
+  throw new Error(`Part ${partIndex + 1} generation failed due to high server demand (503). Please try again.`);
 }
 
 function cleanAndParseJSON(text) {
@@ -130,7 +127,7 @@ export async function generateAndAuditPaper(config) {
 [
   { "qNo": 1, "question": "Question text here", "options": ["Option 1", "Option 2", "Option 3", "Option 4"], "correctAnswer": "Option 1", "marks": 1 }
 ]`;
-  let raw1 = await callGeminiPart(prompt1, 0);
+  let raw1 = await callGeminiPartWithRetry(prompt1, 0);
   let part1Q = sanitizeQuestions(cleanAndParseJSON(raw1));
 
   if (onProgress) {
@@ -140,7 +137,7 @@ export async function generateAndAuditPaper(config) {
 [
   { "qNo": 21, "question": "Question text with sub-parts (i)... (ii)...", "marks": 3 }
 ]`;
-  let raw2 = await callGeminiPart(prompt2, 1);
+  let raw2 = await callGeminiPartWithRetry(prompt2, 1);
   let part2Q = sanitizeQuestions(cleanAndParseJSON(raw2));
 
   if (onProgress) {
@@ -150,7 +147,7 @@ export async function generateAndAuditPaper(config) {
 [
   { "qNo": 32, "question": "Detailed final section question text", "marks": 5 }
 ]`;
-  let raw3 = await callGeminiPart(prompt3, 2);
+  let raw3 = await callGeminiPartWithRetry(prompt3, 2);
   let part3Q = sanitizeQuestions(cleanAndParseJSON(raw3));
 
   let allQuestions = [...part1Q, ...part2Q, ...part3Q];
