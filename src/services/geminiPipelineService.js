@@ -1,4 +1,4 @@
-// --- BULLETPROOF 4-STAGE PIPELINE WITH FALLBACK BLUEPRINT FOR CBSE EXAMS ---
+// --- FINAL BULLETPROOF 4-STAGE PIPELINE SERVICE ---
 
 const getApiKey = (index) => {
   try {
@@ -111,7 +111,6 @@ export async function generateAndAuditPaper(config) {
   const targetClass = selectedClass || "12th";
   const maxMarksVal = targetSubject.includes("Physics") || targetSubject.includes("Chemistry") || targetSubject.includes("Biology") ? 70 : 80;
 
-  // STAGE 1: API Key 1 - Blueprint Analysis (with robust fallback)
   if (onProgress) {
     onProgress({ text: `[Stage 1/4] API Key 1 analyzing official CBSE blueprint for ${targetClass} ${targetSubject}...` });
   }
@@ -122,11 +121,9 @@ export async function generateAndAuditPaper(config) {
     let rawBlueprint = await callGeminiRawWithRetry(promptStage1, 0, 2);
     blueprint = parseJSONSafely(rawBlueprint);
   } catch (err) {
-    // Fallback static blueprint to ensure 100% uptime when Google servers are busy
     blueprint = { totalMarks: maxMarksVal, totalQuestions: 34, sections: ["Section A", "Section B", "Section C", "Section D", "Section E"] };
   }
 
-  // STAGE 2: API Key 2 - Section A & B Generation (MCQs & Short Answer)
   if (onProgress) {
     onProgress({ text: `[Stage 2/4] API Key 2 generating Section A & B (MCQs & Short Answers) in background...` });
   }
@@ -134,7 +131,6 @@ export async function generateAndAuditPaper(config) {
   let rawSecAB = await callGeminiRawWithRetry(promptStage2, 1, 3);
   let questionsAB = parseJSONSafely(rawSecAB);
 
-  // STAGE 3: API Key 3 - Section C, D & E Generation (Long Answers & Source-based)
   if (onProgress) {
     onProgress({ text: `[Stage 3/4] API Key 3 generating Section C, D & E (Source-based & Long Answers)...` });
   }
@@ -142,7 +138,6 @@ export async function generateAndAuditPaper(config) {
   let rawSecCDE = await callGeminiRawWithRetry(promptStage3, 2, 3);
   let questionsCDE = parseJSONSafely(rawSecCDE);
 
-  // STAGE 4: Final Assembly & Multi-Stage Error Audit
   if (onProgress) {
     onProgress({ text: `[Stage 4/4] Running 4-stage background audit and sanitizing final question paper...` });
   }
