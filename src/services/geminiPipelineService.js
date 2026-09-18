@@ -1,4 +1,4 @@
-// --- ULTIMATE RESILIENT MULTI-KEY PIPELINE ENGINE ---
+// --- ENTERPRISE RESILIENT 3-PART PIPELINE ENGINE (9th to 12th) ---
 import { CBSE_BLUEPRINTS } from '../config/blueprints.js';
 
 const getAllAvailableApiKeys = () => {
@@ -21,7 +21,6 @@ async function callGeminiChunk(promptText, partIndex) {
   const models = ["gemini-3.6-flash", "gemini-3.5-flash"];
   let lastErr = null;
 
-  // Try across all keys and models with automatic rotation and failover
   for (let kIdx = 0; kIdx < keys.length; kIdx++) {
     const currentKey = keys[(partIndex + kIdx) % keys.length];
     if (!currentKey) continue;
@@ -54,7 +53,6 @@ async function callGeminiChunk(promptText, partIndex) {
     }
   }
 
-  // Graceful fallback to avoid throwing unhandled errors
   return JSON.stringify([
     { qNo: 1, question: "Examine the primary concepts, analytical reasoning and theoretical framework as per CBSE guidelines.", options: ["Option A", "Option B", "Option C", "Option D"], marks: 1 }
   ]);
@@ -120,7 +118,7 @@ function auditAndSanitizePaper(paperObj, targetSubject, targetClass) {
 
 export async function generateAndAuditPaper(config) {
   const { selectedClass, selectedSubject, onProgress } = config;
-  const targetSubject = selectedSubject || "Economics";
+  const targetSubject = selectedSubject || "History";
   const targetClass = selectedClass || "12th";
 
   const isJunior = targetClass.includes("9") || targetClass.includes("10") || targetClass.toLowerCase().includes("ix") || targetClass.toLowerCase().includes("x");

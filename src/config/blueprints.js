@@ -1,6 +1,5 @@
 // --- COMPREHENSIVE CBSE BLUEPRINTS REPOSITORY (9th to 12th) ---
 export const CBSE_BLUEPRINTS = {
-  // Class 9th & 10th Standard Blueprints
   "9th-10th": {
     "Hindi Course A": { maxMarks: 80, totalQuestions: 15, sections: ["Khand K", "Khand Kh", "Khand G", "Khand Gh"] },
     "Hindi Course B": { maxMarks: 80, totalQuestions: 16, sections: ["Khand K", "Khand Kh", "Khand G", "Khand Gh"] },
@@ -15,7 +14,6 @@ export const CBSE_BLUEPRINTS = {
     "NCC": { maxMarks: 70, totalQuestions: 21, sections: ["Section A", "Section B", "Section C", "Section D", "Section E", "Section F"] },
     "Punjabi": { maxMarks: 80, totalQuestions: 16, sections: ["Bhag 1", "Bhag 2", "Bhag 3", "Bhag 4"] }
   },
-  // Class 11th & 12th Standard Blueprints
   "11th-12th": {
     "History": { maxMarks: 80, totalQuestions: 34, sections: ["Section A", "Section B", "Section C", "Section D", "Section E"] },
     "Geography": { maxMarks: 70, totalQuestions: 30, sections: ["Section A", "Section B", "Section C", "Section D", "Section E"] },
