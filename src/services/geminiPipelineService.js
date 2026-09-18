@@ -1,20 +1,29 @@
 // --- ENTERPRISE CBSE REPOSITORY & 3-KEY PIPELINE SERVICE ---
 
-// Centralized Blueprint Repository matching official CBSE SQP standards
+// Centralized Blueprint Repository matching official CBSE SQP standards across all subjects
 const CBSE_BLUEPRINTS = {
   "History": { className: "12th", maxMarks: 80, totalQuestions: 34, sections: ["Section A", "Section B", "Section C", "Section D", "Section E"] },
   "Geography": { className: "12th", maxMarks: 70, totalQuestions: 30, sections: ["Section A", "Section B", "Section C", "Section D", "Section E"] },
   "Political Science": { className: "12th", maxMarks: 80, totalQuestions: 30, sections: ["Section A", "Section B", "Section C", "Section D", "Section E"] },
   "Physics": { className: "12th", maxMarks: 70, totalQuestions: 33, sections: ["Section A", "Section B", "Section C", "Section D", "Section E"] },
+  "Chemistry": { className: "12th", maxMarks: 70, totalQuestions: 33, sections: ["Section A", "Section B", "Section C", "Section D", "Section E"] },
+  "Biology": { className: "12th", maxMarks: 70, totalQuestions: 33, sections: ["Section A", "Section B", "Section C", "Section D", "Section E"] },
   "Mathematics": { className: "12th", maxMarks: 80, totalQuestions: 38, sections: ["Section A", "Section B", "Section C", "Section D", "Section E"] },
   "Applied Mathematics": { className: "12th", maxMarks: 80, totalQuestions: 38, sections: ["Section A", "Section B", "Section C", "Section D", "Section E"] },
-  "Psychology": { className: "12th", maxMarks: 70, totalQuestions: 33, sections: ["Section A", "Section B", "Section C", "Section D", "Section E"] },
+  "Psychology": { className: "12th", maxMarks: 70, totalQuestions: 33, sections: ["Section A", "Section B", "Section C", "Section D", "Section E", "Section F"] },
   "Home Science": { className: "12th", maxMarks: 70, totalQuestions: 35, sections: ["Section A", "Section B", "Section C", "Section D"] },
   "Informatics Practices": { className: "12th", maxMarks: 70, totalQuestions: 37, sections: ["Section A", "Section B", "Section C", "Section D", "Section E"] },
+  "Computer Science": { className: "12th", maxMarks: 70, totalQuestions: 37, sections: ["Section A", "Section B", "Section C", "Section D", "Section E"] },
   "Legal Studies": { className: "12th", maxMarks: 80, totalQuestions: 40, sections: ["Section A", "Section B", "Section C", "Section D"] },
+  "Business Studies": { className: "12th", maxMarks: 80, totalQuestions: 34, sections: ["Section A", "Section B", "Section C", "Section D"] },
+  "Economics": { className: "12th", maxMarks: 80, totalQuestions: 34, sections: ["Section A", "Section B"] },
+  "Accountancy": { className: "12th", maxMarks: 80, totalQuestions: 34, sections: ["Part A", "Part B"] },
   "Hindi Core": { className: "12th", maxMarks: 80, totalQuestions: 12, sections: ["Khand K", "Khand Kh", "Khand G"] },
   "Hindi Elective": { className: "12th", maxMarks: 80, totalQuestions: 13, sections: ["Khand K", "Khand Kh", "Khand G"] },
-  "English Elective": { className: "12th", maxMarks: 80, totalQuestions: 13, sections: ["Section A", "Section B", "Section C"] }
+  "English Core": { className: "12th", maxMarks: 80, totalQuestions: 13, sections: ["Section A", "Section B", "Section C"] },
+  "English Elective": { className: "12th", maxMarks: 80, totalQuestions: 13, sections: ["Section A", "Section B", "Section C"] },
+  "NCC": { className: "12th", maxMarks: 70, totalQuestions: 21, sections: ["Section A", "Section B", "Section C", "Section D", "Section E", "Section F"] },
+  "Physical Education": { className: "12th", maxMarks: 70, totalQuestions: 37, sections: ["Section A", "Section B", "Section C", "Section D", "Section E"] }
 };
 
 const getApiKeyByPart = (partIndex) => {
@@ -133,11 +142,7 @@ export async function generateAndAuditPaper(config) {
     className: targetClass,
     maxMarks: 80,
     totalQuestions: 34,
-    sections: [
-      { name: "Section A", type: "MCQ", count: 20, marksPerQ: 1, desc: "MCQs" },
-      { name: "Section B", type: "Short Answer", count: 6, marksPerQ: 3, desc: "Short Answer" },
-      { name: "Section C", type: "Long Answer", count: 8, marksPerQ: 5, desc: "Long Answer" }
-    ]
+    sections: ["Section A", "Section B", "Section C"]
   };
 
   if (onProgress) {
