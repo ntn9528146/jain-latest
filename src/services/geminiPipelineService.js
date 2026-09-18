@@ -1,5 +1,6 @@
-// --- ENTERPRISE RESILIENT 3-PART PIPELINE ENGINE (9th to 12th) ---
-import { CBSE_BLUEPRINTS } from '../config/blueprints.js';
+// --- MULTI-KEY RESILIENT PIPELINE ENGINE WITH SEPARATE BLUEPRINT FILES ---
+import { BLUEPRINTS_9_10 } from '../config/blueprints9_10.js';
+import { BLUEPRINTS_11_12 } from '../config/blueprints11_12.js';
 
 const getAllAvailableApiKeys = () => {
   const keys = [];
@@ -118,13 +119,13 @@ function auditAndSanitizePaper(paperObj, targetSubject, targetClass) {
 
 export async function generateAndAuditPaper(config) {
   const { selectedClass, selectedSubject, onProgress } = config;
-  const targetSubject = selectedSubject || "History";
-  const targetClass = selectedClass || "12th";
+  const targetSubject = selectedSubject || "Social Science";
+  const targetClass = selectedClass || "10th";
 
   const isJunior = targetClass.includes("9") || targetClass.includes("10") || targetClass.toLowerCase().includes("ix") || targetClass.toLowerCase().includes("x");
-  const groupKey = isJunior ? "9th-10th" : "11th-12th";
+  const repo = isJunior ? BLUEPRINTS_9_10 : BLUEPRINTS_11_12;
 
-  const blueprint = CBSE_BLUEPRINTS[groupKey]?.[targetSubject] || {
+  const blueprint = repo[targetSubject] || {
     maxMarks: 80,
     totalQuestions: 34,
     sections: ["Section A", "Section B", "Section C"]
@@ -149,9 +150,9 @@ export async function generateAndAuditPaper(config) {
   let part2Q = parseJSONSafely(raw2);
 
   if (onProgress) {
-    onProgress({ text: `[Part 3/3] Generating Long Answer & Numerical sections using tertiary API pool...` });
+    onProgress({ text: `[Part 3/3] Generating Long Answer & Case Study sections using tertiary API pool...` });
   }
-  const prompt3 = `Using official CBSE SQP guidelines for Class ${targetClass} ${targetSubject}, generate a JSON array of final section questions (Long Answer / Case Study 6 marks). NO placeholders. Format: [{ "qNo": 25, "question": "...", "marks": 6 }]`;
+  const prompt3 = `Using official CBSE SQP guidelines for Class ${targetClass} ${targetSubject}, generate a JSON array of final section questions (Long Answer / Case Study 5 or 6 marks). NO placeholders. Format: [{ "qNo": 25, "question": "...", "marks": 5 }]`;
   let raw3 = await callGeminiChunk(prompt3, 2);
   let part3Q = parseJSONSafely(raw3);
 
@@ -186,7 +187,7 @@ export async function generateAndAuditPaper(config) {
       },
       {
         name: "Section C",
-        description: "Long Answer Type Questions (6 Marks each)",
+        description: "Long Answer Type Questions (5 & 6 Marks each)",
         questions: allQuestions.filter(q => q.marks >= 5)
       }
     ],
