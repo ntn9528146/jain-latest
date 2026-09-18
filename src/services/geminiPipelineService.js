@@ -1,4 +1,4 @@
-// --- EXACT .ENV MATCHING CHAT-STYLE PIPELINE SERVICE ---
+// --- FINAL BULLETPROOF CBSE 2025-26 PIPELINE SERVICE ---
 
 const getAllAvailableApiKeys = () => {
   const keys = [];
@@ -114,6 +114,8 @@ Return ONLY valid JSON.
   return paper;
 }
 
-export default async function executePaperPipeline(config) {
+export async function executePaperPipeline(config) {
   return await generateAndAuditPaper(config);
 }
+
+export default executePaperPipeline;
