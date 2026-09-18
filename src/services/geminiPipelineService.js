@@ -1,4 +1,4 @@
-// --- MULTI-STEP SECTION-WISE CHUNKED PIPELINE (DIRECT GEMINI WEB APPROACH) ---
+// --- FINAL CHUNKED CBSE 2025-26 PIPELINE SERVICE ---
 
 const getAllAvailableApiKeys = () => {
   const keys = [];
@@ -90,7 +90,6 @@ export async function generateAndAuditPaper(config) {
     onProgress({ text: `[1/4] Generating Section A (MCQs) using API Key 1...` });
   }
 
-  // Chunk 1: Section A (MCQs 1-20 approx)
   const prompt1 = `Generate a JSON array of official CBSE Section A Multiple Choice Questions (Q1 to Q20) for Class ${targetClass} ${targetSubject}. Use proper LaTeX for math. NO placeholders. Format:
 [
   { "qNo": 1, "question": "Question text", "options": ["Option 1", "Option 2", "Option 3", "Option 4"], "correctAnswer": "Option 1", "marks": 1 }
@@ -102,7 +101,6 @@ export async function generateAndAuditPaper(config) {
     onProgress({ text: `[2/4] Generating Section B & C (VSA & SA) using API Key 2...` });
   }
 
-  // Chunk 2: Section B & C (2 and 3 marks questions)
   const prompt2 = `Generate a JSON array of official CBSE Section B (2 marks, Q21-25) and Section C (3 marks, Q26-30) for Class ${targetClass} ${targetSubject}. Ensure sub-parts (i), (ii) start on fresh lines. NO placeholders. Format:
 [
   { "qNo": 21, "question": "Question text with sub-parts", "marks": 2 }
@@ -114,7 +112,6 @@ export async function generateAndAuditPaper(config) {
     onProgress({ text: `[3/4] Generating Section D & E (Case Study & LA) using API Key 3...` });
   }
 
-  // Chunk 3: Section D & E (4 and 5 marks questions)
   const prompt3 = `Generate a JSON array of official CBSE Section D Case Study (4 marks, Q31-33) and Section E Long Answer (5 marks, Q34-38) for Class ${targetClass} ${targetSubject}. NO placeholders like standard question numbers. Format:
 [
   { "qNo": 31, "question": "Detailed case study or long answer question", "marks": 4 }
@@ -126,7 +123,6 @@ export async function generateAndAuditPaper(config) {
     onProgress({ text: `[4/4] Combining chunks and assembling final CBSE question paper...` });
   }
 
-  // Combine all questions sequentially
   let allQuestions = [...(Array.isArray(secAQuestions) ? secAQuestions : []), ...(Array.isArray(secBCQuestions) ? secBCQuestions : []), ...(Array.isArray(secDEQuestions) ? secDEQuestions : [])];
   
   allQuestions.forEach((q, idx) => {
@@ -172,6 +168,9 @@ export async function generateAndAuditPaper(config) {
   return finalPaper;
 }
 
-export default async function executePaperPipeline(config) {
+export async function executePaperPipeline(config) {
   return await generateAndAuditPaper(config);
 }
+
+const defaultExport = executePaperPipeline;
+export default defaultExport;
