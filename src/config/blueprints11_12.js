@@ -12,6 +12,8 @@ export const BLUEPRINTS_11_12 = {
   "Home Science": { maxMarks: 70, totalQuestions: 35, sections: ["Section A", "Section B", "Section C", "Section D"] },
   "Informatics Practices": { maxMarks: 70, totalQuestions: 37, sections: ["Section A", "Section B", "Section C", "Section D", "Section E"] },
   "Computer Science": { maxMarks: 70, totalQuestions: 37, sections: ["Section A", "Section B", "Section C", "Section D", "Section E"] },
+  "Web Applications": { maxMarks: 60, totalQuestions: 24, sections: ["Section A", "Section B"] },
+  "Yoga": { maxMarks: 50, totalQuestions: 21, sections: ["Section A", "Section B"] },
   "Legal Studies": { maxMarks: 80, totalQuestions: 40, sections: ["Section A", "Section B", "Section C", "Section D"] },
   "Business Studies": { maxMarks: 80, totalQuestions: 34, sections: ["Section A", "Section B", "Section C", "Section D"] },
   "Economics": { maxMarks: 80, totalQuestions: 34, sections: ["Section A", "Section B"] },
