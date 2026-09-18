@@ -1,4 +1,4 @@
-// --- ROBUST AUTO-RETRY CHUNKED PIPELINE SERVICE (CBSE 2025-26) ---
+// --- FINAL BULLETPROOF CHUNKED PIPELINE SERVICE ---
 
 const getAllAvailableApiKeys = () => {
   const keys = [];
@@ -47,7 +47,6 @@ async function callGeminiChunkWithRetry(promptText, attempt = 0) {
 
       if (!response.ok) {
         const errData = await response.text();
-        // Agar 503 ya 429 aaye, toh thoda ruk kar retry karo ya next model try karo
         if ((response.status === 503 || response.status === 429) && attempt < 5) {
           await new Promise(r => setTimeout(r, 2000));
           return await callGeminiChunkWithRetry(promptText, attempt + 1);
