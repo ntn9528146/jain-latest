@@ -1,4 +1,4 @@
-// --- BULLETPROOF CBSE 2025-26 PIPELINE SERVICE ---
+// --- ULTIMATE BULLETPROOF CBSE 2025-26 PIPELINE SERVICE ---
 
 const getAllAvailableApiKeys = () => {
   const keys = [];
@@ -28,7 +28,8 @@ async function callGeminiWithAutoRetry(promptText, retryCount = 0) {
     throw new Error("VITE_GEMINI_API_KEY is missing in environment variables.");
   }
 
-  const modelsToTry = ["gemini-3.6-flash", "gemini-2.5-flash", "gemini-1.5-flash"];
+  // Purane 1.5-flash ko hata kar sirf active models rakhe hain taki 404 na aaye
+  const modelsToTry = ["gemini-3.6-flash", "gemini-2.5-flash"];
   let lastError = null;
 
   for (const modelName of modelsToTry) {
@@ -77,7 +78,6 @@ function cleanAndParseJSON(text) {
     cleaned = cleaned.replace(/^```/, "").replace(/```$/, "").trim();
   }
 
-  // Pre-process unescaped backslashes in LaTeX tokens
   cleaned = cleaned.replace(/\\([^\\"\/bfnrtu])/g, "\\\\$1");
 
   try {
@@ -108,7 +108,6 @@ function sanitizePaperContent(paper, targetSubject) {
           q.question = `Examine the core scientific and mathematical principles of ${targetSubject} with appropriate analytical derivations and formulas.`;
         }
 
-        // Force sub-parts (i), (ii), (iii), (iv) onto separate new lines cleanly
         q.question = q.question
           .replace(/([.?!])\s*(\(i\))/g, "$1\n\n(i)")
           .replace(/([.?!])\s*(\(ii\))/g, "$1\n\n(ii)")
@@ -120,11 +119,10 @@ function sanitizePaperContent(paper, targetSubject) {
           .replace(/\s+(\(iii\)\s)/g, "\n\n(iii) ")
           .replace(/\s+(\(iv\)\s)/g, "\n\n(iv) ")
           .replace(/\s+(\(v\)\s)/g, "\n\n(v) ")
-          .replace(/([a-zA-Z0-9.,)]+)\s+\((i|ii|iii|iv|v)\)\s+/g, "$1\n\n($2) ")
-          .replace(/:\s*\((i|ii|iii|iv|v)\)/g, ":\n\n($1)")
-          .replace(/;\s*\((i|ii|iii|iv|v)\)/g, ";\n\n($1)");
+          .replace(/([a-zA-Z0-9.,)]+)\s+\((i\vert{}ii\vert{}iii\vert{}iv\vert{}v)\)\s+/g, "$1\n\n($2) ")
+          .replace(/:\s*\((i\vert{}ii\vert{}iii\vert{}iv\vert{}v)\)/g, ":\n\n($1)")
+          .replace(/;\s*\((i\vert{}ii\vert{}iii\vert{}iv\vert{}v)\)/g, ";\n\n($1)");
 
-        // Clean options to keep pure text without adding duplicate prefix labels
         if (q.options && Array.isArray(q.options)) {
           q.options = q.options.map((opt) => {
             if (!opt || /option\s*[a-d]/i.test(opt) || opt.length < 2 || opt === "Option A" || opt === "Option B") {
@@ -233,4 +231,5 @@ export async function executePaperPipeline(config) {
   return await generateAndAuditPaper(config);
 }
 
-export default executePaperPipeline;
+const defaultExport = executePaperPipeline;
+export default defaultExport;
