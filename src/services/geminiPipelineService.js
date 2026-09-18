@@ -1,4 +1,4 @@
-// --- FINAL BULLETPROOF CHUNKED PIPELINE SERVICE ---
+// --- ULTIMATE STABLE 2026 CBSE PIPELINE SERVICE ---
 
 const getAllAvailableApiKeys = () => {
   const keys = [];
@@ -29,7 +29,8 @@ async function callGeminiChunkWithRetry(promptText, attempt = 0) {
     throw new Error("API key is missing in environment variables.");
   }
 
-  const modelsToTry = ["gemini-3.6-flash", "gemini-2.5-flash"];
+  // Active and supported 2026 models list
+  const modelsToTry = ["gemini-3.6-flash", "gemini-3.5-flash"];
   let lastError = null;
 
   for (const modelName of modelsToTry) {
