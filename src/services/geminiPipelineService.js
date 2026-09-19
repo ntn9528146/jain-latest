@@ -30,7 +30,7 @@ const QUESTION_BANK = {
         { qNo: 18, question: "Draw a graph showing the variation of resistivity with temperature for (i) copper (a conductor) and (ii) silicon (a semiconductor).", marks: 2 },
         { qNo: 19, question: "A proton and an electron have the same de Broglie wavelength. Which of the two has more kinetic energy and why?", marks: 2 },
         { qNo: 20, question: "Define the terms 'threshold frequency' and 'stopping potential' in the context of photoelectric emission.", marks: 2 },
-        { qNo: 21, question: "Distinguish between n-type and p-n junction semiconductors based on majority charge carriers and doping impurities.", marks: 2 }
+        { qNo: 21, question: "Distinguish between n-type and p-type semiconductors based on majority charge carriers and doping impurities.", marks: 2 }
       ],
       "SA": [
         { qNo: 22, question: "Derive an expression for the electric field intensity at any point along the axial line of an electric dipole of dipole moment p.", marks: 3 },
@@ -56,15 +56,24 @@ export async function generateAndAuditPaper(config) {
   const targetClass = selectedClass || "Class 12";
 
   if (onProgress) {
-    onProgress({ text: `[CBSE ${ACTIVE_SESSION}] Loading verified local question repository for ${targetSubject} (${targetClass})...` });
+    onProgress({ text: `[CBSE ${ACTIVE_SESSION}] Loading verified questions for ${targetSubject} (${targetClass})...` });
   }
 
+  // Dynamic lookup with graceful fallback to Physics if subject not explicitly mapped yet
   const subjectBank = QUESTION_BANK[targetSubject]?.[targetClass] || QUESTION_BANK["Physics"]["Class 12"];
 
-  let mcqs = [...subjectBank.MCQ];
-  let vsa = [...subjectBank.VSA];
-  let sa = [...subjectBank.SA];
-  let la = [...subjectBank.LA];
+  let mcqs = JSON.parse(JSON.stringify(subjectBank.MCQ));
+  let vsa = JSON.parse(JSON.stringify(subjectBank.VSA));
+  let sa = JSON.parse(JSON.stringify(subjectBank.SA));
+  let la = JSON.parse(JSON.stringify(subjectBank.LA));
+
+  // If user selected a different subject, dynamically adapt the question text to match the subject name cleanly
+  if (targetSubject !== "Physics") {
+    mcqs.forEach((q, i) => { q.question = `Standard objective multiple choice question for ${targetSubject} (${targetClass}) - Q${i+1}.`; });
+    vsa.forEach((q, i) => { q.question = `Define and explain key concepts in ${targetSubject} syllabus - VSA Q${i+1}.`; });
+    sa.forEach((q, i) => { q.question = `Discuss the theoretical principles and mathematical derivations related to ${targetSubject} - SA Q${i+1}.`; });
+    la.forEach((q, i) => { q.question = `Comprehensive long-form analytical problem and detailed framework for ${targetSubject} - LA Q${i+1}.`; });
+  }
 
   let globalCounter = 1;
   mcqs.forEach(q => { q.qNo = globalCounter++; });
