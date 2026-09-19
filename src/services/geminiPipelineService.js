@@ -1,4 +1,4 @@
-// --- STRICT CBSE CURRICULUM PIPELINE WITH REAL CONTENT GENERATION ---
+// --- STRICT CBSE CURRICULUM PIPELINE WITH ROBUST EXPORTS ---
 import { BLUEPRINTS_9_10 } from '../config/blueprints9_10.js';
 import { BLUEPRINTS_11_12 } from '../config/blueprints11_12.js';
 
@@ -91,15 +91,14 @@ export async function generateAndAuditPaper(config) {
     onProgress({ text: `[CBSE ${ACTIVE_SESSION}] Generating authentic questions for ${targetSubject} (${targetClass})...` });
   }
 
-  // Strict Prompts ensuring NO placeholders and REAL Subject Options
-  const prompt1 = `Generate a JSON array of 12 official CBSE Class ${targetClass} ${targetSubject} MCQ questions (1 mark each). Each MCQ MUST include 4 distinct, meaningful, subject-specific options (no "Option A/B/C/D"). Format: [{"qNo": 1, "question": "...", "options": ["Specific Answer 1", "Specific Answer 2", "Specific Answer 3", "Specific Answer 4"], "marks": 1}]`;
+  const prompt1 = `Generate a JSON array of 12 official CBSE Class ${targetClass} ${targetSubject} MCQ questions (1 mark each). Each MCQ MUST include 4 distinct, meaningful, subject-specific options. Format: [{"qNo": 1, "question": "...", "options": ["Specific Answer 1", "Specific Answer 2", "Specific Answer 3", "Specific Answer 4"], "marks": 1}]`;
   let qPart1 = parseJSONSafely(await callGeminiChunk(prompt1, 0));
 
   const prompt2 = `Generate a JSON array of 10 official CBSE Class ${targetClass} ${targetSubject} short answer questions (2 or 3 marks each). Format: [{"qNo": 13, "question": "...", "marks": 3}]`;
   let qPart2 = parseJSONSafely(await callGeminiChunk(prompt2, 1));
 
   const remainingCount = Math.max(5, blueprint.totalQuestions - qPart1.length - qPart2.length);
-  const prompt3 = `Generate a JSON array of ${remainingCount} official CBSE Class ${targetClass} ${targetSubject} long answer / case-study questions (5 marks each) to reach total ${blueprint.totalQuestions} questions. Format: [{"qNo": 23, "question": "...", "marks": 5}]`;
+  const prompt3 = `Generate a JSON array of ${remainingCount} official CBSE Class ${targetClass} ${targetSubject} long answer questions (5 marks each) to reach total ${blueprint.totalQuestions} questions. Format: [{"qNo": 23, "question": "...", "marks": 5}]`;
   let qPart3 = parseJSONSafely(await callGeminiChunk(prompt3, 2));
 
   let allQuestions = [...qPart1, ...qPart2, ...qPart3];
@@ -118,7 +117,6 @@ export async function generateAndAuditPaper(config) {
 
   allQuestions.forEach((q, idx) => {
     q.qNo = idx + 1;
-    // Fallback sanitizer if any placeholder sneaks in
     if (!q.question || q.question.includes("Standard question number") || q.question.includes("${qNo}")) {
       q.question = `Examine the analytical and theoretical framework of ${targetSubject} with respect to Class ${targetClass} syllabus.`;
     }
@@ -163,5 +161,4 @@ export async function executePaperPipeline(config) {
   return await generateAndAuditPaper(config);
 }
 
-const defaultExport = executePaperPipeline;
-export default defaultExport;
+export default executePaperPipeline;
