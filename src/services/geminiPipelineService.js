@@ -1,4 +1,4 @@
-// --- FINAL CLEAN REAL-QUESTION CBSE PIPELINE ---
+// --- BULLETPROOF DUAL EXPORT CBSE PIPELINE ---
 import { BLUEPRINTS_9_10 } from '../config/blueprints9_10.js';
 import { BLUEPRINTS_11_12 } from '../config/blueprints11_12.js';
 
@@ -63,7 +63,6 @@ export async function generateAndAuditPaper(config) {
     onProgress({ text: `[CBSE ${ACTIVE_SESSION}] Loading verified authentic questions for ${targetSubject} (${targetClass})...` });
   }
 
-  // Always use the bank cleanly without any generic overwriting
   const bank = QUESTION_BANK["Physics"]["Class 12"];
 
   let secA = JSON.parse(JSON.stringify(bank.SecA));
@@ -74,7 +73,6 @@ export async function generateAndAuditPaper(config) {
 
   let globalCounter = 1;
 
-  // STRICT ENFORCEMENT: Section A = 1M + Options, Others = Subjective + No Options
   secA.forEach(q => {
     q.qNo = globalCounter++;
     q.marks = 1;
@@ -135,6 +133,9 @@ export async function generateAndAuditPaper(config) {
   return assembledPaper;
 }
 
-export default async function executePaperPipeline(config) {
+export async function executePaperPipeline(config) {
   return await generateAndAuditPaper(config);
 }
+
+const defaultExport = executePaperPipeline;
+export default defaultExport;
