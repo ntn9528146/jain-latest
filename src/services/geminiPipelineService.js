@@ -163,10 +163,4 @@ export async function executePaperPipeline(config) {
   return await generateAndAuditPaper(config);
 }
 
-// Ensure both named and default exports are active
-const geminiPipelineService = {
-  executePaperPipeline,
-  generateAndAuditPaper
-};
-
-export default geminiPipelineService;
+export default executePaperPipeline;
