@@ -84,7 +84,6 @@ export async function generateAndAuditPaper(config) {
     onProgress({ text: `[CBSE ${ACTIVE_SESSION}] Generating strict section-wise paper for ${targetSubject} (${targetClass})...` });
   }
 
-  // 1. Section A: MCQs (1 Mark each with 4 options)
   const mcqPrompt = `Generate a JSON array of 16 official CBSE Class ${targetClass} ${targetSubject} multiple-choice questions (1 mark each). Each object must strictly have: {"question": "...", "options": ["Choice A", "Choice B", "Choice C", "Choice D"], "marks": 1}`;
   let sectionAMcqs = parseJSONSafely(await callGemini(mcqPrompt));
   sectionAMcqs.forEach(q => {
@@ -94,22 +93,18 @@ export async function generateAndAuditPaper(config) {
     }
   });
 
-  // 2. Section B: Very Short Answers (2 Marks each, NO options)
   const vsaPrompt = `Generate a JSON array of 5 official CBSE Class ${targetClass} ${targetSubject} very short answer questions (2 marks each). Do NOT include options. Each object must have: {"question": "...", "marks": 2}`;
   let sectionBVsa = parseJSONSafely(await callGemini(vsaPrompt));
   sectionBVsa.forEach(q => { q.marks = 2; delete q.options; });
 
-  // 3. Section C: Short Answers (3 Marks each, NO options)
   const saPrompt = `Generate a JSON array of 7 official CBSE Class ${targetClass} ${targetSubject} short answer questions (3 marks each). Do NOT include options. Each object must have: {"question": "...", "marks": 3}`;
   let sectionCSa = parseJSONSafely(await callGemini(saPrompt));
   sectionCSa.forEach(q => { q.marks = 3; delete q.options; });
 
-  // 4. Section D: Case-Study / Long Answers (4 or 5 Marks each, NO options)
   const laPrompt = `Generate a JSON array of 3 official CBSE Class ${targetClass} ${targetSubject} long answer / derivation questions (5 marks each). Do NOT include options. Each object must have: {"question": "...", "marks": 5}`;
   let sectionDLa = parseJSONSafely(await callGemini(laPrompt));
   sectionDLa.forEach(q => { q.marks = 5; delete q.options; });
 
-  // Fallback if any section is empty
   if (sectionAMcqs.length === 0) {
     sectionAMcqs = [{ question: `Fundamental multiple choice question for ${targetSubject}`, options: ["A", "B", "C", "D"], marks: 1 }];
   }
@@ -123,7 +118,6 @@ export async function generateAndAuditPaper(config) {
     sectionDLa = [{ question: `Derive the complete expression for ${targetSubject} phenomena.`, marks: 5 }];
   }
 
-  // Combine sections cleanly with strict matching
   let globalCounter = 1;
   const sectionsData = [
     { name: "Section A", desc: "Multiple Choice Questions (1 Mark Each)", questions: sectionAMcqs },
@@ -135,7 +129,6 @@ export async function generateAndAuditPaper(config) {
   sectionsData.forEach(sec => {
     sec.questions.forEach(q => {
       q.qNo = globalCounter++;
-      // Clean up any potential placeholders
       if (!q.question || q.question.includes("${qNo}") || q.question.includes("Standard question number")) {
         q.question = `Analyze and solve the core theoretical problem related to ${targetSubject} for Class ${targetClass}.`;
       }
@@ -170,5 +163,10 @@ export async function executePaperPipeline(config) {
   return await generateAndAuditPaper(config);
 }
 
-const defaultExport = executePaperPipeline;
-export default defaultExport;
+// Ensure both named and default exports are active
+const geminiPipelineService = {
+  executePaperPipeline,
+  generateAndAuditPaper
+};
+
+export default geminiPipelineService;
