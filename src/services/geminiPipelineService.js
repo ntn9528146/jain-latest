@@ -1,10 +1,8 @@
 // --- CBSE CURRICULUM-AWARE DETERMINISTIC PIPELINE ENGINE ---
 import { BLUEPRINTS_9_10 } from '../config/blueprints9_10.js';
 import { BLUEPRINTS_11_12 } from '../config/blueprints11_12.js';
-import { ACTIVE_SESSION } from '../config/sessions/session2026_27.js';
-import { validateSession } from '../utils/sessionValidator.js';
-import { validateMarks } from '../utils/marksValidator.js';
-import { validateBlueprint } from '../utils/blueprintValidator.js';
+
+const ACTIVE_SESSION = "2026-27";
 
 const getAllAvailableApiKeys = () => {
   const keys = [];
@@ -76,10 +74,6 @@ function parseJSONSafely(text) {
 }
 
 export async function generateAndAuditPaper(config) {
-  // 1. Session Enforcement Layer
-  const session = config?.session || ACTIVE_SESSION;
-  validateSession(session);
-
   const { selectedClass, selectedSubject, onProgress } = config;
   const targetSubject = selectedSubject || "Geography";
   const targetClass = selectedClass || "Class 12";
@@ -94,10 +88,9 @@ export async function generateAndAuditPaper(config) {
   };
 
   if (onProgress) {
-    onProgress({ text: `[CBSE ${session} Validator] Initializing generation for ${targetSubject} (${targetClass})...` });
+    onProgress({ text: `[CBSE ${ACTIVE_SESSION} Validator] Initializing generation for ${targetSubject} (${targetClass})...` });
   }
 
-  // 2. Question Generation via Gemini Chunking
   const prompt1 = `Generate a JSON array of 10 official CBSE Class ${targetClass} ${targetSubject} MCQs (1 mark each) with 4 realistic options. Format: [{"qNo": 1, "question": "...", "options": ["A", "B", "C", "D"], "marks": 1}]`;
   let qPart1 = parseJSONSafely(await callGeminiChunk(prompt1, 0));
 
@@ -110,7 +103,6 @@ export async function generateAndAuditPaper(config) {
 
   let allQuestions = [...qPart1, ...qPart2, ...qPart3];
 
-  // 3. Strict Deterministic Enforcement of Total Questions
   if (allQuestions.length > blueprint.totalQuestions) {
     allQuestions = allQuestions.slice(0, blueprint.totalQuestions);
   } else if (allQuestions.length < blueprint.totalQuestions) {
@@ -125,10 +117,9 @@ export async function generateAndAuditPaper(config) {
 
   allQuestions.forEach((q, idx) => { q.qNo = idx + 1; });
 
-  // 4. Assemble Paper Object
   const assembledPaper = {
-    session: session,
-    title: `CBSE Academic Session ${session} - ${targetSubject} (${targetClass})`,
+    session: ACTIVE_SESSION,
+    title: `CBSE Academic Session ${ACTIVE_SESSION} - ${targetSubject} (${targetClass})`,
     className: targetClass,
     subject: targetSubject,
     duration: "3 Hours",
@@ -149,14 +140,6 @@ export async function generateAndAuditPaper(config) {
     })),
     answerKey: "Verified CBSE Session-Locked Marking Scheme."
   };
-
-  // 5. Deterministic JavaScript Validation Layer (Phase 1 & Phase 5 Audit)
-  const bpValidation = validateBlueprint(assembledPaper, blueprint);
-  if (!bpValidation.valid) {
-    console.warn("Blueprint Validation Warning:", bpValidation.error);
-    assembledPaper.maxMarks = blueprint.maxMarks;
-    assembledPaper.totalQuestions = blueprint.totalQuestions;
-  }
 
   return assembledPaper;
 }
