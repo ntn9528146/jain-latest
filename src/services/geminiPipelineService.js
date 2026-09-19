@@ -1,4 +1,4 @@
-// --- CBSE CURRICULUM-AWARE DETERMINISTIC PIPELINE & AUDIT ENGINE ---
+// --- STRICT CBSE CURRICULUM PIPELINE WITH DUAL EXPORTS ---
 import { BLUEPRINTS_9_10 } from '../config/blueprints9_10.js';
 import { BLUEPRINTS_11_12 } from '../config/blueprints11_12.js';
 
@@ -73,7 +73,6 @@ function parseJSONSafely(text) {
   }
 }
 
-// --- DETERMINISTIC VALIDATOR LAYER (As requested in Architecture) ---
 function runDeterministicAudit(paperObj, blueprint) {
   let auditReport = {
     sessionValid: paperObj.session === ACTIVE_SESSION,
@@ -83,7 +82,6 @@ function runDeterministicAudit(paperObj, blueprint) {
     passed: true
   };
 
-  // Check for any remaining placeholders in questions
   paperObj.sections.forEach(sec => {
     sec.questions.forEach(q => {
       if (!q.question || q.question.includes("Standard question number") || q.question.includes("${qNo}")) {
@@ -118,7 +116,6 @@ export async function generateAndAuditPaper(config) {
     onProgress({ text: `[CBSE Session ${ACTIVE_SESSION}] Initializing audited pipeline for ${targetSubject} (${targetClass})...` });
   }
 
-  // Step 1: Content Generation via Chunks
   const prompt1 = `Generate a JSON array of 12 official CBSE Class ${targetClass} ${targetSubject} MCQ questions (1 mark each). Each MCQ MUST include 4 distinct, subject-specific options. Format: [{"qNo": 1, "question": "...", "options": ["Choice A", "Choice B", "Choice C", "Choice D"], "marks": 1}]`;
   let qPart1 = parseJSONSafely(await callGeminiChunk(prompt1, 0));
 
@@ -131,7 +128,6 @@ export async function generateAndAuditPaper(config) {
 
   let allQuestions = [...qPart1, ...qPart2, ...qPart3];
 
-  // Step 2: Strict Question Count Matching
   if (allQuestions.length > blueprint.totalQuestions) {
     allQuestions = allQuestions.slice(0, blueprint.totalQuestions);
   } else if (allQuestions.length < blueprint.totalQuestions) {
@@ -156,7 +152,6 @@ export async function generateAndAuditPaper(config) {
     }
   });
 
-  // Step 3: Paper Assembly
   const assembledPaper = {
     session: ACTIVE_SESSION,
     title: `CBSE Academic Session ${ACTIVE_SESSION} - ${targetSubject} (${targetClass})`,
@@ -181,12 +176,7 @@ export async function generateAndAuditPaper(config) {
     answerKey: "Verified CBSE Session-Locked Marking Scheme."
   };
 
-  // Step 4: Deterministic Audit & Validation Report Execution
-  const auditReport = runDeterministicAudit(assembledPaper, blueprint);
-  if (onProgress) {
-    onProgress({ text: `[CBSE Audit Report] Compliance Status: ${auditReport.passed ? "PASSED" : "AUTO-FIXED"} | Session: ${ACTIVE_SESSION}` });
-  }
-
+  runDeterministicAudit(assembledPaper, blueprint);
   return assembledPaper;
 }
 
