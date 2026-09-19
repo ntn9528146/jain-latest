@@ -84,40 +84,31 @@ export async function generateAndAuditPaper(config) {
     onProgress({ text: `[CBSE ${ACTIVE_SESSION}] Generating structured paper for ${targetSubject} (${targetClass})...` });
   }
 
-  // 1. Fetch MCQs (1 Mark each with Options)
   const mcqPrompt = `Generate a JSON array of 16 official CBSE Class ${targetClass} ${targetSubject} multiple-choice questions (1 mark each). Each object must have: {"question": "...", "options": ["Op 1", "Op 2", "Op 3", "Op 4"], "marks": 1}`;
   let mcqs = parseJSONSafely(await callGemini(mcqPrompt));
 
-  // 2. Fetch Short/Descriptive Questions (2 or 3 Marks, NO options)
   const shortPrompt = `Generate a JSON array of 10 official CBSE Class ${targetClass} ${targetSubject} short answer questions (3 marks each). Do NOT include options. Each object must have: {"question": "...", "marks": 3}`;
   let shortAns = parseJSONSafely(await callGemini(shortPrompt));
 
-  // 3. Fetch Long/Derivation Questions (5 Marks, NO options)
   const longPrompt = `Generate a JSON array of 7 official CBSE Class ${targetClass} ${targetSubject} long answer / numerical / derivation questions (5 marks each). Do NOT include options. Each object must have: {"question": "...", "marks": 5}`;
   let longAns = parseJSONSafely(await callGemini(longPrompt));
 
   let allQuestions = [...mcqs, ...shortAns, ...longAns];
 
-  // Fallback and Sanitizer to remove all placeholders and fix mark mappings
   allQuestions.forEach((q, idx) => {
     q.qNo = idx + 1;
-    
-    // Check if question text is missing or contains placeholder
     if (!q.question || q.question.includes("${qNo}") || q.question.includes("Standard question number")) {
       q.question = `Discuss the core theoretical principles and applications related to ${targetSubject} in Class ${targetClass}.`;
     }
-
-    // Strict type separation: ONLY 1-mark questions get options; others must not have options
     if (q.marks === 1) {
       if (!q.options || q.options.length < 4) {
         q.options = ["Correct scientific statement", "Derived empirical relation", "Standard accepted value", "None of the above"];
       }
     } else {
-      delete q.options; // Ensure options property is completely wiped out for subjective/long questions
+      delete q.options;
     }
   });
 
-  // Ensure total questions matches blueprint
   if (allQuestions.length > blueprint.totalQuestions) {
     allQuestions = allQuestions.slice(0, blueprint.totalQuestions);
   } else {
@@ -130,7 +121,6 @@ export async function generateAndAuditPaper(config) {
     }
   }
 
-  // Re-assign serial numbers sequentially
   allQuestions.forEach((q, idx) => { q.qNo = idx + 1; });
 
   const assembledPaper = {
@@ -164,4 +154,5 @@ export async function executePaperPipeline(config) {
   return await generateAndAuditPaper(config);
 }
 
-export default executePaperPipeline;
+const defaultExport = executePaperPipeline;
+export default defaultExport;
