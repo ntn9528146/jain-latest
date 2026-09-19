@@ -1,4 +1,4 @@
-// --- STRICT CBSE SECTION-WISE DETERMINISTIC PIPELINE ---
+// --- OFFICIAL CBSE STRUCTURED PIPELINE (MATCHING STREAMLIT MECHANISM) ---
 import { BLUEPRINTS_9_10 } from '../config/blueprints9_10.js';
 import { BLUEPRINTS_11_12 } from '../config/blueprints11_12.js';
 
@@ -17,10 +17,10 @@ const getAllAvailableApiKeys = () => {
   return keys.filter(Boolean);
 };
 
-async function callGemini(promptText) {
+async function callGeminiStructured(promptText) {
   const keys = getAllAvailableApiKeys();
   if (keys.length === 0) keys.push("");
-  const models = ["gemini-3.6-flash", "gemini-3.5-flash"];
+  const models = ["gemini-2.5-flash", "gemini-1.5-flash", "gemini-1.5-pro"];
 
   for (let kIdx = 0; kIdx < keys.length; kIdx++) {
     const currentKey = keys[kIdx % keys.length];
@@ -32,7 +32,7 @@ async function callGemini(promptText) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             contents: [{ parts: [{ text: promptText }] }],
-            generationConfig: { temperature: 0.4, responseMimeType: "application/json" }
+            generationConfig: { temperature: 0.3, responseMimeType: "application/json" }
           })
         });
         if (resp.ok) {
@@ -81,58 +81,84 @@ export async function generateAndAuditPaper(config) {
   };
 
   if (onProgress) {
-    onProgress({ text: `[CBSE ${ACTIVE_SESSION}] Generating strict section-wise paper for ${targetSubject} (${targetClass})...` });
+    onProgress({ text: `[CBSE ${ACTIVE_SESSION}] Generating authentic structured paper for ${targetSubject} (${targetClass})...` });
   }
 
-  const mcqPrompt = `Generate a JSON array of 16 official CBSE Class ${targetClass} ${targetSubject} multiple-choice questions (1 mark each). Each object must strictly have: {"question": "...", "options": ["Choice A", "Choice B", "Choice C", "Choice D"], "marks": 1}`;
-  let sectionAMcqs = parseJSONSafely(await callGemini(mcqPrompt));
-  sectionAMcqs.forEach(q => {
-    q.marks = 1;
-    if (!q.options || q.options.length < 4) {
-      q.options = ["Accurate conceptual option", "Standard derived choice", "Empirical relation option", "None of the above"];
-    }
-  });
+  // Structured Prompt Mechanism inspired by Streamlit app
+  const prompt = `
+You are a Senior CBSE Examination Paper Setter for Academic Session ${ACTIVE_SESSION}.
+Generate a complete official CBSE question paper for Class ${targetClass}, Subject ${targetSubject}.
+Total Marks: ${blueprint.maxMarks}.
 
-  const vsaPrompt = `Generate a JSON array of 5 official CBSE Class ${targetClass} ${targetSubject} very short answer questions (2 marks each). Do NOT include options. Each object must have: {"question": "...", "marks": 2}`;
-  let sectionBVsa = parseJSONSafely(await callGemini(vsaPrompt));
-  sectionBVsa.forEach(q => { q.marks = 2; delete q.options; });
+Return a JSON array of objects representing sections, where each section has a name, description, and an array of questions.
+Strict Rules:
+1. Section A must contain Multiple Choice Questions (1 mark each) with an "options" array containing 4 distinct choices.
+2. Section B, C, D, E must contain subjective/descriptive/derivation questions (2, 3, or 5 marks each). Do NOT include an "options" array for these non-MCQ sections.
+3. Ensure absolute academic accuracy as per NCERT and CBSE guidelines for session ${ACTIVE_SESSION}.
 
-  const saPrompt = `Generate a JSON array of 7 official CBSE Class ${targetClass} ${targetSubject} short answer questions (3 marks each). Do NOT include options. Each object must have: {"question": "...", "marks": 3}`;
-  let sectionCSa = parseJSONSafely(await callGemini(saPrompt));
-  sectionCSa.forEach(q => { q.marks = 3; delete q.options; });
-
-  const laPrompt = `Generate a JSON array of 3 official CBSE Class ${targetClass} ${targetSubject} long answer / derivation questions (5 marks each). Do NOT include options. Each object must have: {"question": "...", "marks": 5}`;
-  let sectionDLa = parseJSONSafely(await callGemini(laPrompt));
-  sectionDLa.forEach(q => { q.marks = 5; delete q.options; });
-
-  if (sectionAMcqs.length === 0) {
-    sectionAMcqs = [{ question: `Fundamental multiple choice question for ${targetSubject}`, options: ["A", "B", "C", "D"], marks: 1 }];
-  }
-  if (sectionBVsa.length === 0) {
-    sectionBVsa = [{ question: `Define key terms in ${targetSubject}.`, marks: 2 }];
-  }
-  if (sectionCSa.length === 0) {
-    sectionCSa = [{ question: `Explain the working principle and equations in ${targetSubject}.`, marks: 3 }];
-  }
-  if (sectionDLa.length === 0) {
-    sectionDLa = [{ question: `Derive the complete expression for ${targetSubject} phenomena.`, marks: 5 }];
-  }
-
-  let globalCounter = 1;
-  const sectionsData = [
-    { name: "Section A", desc: "Multiple Choice Questions (1 Mark Each)", questions: sectionAMcqs },
-    { name: "Section B", desc: "Very Short Answer Questions (2 Marks Each)", questions: sectionBVsa },
-    { name: "Section C", desc: "Short Answer Questions (3 Marks Each)", questions: sectionCSa },
-    { name: "Section D", desc: "Long Answer & Derivation Questions (5 Marks Each)", questions: sectionDLa }
-  ];
-
-  sectionsData.forEach(sec => {
-    sec.questions.forEach(q => {
-      q.qNo = globalCounter++;
-      if (!q.question || q.question.includes("${qNo}") || q.question.includes("Standard question number")) {
-        q.question = `Analyze and solve the core theoretical problem related to ${targetSubject} for Class ${targetClass}.`;
+Format Required (JSON):
+[
+  {
+    "name": "Section A",
+    "description": "Multiple Choice Questions (1 Mark Each)",
+    "questions": [
+      {
+        "qNo": 1,
+        "question": "Question text here...",
+        "options": ["Option A", "Option B", "Option C", "Option D"],
+        "marks": 1
       }
-    });
+    ]
+  },
+  {
+    "name": "Section B",
+    "description": "Very Short Answer Questions (2 Marks Each)",
+    "questions": [
+      {
+        "qNo": 17,
+        "question": "Descriptive question text here...",
+        "marks": 2
+      }
+    ]
+  }
+]
+`;
+
+  const rawJsonText = await callGeminiStructured(prompt);
+  let parsedSections = parseJSONSafely(rawJsonText);
+
+  // Fallback if parsing fails or sections are empty
+  if (!parsedSections || parsedSections.length === 0) {
+    parsedSections = [
+      {
+        name: "Section A",
+        description: "Multiple Choice Questions (1 Mark Each)",
+        questions: [
+          { qNo: 1, question: `Sample MCQ question for ${targetSubject}`, options: ["Choice A", "Choice B", "Choice C", "Choice D"], marks: 1 }
+        ]
+      },
+      {
+        name: "Section B",
+        description: "Short Answer Questions (3 Marks Each)",
+        questions: [
+          { qNo: 2, question: `Sample subjective question for ${targetSubject}`, marks: 3 }
+        ]
+      }
+    ];
+  }
+
+  // Re-index question numbers globally across all sections to maintain strict sequence
+  let globalCounter = 1;
+  parsedSections.forEach(sec => {
+    if (sec.questions && Array.isArray(sec.questions)) {
+      sec.questions.forEach(q => {
+        q.qNo = globalCounter++;
+        // Clean up options for non-1 mark questions
+        if (q.marks !== 1 && q.options) {
+          delete q.options;
+        }
+      });
+    }
   });
 
   const assembledPaper = {
@@ -145,14 +171,10 @@ export async function generateAndAuditPaper(config) {
     totalQuestions: globalCounter - 1,
     generalInstructions: [
       "1. Please check that this question paper contains all printed sections.",
-      "2. All questions are compulsory. Internal choices are provided.",
+      "2. All questions are compulsory. Internal choices are provided where applicable.",
       "3. Use of calculators is not allowed."
     ],
-    sections: sectionsData.map(sec => ({
-      name: sec.name,
-      description: sec.desc,
-      questions: sec.questions
-    })),
+    sections: parsedSections,
     answerKey: "Verified CBSE Session-Locked Marking Scheme."
   };
 
@@ -163,4 +185,5 @@ export async function executePaperPipeline(config) {
   return await generateAndAuditPaper(config);
 }
 
-export default executePaperPipeline;
+const defaultExport = executePaperPipeline;
+export default defaultExport;
