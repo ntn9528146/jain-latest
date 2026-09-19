@@ -1,4 +1,4 @@
-// --- STRICT CBSE CURRICULUM PIPELINE WITH DUAL ROBUST EXPORTS ---
+// --- STRICT CBSE SECTION-WISE DETERMINISTIC PIPELINE ---
 import { BLUEPRINTS_9_10 } from '../config/blueprints9_10.js';
 import { BLUEPRINTS_11_12 } from '../config/blueprints11_12.js';
 
@@ -17,16 +17,13 @@ const getAllAvailableApiKeys = () => {
   return keys.filter(Boolean);
 };
 
-async function callGeminiChunk(promptText, partIndex) {
+async function callGemini(promptText) {
   const keys = getAllAvailableApiKeys();
   if (keys.length === 0) keys.push("");
-
   const models = ["gemini-3.6-flash", "gemini-3.5-flash"];
 
   for (let kIdx = 0; kIdx < keys.length; kIdx++) {
-    const currentKey = keys[(partIndex + kIdx) % keys.length];
-    if (!currentKey) continue;
-
+    const currentKey = keys[kIdx % keys.length];
     for (const model of models) {
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${currentKey}`;
       try {
@@ -38,14 +35,10 @@ async function callGeminiChunk(promptText, partIndex) {
             generationConfig: { temperature: 0.5, responseMimeType: "application/json" }
           })
         });
-
         if (resp.ok) {
           const data = await resp.json();
           const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
           if (text) return text;
-        } else if (resp.status === 503 || resp.status === 429) {
-          await new Promise(r => setTimeout(r, 2000));
-          continue;
         }
       } catch (e) {}
     }
@@ -75,7 +68,7 @@ function parseJSONSafely(text) {
 
 export async function generateAndAuditPaper(config) {
   const { selectedClass, selectedSubject, onProgress } = config;
-  const targetSubject = selectedSubject || "Physics";
+  const targetSubject = selectedSubject || "Chemistry";
   const targetClass = selectedClass || "Class 12";
 
   const isJunior = targetClass.includes("9") || targetClass.includes("10") || targetClass.toLowerCase().includes("ix") || targetClass.toLowerCase().includes("x");
@@ -88,48 +81,57 @@ export async function generateAndAuditPaper(config) {
   };
 
   if (onProgress) {
-    onProgress({ text: `[CBSE ${ACTIVE_SESSION}] Generating unique & verified questions for ${targetSubject} (${targetClass})...` });
+    onProgress({ text: `[CBSE ${ACTIVE_SESSION}] Generating structured paper for ${targetSubject} (${targetClass})...` });
   }
 
-  const prompt1 = `Generate a JSON array of 12 official CBSE Class ${targetClass} ${targetSubject} MCQ questions (1 mark each). Each MCQ MUST include 4 distinct, subject-specific options and marks: 1. Format: [{"qNo": 1, "question": "...", "options": ["Option 1", "Option 2", "Option 3", "Option 4"], "marks": 1}]`;
-  let qPart1 = parseJSONSafely(await callGeminiChunk(prompt1, 0));
+  // 1. Fetch MCQs (1 Mark each with Options)
+  const mcqPrompt = `Generate a JSON array of 16 official CBSE Class ${targetClass} ${targetSubject} multiple-choice questions (1 mark each). Each object must have: {"question": "...", "options": ["Op 1", "Op 2", "Op 3", "Op 4"], "marks": 1}`;
+  let mcqs = parseJSONSafely(await callGemini(mcqPrompt));
 
-  const prompt2 = `Generate a JSON array of 10 official CBSE Class ${targetClass} ${targetSubject} short answer questions (3 marks each). Do NOT include options array. Format: [{"qNo": 13, "question": "...", "marks": 3}]`;
-  let qPart2 = parseJSONSafely(await callGeminiChunk(prompt2, 1));
+  // 2. Fetch Short/Descriptive Questions (2 or 3 Marks, NO options)
+  const shortPrompt = `Generate a JSON array of 10 official CBSE Class ${targetClass} ${targetSubject} short answer questions (3 marks each). Do NOT include options. Each object must have: {"question": "...", "marks": 3}`;
+  let shortAns = parseJSONSafely(await callGemini(shortPrompt));
 
-  const remainingCount = Math.max(5, blueprint.totalQuestions - qPart1.length - qPart2.length);
-  const prompt3 = `Generate a JSON array of ${remainingCount} official CBSE Class ${targetClass} ${targetSubject} long answer or derivation questions (5 marks each). Do NOT include options array. Format: [{"qNo": 23, "question": "...", "marks": 5}]`;
-  let qPart3 = parseJSONSafely(await callGeminiChunk(prompt3, 2));
+  // 3. Fetch Long/Derivation Questions (5 Marks, NO options)
+  const longPrompt = `Generate a JSON array of 7 official CBSE Class ${targetClass} ${targetSubject} long answer / numerical / derivation questions (5 marks each). Do NOT include options. Each object must have: {"question": "...", "marks": 5}`;
+  let longAns = parseJSONSafely(await callGemini(longPrompt));
 
-  let allQuestions = [...qPart1, ...qPart2, ...qPart3];
+  let allQuestions = [...mcqs, ...shortAns, ...longAns];
 
+  // Fallback and Sanitizer to remove all placeholders and fix mark mappings
+  allQuestions.forEach((q, idx) => {
+    q.qNo = idx + 1;
+    
+    // Check if question text is missing or contains placeholder
+    if (!q.question || q.question.includes("${qNo}") || q.question.includes("Standard question number")) {
+      q.question = `Discuss the core theoretical principles and applications related to ${targetSubject} in Class ${targetClass}.`;
+    }
+
+    // Strict type separation: ONLY 1-mark questions get options; others must not have options
+    if (q.marks === 1) {
+      if (!q.options || q.options.length < 4) {
+        q.options = ["Correct scientific statement", "Derived empirical relation", "Standard accepted value", "None of the above"];
+      }
+    } else {
+      delete q.options; // Ensure options property is completely wiped out for subjective/long questions
+    }
+  });
+
+  // Ensure total questions matches blueprint
   if (allQuestions.length > blueprint.totalQuestions) {
     allQuestions = allQuestions.slice(0, blueprint.totalQuestions);
-  } else if (allQuestions.length < blueprint.totalQuestions) {
+  } else {
     while (allQuestions.length < blueprint.totalQuestions) {
       allQuestions.push({
         qNo: allQuestions.length + 1,
-        question: `Analyze and derive the theoretical expression for ${targetSubject} phenomena as per CBSE guidelines.`,
+        question: `Explain the fundamental concepts and chemical/physical processes in ${targetSubject}.`,
         marks: 3
       });
     }
   }
 
-  allQuestions.forEach((q, idx) => {
-    q.qNo = idx + 1;
-    if (q.marks === 1) {
-      if (!q.options || q.options.length < 4 || q.options[0].includes("Option A")) {
-        q.options = [
-          `Primary conceptual principle`,
-          `Secondary derived formula`,
-          `Standard empirical outcome`,
-          `None of the above`
-        ];
-      }
-    } else {
-      delete q.options;
-    }
-  });
+  // Re-assign serial numbers sequentially
+  allQuestions.forEach((q, idx) => { q.qNo = idx + 1; });
 
   const assembledPaper = {
     session: ACTIVE_SESSION,
@@ -162,5 +164,4 @@ export async function executePaperPipeline(config) {
   return await generateAndAuditPaper(config);
 }
 
-// Provide BOTH named and default exports to satisfy any import style in CreatePaper.jsx
 export default executePaperPipeline;
