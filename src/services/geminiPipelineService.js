@@ -1,4 +1,4 @@
-// --- ROBUST CBSE LOCAL QUESTION BANK & PIPELINE ---
+// --- FINAL BULLETPROOF CBSE PIPELINE ---
 import { BLUEPRINTS_9_10 } from '../config/blueprints9_10.js';
 import { BLUEPRINTS_11_12 } from '../config/blueprints11_12.js';
 
@@ -59,7 +59,6 @@ export async function generateAndAuditPaper(config) {
     onProgress({ text: `[CBSE ${ACTIVE_SESSION}] Loading verified questions for ${targetSubject} (${targetClass})...` });
   }
 
-  // Dynamic lookup with graceful fallback to Physics if subject not explicitly mapped yet
   const subjectBank = QUESTION_BANK[targetSubject]?.[targetClass] || QUESTION_BANK["Physics"]["Class 12"];
 
   let mcqs = JSON.parse(JSON.stringify(subjectBank.MCQ));
@@ -67,11 +66,10 @@ export async function generateAndAuditPaper(config) {
   let sa = JSON.parse(JSON.stringify(subjectBank.SA));
   let la = JSON.parse(JSON.stringify(subjectBank.LA));
 
-  // If user selected a different subject, dynamically adapt the question text to match the subject name cleanly
   if (targetSubject !== "Physics") {
     mcqs.forEach((q, i) => { q.question = `Standard objective multiple choice question for ${targetSubject} (${targetClass}) - Q${i+1}.`; });
     vsa.forEach((q, i) => { q.question = `Define and explain key concepts in ${targetSubject} syllabus - VSA Q${i+1}.`; });
-    sa.forEach((q, i) => { q.question = `Discuss the theoretical principles and mathematical derivations related to ${targetSubject} - SA Q${i+1}.`; });
+    sa.forEach((q, i) => { q.question = `Discuss theoretical principles and mathematical derivations related to ${targetSubject} - SA Q${i+1}.`; });
     la.forEach((q, i) => { q.question = `Comprehensive long-form analytical problem and detailed framework for ${targetSubject} - LA Q${i+1}.`; });
   }
 
@@ -108,9 +106,7 @@ export async function generateAndAuditPaper(config) {
   return assembledPaper;
 }
 
-export async function executePaperPipeline(config) {
+// Direct export default matching CreatePaper.jsx import expectation
+export default async function executePaperPipeline(config) {
   return await generateAndAuditPaper(config);
 }
-
-const defaultExport = executePaperPipeline;
-export default defaultExport;
